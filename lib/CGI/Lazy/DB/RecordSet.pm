@@ -1,105 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
-=head1 NAME
-
-CGI::Lazy::RecordSet
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-our $q = CGI::Lazy->new({
-				tmplDir 	=> "/templates",
-				jsDir		=>  "/js",
-				plugins 	=> {
-					mod_perl => {
-						PerlHandler 	=> "ModPerl::Registry",
-						saveOnCleanup	=> 1,
-					},
-					ajax	=>  1,
-					dbh 	=> {
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-						dbUser 		=> "dbuser",
-						dbPasswd 	=> "letmein",
-						dbArgs 		=> {"RaiseError" => 1},
-					},
-					session	=> {
-						sessionTable	=> 'SessionData',
-						sessionCookie	=> 'frobnostication',
-						saveOnDestroy	=> 1,
-						expires		=> '+15m',
-					},
-				},
-			});
-my $recordset = $q->db->recordset({
-		table		=> 'detail',  #table where records are coming from
-		fieldlist	=> [
-					{name => 'detail.ID', #name of field
-						hidden => 1}, #do not display to screen.  Recordset cant do any operations on fields that are not a part of itself, however all fields need not be displayed
-					{name => 'invoiceid', 
-						hidden => 1},
-					{name => 'prodCode', 
-						label => 'Product Code', 
-						validator => {rules => ['/\d+/'], msg => 'number only, and is required'}}, #validator for filed.  msg is not implemented at present.
-					{name 		=> 'quantity', 
-						label 		=> 'Quantity', 
-						validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-						outputMask	=> "%.1f", #formatting to data applied on output to browser
-					},
-					{name => 'unitPrice', 
-						label 		=> 'Unit Price' , 
-						validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-						inputMask	=> "%.1f", #formatting to data applied on input to database
-						},
-					{name => 'productGross', 
-						label => 'Product Gross' , 
-						validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
-					{name => 'prodCodeLookup.description', 
-						label => 'Product Description', 
-						readOnly => 1 }, #readOnly values display to the screen, but never get written to the db
-					], 
-		basewhere 	=> '',  #baseline where clause for the select query.  this is used in all selects, even if 'where is set later.
-		joins		=> [ #table joins
-					{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
-		],
-		orderby		=> 'detail.ID',  #order by clause for select wuery
-		primarykey	=> 'detail.ID', #primary key for recordset.  This value is looked for for all updates and deletes
-	});
-
-my $thing = $q->ajax->dataset({
-		id		=> 'detailBlock',
-		type		=> 'multi',
-		template	=> "UsbInternalPOCDetailBlock.tmpl",
-		lookups		=> {
-				prodcodeLookup  => {
-					sql 		=> 'select ID, description from prodCodeLookup', 
-					preload 	=> 1,
-					orderby		=> ['ID'],
-					output		=> 'hash',
-					primarykey	=> 'ID',
-				},
-					
-		},
-		recordset	=> $recordset,
-		});
-		
-
-=head1 DESCRIPTION
-
-CGI::Lazy::DB::Recordset is a container object for handling a set of records pulled out of a database.  The big difference between using the Recordset object and just using a standard query is the Recordset, with it's defined internal structure allows for automated transformations to the data.  The object builds the queries on the fly, and remembers where it got all the data in question, so it can edit it and put it back.  Much of this functionality is seen in the Ajax::Dataset object, for which the Recordset object was originally written.
-
-=cut
-
 package CGI::Lazy::DB::RecordSet;
 
 use strict;
@@ -109,12 +7,6 @@ use Tie::IxHash;
 use Data::Dumper;
 
 #------------------------------------------------------------------
-=head2 basewhere ()
-
-Returns the basewhere string for the recordset.  
-
-=cut
-
 sub basewhere {
 	my $self = shift;
 
@@ -122,12 +14,6 @@ sub basewhere {
 }
 
 #--------------------------------------------------------------------
-=head2 createSelect ()
-
-Creates the Select statement out of the structure of the Recordset.
-
-=cut
-
 sub createSelect {
 	my $self = shift;
 
@@ -171,24 +57,12 @@ sub createSelect {
 }
 
 #------------------------------------------------------------------
-=head2 data ()
-
-Returns data reference from Recordset.  Will always be present, but will be empty until select() is called.
-
-=cut
-
 sub data {
 	my $self = shift;
 	return $self->{_data};
 }
 
 #------------------------------------------------------------------
-=head2 db ()
-
-Returns reference to CGI::Lazy::DB object
-
-=cut
-
 sub db {
 	my $self = shift;
 
@@ -196,16 +70,6 @@ sub db {
 }
 
 #------------------------------------------------------------------------------
-=head2 delete ( data )
-
-Deletes records with primary keys in data.
-
-=head3 data
-
-Hashref who's keys are the primary keys of the records to be deleted.
-
-=cut
-
 sub delete {
 	my $self = shift;
 	my $data = shift;
@@ -223,16 +87,6 @@ sub delete {
 }
 	
 #------------------------------------------------------------------------------
-=head2 displayOnly ( field )
-
-Returns true if field has displayOnly key set to a true value.
-
-=head3 field
-
-name of field to test
-
-=cut 
-
 sub displayOnly {
 	my $self = shift;
 	my $field = shift;
@@ -249,12 +103,6 @@ sub displayOnly {
 }
 
 #------------------------------------------------------------------------------
-=head2 fieldlist ()
-
-Returns array ref of field list with which recordset was built.
-
-=cut
-
 sub fieldlist {
 	my $self = shift;
 
@@ -262,16 +110,6 @@ sub fieldlist {
 }
 
 #------------------------------------------------------------------
-=head2 handle ( field )
-
-Returns reference used as handle to value of field.
-
-=head3 field
-
-Name of field who's handle to retrieve
-
-=cut
-
 sub handle {
 	my $self = shift;
 	my $field = shift;
@@ -284,16 +122,6 @@ sub handle {
 }
 
 #------------------------------------------------------------------------------
-=head2 hidden ( field )
-
-Returns true if field in question has been set to hidden
-
-=head3 field
-
-name of field to test
-
-=cut
-
 sub hidden {
 	my $self = shift;
 	my $field = shift;
@@ -306,16 +134,6 @@ sub hidden {
 }
 
 #-------------------------------------------------------------------------------
-=head2 inputMask ( field )
-
-Returns inputMask for field of given name, if one has been set.
-
-=head3 field
-
-Name of field to test.
-
-=cut
-
 sub inputMask {
 	my $self = shift;
 	my $field = shift;
@@ -332,20 +150,6 @@ sub inputMask {
 }
 
 #------------------------------------------------------------------------------
-=head2 insert ( data, vars )
-
-Inserts data modified by vars into table accessed by Recordset.
-
-=head3 data
-
-Hashref of data to be inserted.  Each key corresponds to a row of data
-
-=head3 vars
-
-modifiers for data to be inserted
-
-=cut
-
 sub insert {
 	my $self = shift;
 	my $data = shift;
@@ -441,12 +245,6 @@ sub insert {
 }
 
 #----------------------------------------------------------------------
-=head2 insertadditonal
-
-Returns reference of additional information to be inserted with each new record
-
-=cut
-
 sub insertadditional {
 	my $self = shift;
 
@@ -454,12 +252,6 @@ sub insertadditional {
 }
 
 #----------------------------------------------------------------------
-=head2 insertdefaults
-
-Returns reference of default values to be inserted with each new record
-
-=cut
-
 sub insertdefaults {
 	my $self = shift;
 
@@ -467,12 +259,6 @@ sub insertdefaults {
 }
 
 #--------------------------------------------------------------------
-=head2 joins
-
-Returns either list or arrayref of joins for Recordset
-
-=cut
-
 sub joins {
 	my $self = shift;
 
@@ -480,16 +266,6 @@ sub joins {
 }
 
 #--------------------------------------------------------------------
-=head2 label ( field )
-
-Returns label set for field, or name of field if no label has been specified
-
-=head3 field
-
-field name to test.
-
-=cut
-
 sub label {
 	my $self = shift;
 	my $field = shift;
@@ -498,47 +274,6 @@ sub label {
 }
 
 #----------------------------------------------------------------------
-=head2 new ( vars )
-
-Constructor
-
-=head3 vars
-
-Hashref with construction properties.  
-
-Minimum:
-
-	{
-		table=>$table, 
-		where => $where, 
-		orderby => $order by, 
-		primarykey => $keyfield, 
-		fieldlist => [{name => 'fieldname', label => 'some field'}] 
-	}
-
-
-=head3 table
-
-string.  name of table
-
-=head3 where
-
-string. where clause
-
-=head3 orderby
-
-string. orderby clause
-
-=head3 primarykey
-
-field name of primary key for table
-
-=head3 fieldlist
-
-array ref. list of fields with their attributes
-
-=cut
-
 sub new {
 	my $class = shift;
 	my $db = shift;
@@ -572,16 +307,6 @@ sub new {
 }
 
 #------------------------------------------------------------------------------
-=head2 noLabel ( field )
-
-Returns true if field in question has been set with the noLabel option
-
-=head3 field
-
-Name of field to test.
-
-=cut
-
 sub noLabel {
 	my $self = shift;
 	my $field = shift;
@@ -594,16 +319,6 @@ sub noLabel {
 }
 
 #--------------------------------------------------------------------
-=head2 orderby ( sql )
-
-returns or sets the order by clause
-
-=head3 sql
-
-sql string
-
-=cut
-
 sub orderby {
 	my $self = shift;
 	my $value = shift;
@@ -616,16 +331,6 @@ sub orderby {
 }
 
 #-------------------------------------------------------------------------------
-=head2 outMask ( field )
-
-Returns outputMask set for field.
-
-=head3 field
-
-Name of field to test.
-
-=cut
-
 sub outputMask {
 	my $self = shift;
 	my $field = shift;
@@ -642,16 +347,6 @@ sub outputMask {
 }
 
 #------------------------------------------------------------------------------
-=head2 multipleFiled ( field )
-
-Returns true if field in question has multipleField option set (i.e. it's supposed to turn up on the mulitple record screen)
-
-=head3 field
-
-Name of field to test.
-
-=cut 
-
 sub multipleField {
 	my $self = shift;
 	my $field = shift;
@@ -664,12 +359,6 @@ sub multipleField {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 multipleFieldList
-
-Returns arrayref or array of fields flagged to show up on multiple records page
-
-=cut
-
 sub multipleFieldList {
 	my $self = shift;
 
@@ -685,12 +374,6 @@ sub multipleFieldList {
 }
 
 #-----------------------------------------------------------------------------
-=head2 multipleFieldLabels
-
-Returns arrayref or array of labels for fields chosen to appear on multiple record pages.
-
-=cut
-
 sub multipleFieldLabels {
 	my $self = shift;
 
@@ -706,16 +389,6 @@ sub multipleFieldLabels {
 }
 
 #------------------------------------------------------------------------------
-=head2 primarykey ( fieldname )
-
-returns or sets the primary key for the object
-
-=head3 fieldname
-
-The name of the field in the database
-
-=cut
-
 sub primarykey {
 	my $self = shift;
 	my $value = shift;
@@ -728,12 +401,6 @@ sub primarykey {
 }
 
 #------------------------------------------------------------------
-=head2 q ()
-
-returns reference to CGI::Lazy object.
-
-=cut
-
 sub q {
 	my $self = shift;
 
@@ -741,16 +408,6 @@ sub q {
 }
 
 #-----------------------------------------------------------------------------
-=head2 readfunc ( field )
-
-Returns readfunction set for field in question, if any.
-
-=head3 field
-
-field to be tested.
-
-=cut
-
 sub readfunc {
 	my $self = shift;
 	my $field = shift;
@@ -763,16 +420,6 @@ sub readfunc {
 }
 
 #------------------------------------------------------------------------------
-=head2 readOnly ( field )
-
-Returns true if field in question has been set to readOnly.
-
-=head3 field
-
-field to be tested
-
-=cut
-
 sub readOnly {
 	my $self = shift;
 	my $field = shift;
@@ -789,14 +436,6 @@ sub readOnly {
 }
 
 #--------------------------------------------------------------------
-=head2 select ()
-	
-Runs select query based on $self->createSelect, fills $self->{_data}, and returns same.
-
-If where clause is set up with bind placeholders, and select is called with bind variables as arguments, it will bind them and be safe from injection.  if called with straight up variables from the net, it will be vulnerable.  As you will.
-
-=cut
-
 sub select { 
 	my $self = shift;
 	my @bindvars = @_;
@@ -836,16 +475,6 @@ sub select {
 }
 
 #-------------------------------------------------------------------------------
-=head2 table( tablename )
-	
-	gets or sets the table queried
-	
-=head3 table
-	
-	string.
-
-=cut
-
 sub table {
 	my $self = shift;
 	my $value = shift;
@@ -858,20 +487,6 @@ sub table {
 }
 
 #-------------------------------------------------------------------------------
-=head2 update ( data, vars )
-
-Updates fields in data, modified by vars
-
-=head3 data
-
-Hashref of data.  Each key is the primary key off a record, and the value is a hash whose keys are fieldnames and values are field contents.
-
-=head3 vars
-
-modifiers to data
-
-=cut
-
 sub update {
 	my $self = shift;
 	my $data = shift;
@@ -969,12 +584,6 @@ sub update {
 }
 
 #----------------------------------------------------------------------
-=head2 updateadditional ()
-
-Returns updateadditional information for recordset.
-
-=cut
-
 sub updateadditional {
 	my $self = shift;
 
@@ -982,12 +591,6 @@ sub updateadditional {
 }
 
 #----------------------------------------------------------------------
-=head2 updatedefaults ()
-
-Returns updatedefaults information for recordset
-
-=cut
-
 sub updatedefaults {
 	my $self = shift;
 
@@ -995,16 +598,6 @@ sub updatedefaults {
 }
 
 #-----------------------------------------------------------------------------
-=head2 validator ( field )
-
-Returns validator hashref for field.
-
-=head3 field
-
-Name of field to be tested.
-
-=cut
-
 sub validator {
 	my $self = shift;
 	my $field = shift;
@@ -1018,14 +611,6 @@ sub validator {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 verify ( value ) 
-
-Untaints and returns true only if the given string is a field included in the database
-
-Due to the dynamic nature of the Ajax objects, it's not possible to bind all variables coming in from the web.  This is not ideal.  However, we can guard from sql injection attacks by refusing to include strings that contain characters beyond A-Za-z0-9_-, and verify that the field in question is part of your recordset.  If your database structure has special characters in it's table names, go out back and hit yourself with a brick.  Shame on you.
-
-=cut
-
 sub verify {
 	my $self = shift;
 	my $value = shift;
@@ -1037,12 +622,6 @@ sub verify {
 }
 
 #-----------------------------------------------------------------------------
-=head2 visibleFieldLabels ()
-
-Returns array or arrayref of labels for non-hidden fields.
-
-=cut
-
 sub visibleFieldLabels {
 	my $self = shift;
 
@@ -1058,12 +637,6 @@ sub visibleFieldLabels {
 }
 
 #----------------------------------------------------------------------
-=head2 visibleFields
-
-Returns array or arrayref of field names that are not hidden
-
-=cut
-
 sub visibleFields {
 	my $self = shift;
 
@@ -1078,16 +651,6 @@ sub visibleFields {
 }
 
 #-----------------------------------------------------------------------------
-=head2 where($where)
-	
-	gets or sets the where clause
-	
-=head3 $where
-	
-	string.
-
-=cut
-
 sub where {
 	my $self = shift;
 	my $value = shift;
@@ -1100,16 +663,6 @@ sub where {
 }
 
 #-----------------------------------------------------------------------------
-=head2 writefunc ( field )
-
-Returns writefunc set for field.
-
-=head3 field
-
-field to be tested
-
-=cut
-
 sub writefunc {
 	my $self = shift;
 	my $field = shift;
@@ -1122,3 +675,461 @@ sub writefunc {
 }
 
 1;
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::RecordSet
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+our $q = CGI::Lazy->new({
+
+				tmplDir 	=> "/templates",
+
+				jsDir		=>  "/js",
+
+				plugins 	=> {
+
+					mod_perl => {
+
+						PerlHandler 	=> "ModPerl::Registry",
+
+						saveOnCleanup	=> 1,
+
+					},
+
+					ajax	=>  1,
+
+					dbh 	=> {
+
+						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+
+						dbUser 		=> "dbuser",
+
+						dbPasswd 	=> "letmein",
+
+						dbArgs 		=> {"RaiseError" => 1},
+
+					},
+
+					session	=> {
+
+						sessionTable	=> 'SessionData',
+
+						sessionCookie	=> 'frobnostication',
+
+						saveOnDestroy	=> 1,
+
+						expires		=> '+15m',
+
+					},
+
+				},
+
+			});
+
+my $recordset = $q->db->recordset({
+
+		table		=> 'detail',  #table where records are coming from
+
+		fieldlist	=> [
+
+					{name => 'detail.ID', #name of field
+
+						hidden => 1}, #do not display to screen.  Recordset cant do any operations on fields that are not a part of itself, however all fields need not be displayed
+
+					{name => 'invoiceid', 
+
+						hidden => 1},
+
+					{name => 'prodCode', 
+
+						label => 'Product Code', 
+
+						validator => {rules => ['/\d+/'], msg => 'number only, and is required'}}, #validator for filed.  msg is not implemented at present.
+
+					{name 		=> 'quantity', 
+
+						label 		=> 'Quantity', 
+
+						validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
+
+						outputMask	=> "%.1f", #formatting to data applied on output to browser
+
+					},
+
+					{name => 'unitPrice', 
+
+						label 		=> 'Unit Price' , 
+
+						validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
+
+						inputMask	=> "%.1f", #formatting to data applied on input to database
+
+						},
+
+					{name => 'productGross', 
+
+						label => 'Product Gross' , 
+
+						validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+
+					{name => 'prodCodeLookup.description', 
+
+						label => 'Product Description', 
+
+						readOnly => 1 }, #readOnly values display to the screen, but never get written to the db
+
+					], 
+
+		basewhere 	=> '',  #baseline where clause for the select query.  this is used in all selects, even if 'where is set later.
+
+		joins		=> [ #table joins
+
+					{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
+
+		],
+
+		orderby		=> 'detail.ID',  #order by clause for select wuery
+
+		primarykey	=> 'detail.ID', #primary key for recordset.  This value is looked for for all updates and deletes
+
+	});
+
+
+my $thing = $q->ajax->dataset({
+
+		id		=> 'detailBlock',
+
+		type		=> 'multi',
+
+		template	=> "UsbInternalPOCDetailBlock.tmpl",
+
+		lookups		=> {
+
+				prodcodeLookup  => {
+
+					sql 		=> 'select ID, description from prodCodeLookup', 
+
+					preload 	=> 1,
+
+					orderby		=> ['ID'],
+
+					output		=> 'hash',
+
+					primarykey	=> 'ID',
+
+				},
+
+					
+
+		},
+
+		recordset	=> $recordset,
+
+		});
+		
+
+=head1 DESCRIPTION
+
+CGI::Lazy::DB::Recordset is a container object for handling a set of records pulled out of a database.  The big difference between using the Recordset object and just using a standard query is the Recordset, with it's defined internal structure allows for automated transformations to the data.  The object builds the queries on the fly, and remembers where it got all the data in question, so it can edit it and put it back.  Much of this functionality is seen in the Ajax::Dataset object, for which the Recordset object was originally written.
+
+=head1 METHODS
+
+=head2 basewhere ()
+
+Returns the basewhere string for the recordset.  
+
+=head2 createSelect ()
+
+Creates the Select statement out of the structure of the Recordset.
+
+=head2 data ()
+
+Returns data reference from Recordset.  Will always be present, but will be empty until select() is called.
+
+=head2 delete ( data )
+
+Deletes records with primary keys in data.
+
+=head3 data
+
+Hashref who's keys are the primary keys of the records to be deleted.
+
+=head2 displayOnly ( field )
+
+Returns true if field has displayOnly key set to a true value.
+
+=head3 field
+
+name of field to test
+
+=head2 db ()
+
+Returns reference to CGI::Lazy::DB object
+
+
+=head2 fieldlist ()
+
+Returns array ref of field list with which recordset was built.
+
+=head2 handle ( field )
+
+Returns reference used as handle to value of field.
+
+=head3 field
+
+Name of field who's handle to retrieve
+
+=head2 hidden ( field )
+
+Returns true if field in question has been set to hidden
+
+=head3 field
+
+name of field to test
+
+=head2 inputMask ( field )
+
+Returns inputMask for field of given name, if one has been set.
+
+=head3 field
+
+Name of field to test.
+
+=head2 insert ( data, vars )
+
+Inserts data modified by vars into table accessed by Recordset.
+
+=head3 data
+
+Hashref of data to be inserted.  Each key corresponds to a row of data
+
+=head3 vars
+
+modifiers for data to be inserted
+
+=head2 insertadditonal
+
+Returns reference of additional information to be inserted with each new record
+
+=head2 insertdefaults
+
+Returns reference of default values to be inserted with each new record
+
+=head2 joins
+
+Returns either list or arrayref of joins for Recordset
+
+=head2 label ( field )
+
+Returns label set for field, or name of field if no label has been specified
+
+=head3 field
+
+field name to test.
+
+=head2 new ( vars )
+
+Constructor
+
+=head3 vars
+
+Hashref with construction properties.  
+
+Minimum:
+
+	{
+
+		table=>$table, 
+
+		where => $where, 
+
+		orderby => $order by, 
+
+		primarykey => $keyfield, 
+
+		fieldlist => [{name => 'fieldname', label => 'some field'}] 
+
+	}
+
+
+=head3 table
+
+string.  name of table
+
+=head3 where
+
+string. where clause
+
+=head3 orderby
+
+string. orderby clause
+
+=head3 primarykey
+
+field name of primary key for table
+
+=head3 fieldlist
+
+array ref. list of fields with their attributes
+
+=head2 noLabel ( field )
+
+Returns true if field in question has been set with the noLabel option
+
+=head3 field
+
+Name of field to test.
+
+=head2 orderby ( sql )
+
+returns or sets the order by clause
+
+=head3 sql
+
+sql string
+
+=head2 outMask ( field )
+
+Returns outputMask set for field.
+
+=head3 field
+
+Name of field to test.
+
+=head2 multipleFiled ( field )
+
+Returns true if field in question has multipleField option set (i.e. it's supposed to turn up on the mulitple record screen)
+
+=head3 field
+
+Name of field to test.
+
+=head2 multipleFieldList
+
+Returns arrayref or array of fields flagged to show up on multiple records page
+
+=head2 multipleFieldLabels
+
+Returns arrayref or array of labels for fields chosen to appear on multiple record pages.
+
+=head2 primarykey ( fieldname )
+
+returns or sets the primary key for the object
+
+=head3 fieldname
+
+The name of the field in the database
+
+=head2 q ()
+
+returns reference to CGI::Lazy object.
+
+=head2 readfunc ( field )
+
+Returns readfunction set for field in question, if any.
+
+=head3 field
+
+field to be tested.
+
+=head2 readOnly ( field )
+
+Returns true if field in question has been set to readOnly.
+
+=head3 field
+
+field to be tested
+
+=head2 select ()
+	
+Runs select query based on $self->createSelect, fills $self->{_data}, and returns same.
+
+If where clause is set up with bind placeholders, and select is called with bind variables as arguments, it will bind them and be safe from injection.  if called with straight up variables from the net, it will be vulnerable.  As you will.
+
+=head2 table( tablename )
+	
+	gets or sets the table queried
+	
+=head3 table
+	
+	string.
+
+=head2 update ( data, vars )
+
+Updates fields in data, modified by vars
+
+=head3 data
+
+Hashref of data.  Each key is the primary key off a record, and the value is a hash whose keys are fieldnames and values are field contents.
+
+=head3 vars
+
+modifiers to data
+
+=head2 updateadditional ()
+
+Returns updateadditional information for recordset.
+
+=head2 updatedefaults ()
+
+Returns updatedefaults information for recordset
+
+=head2 validator ( field )
+
+Returns validator hashref for field.
+
+=head3 field
+
+Name of field to be tested.
+
+=head2 verify ( value ) 
+
+Untaints and returns true only if the given string is a field included in the database
+
+Due to the dynamic nature of the Ajax objects, it's not possible to bind all variables coming in from the web.  This is not ideal.  However, we can guard from sql injection attacks by refusing to include strings that contain characters beyond A-Za-z0-9_-, and verify that the field in question is part of your recordset.  If your database structure has special characters in it's table names, go out back and hit yourself with a brick.  Shame on you.
+
+=head2 visibleFieldLabels ()
+
+Returns array or arrayref of labels for non-hidden fields.
+
+=head2 visibleFields
+
+Returns array or arrayref of field names that are not hidden
+
+=head2 where($where)
+	
+	gets or sets the where clause
+	
+=head3 $where
+	
+	string.
+
+=head2 writefunc ( field )
+
+Returns writefunc set for field.
+
+=head3 field
+
+field to be tested
+
+=cut
+

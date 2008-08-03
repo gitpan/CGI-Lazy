@@ -1,17 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-Much of this was taken from PlainBlack's WebGUI with many thanks.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
 package CGI::Lazy::ID;
 
 use Digest::MD5;
@@ -21,27 +7,7 @@ use CGI::Lazy::Globals;
 use strict;
 use warnings;
 
-=head1 NAME
-
-CGI::Lazy::ID
-
-=head1 SYNOPSIS
-
-my $id = $session->id->generate();
-
-=head1 DESCRIPTION
-
-Module to generate unique id's.  Inspiration and ideas for this module, and even code itself was taken from PlainBlack's WebGUI with many thanks and much appreciation.  WebGUI was awesom, but far heavier a tool than what was needed.
-
-=cut
-
 #---------------------------------------------------------------------------------------
-=head2 generate ( ) 
-
-Generates a unique identifier.
-
-=cut
-
 sub generate {
 	my $self = shift;
 	
@@ -53,16 +19,6 @@ sub generate {
 }
 
 #---------------------------------------------------------------------------------------
-=head2 new ( session )
-
-Constructor.
-
-=head3 session
-
-CGI::Lazy::Session object
-
-=cut
-
 sub new	{
 	my $class = shift;
 	my $session = shift;
@@ -73,23 +29,12 @@ sub new	{
 }
 
 #---------------------------------------------------------------------------------------
-=head2 session ( )
-
-Returns the session object this object was created with.
-
-=cut
-
 sub session {
 	my $self = shift;
 	return $self->{_session};
 }
 
 #---------------------------------------------------------------------------------------
-=head2 valid ($sessionID)
-
-Returns true if $sessionID is a valid id string
-
-=cut
 sub valid {
 	my $self = shift;
 	my $sessionID = shift || '';
@@ -98,3 +43,55 @@ sub valid {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+Much of this was taken from PlainBlack's WebGUI with many thanks.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::ID
+
+=head1 SYNOPSIS
+
+my $id = $session->id->generate();
+
+=head1 DESCRIPTION
+
+Module to generate unique id's.  Inspiration and ideas for this module, and even code itself was taken from PlainBlack's WebGUI with many thanks and much appreciation.  WebGUI was awesome, but far heavier a tool than what was needed.
+
+=head1 METHODS
+
+=head2 generate ( ) 
+
+Generates a unique identifier.
+
+=head2 session ( )
+
+Returns the session object this object was created with.
+
+=head2 new ( session )
+
+Constructor.
+
+=head3 session
+
+CGI::Lazy::Session object
+
+=head2 valid ($sessionID)
+
+Returns true if $sessionID is a valid id string
+
+=cut

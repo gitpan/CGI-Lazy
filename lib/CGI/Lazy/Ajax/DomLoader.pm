@@ -1,6 +1,39 @@
+package CGI::Lazy::Ajax::DomLoader;
+
+use strict;
+use warnings;
+
+use base qw(CGI::Lazy::Ajax);
+use JSON;
+
+#----------------------------------------------------------------------------------------
+sub new {
+	my $class = shift;
+	my $q = shift;
+	my $vars = shift;
+
+        my $widgetID = $vars->{id};
+	return bless {_q => $q, _vars => $vars, _widgetID => $widgetID}, $class;
+}
+
+#----------------------------------------------------------------------------------------
+sub output {
+	my $self = shift;
+
+	my $output = $self->preloadLookup;
+	$output .= $self->domload;
+
+	return $output;
+}
+
+1
+
+__END__
+
 =head1 LEGAL
 
 #===========================================================================
+
 Copyright (C) 2008 by Nik Ogura. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
@@ -9,9 +42,6 @@ it under the same terms as Perl itself.
 Bug reports and comments to nik.ogura@gmail.com. 
 
 #===========================================================================
-=cut
-
-=pod
 
 =head1 NAME
 
@@ -24,13 +54,21 @@ use CGI::Lazy;
 my $q = CGI::Lazy->new('frobnitz.conf');
 
 my $domloader = $q->domloader({
+
 			lookups =>  {
+
 					countryLookup => {  #name of resultant DOM object
+
 						sql 	=> 'select ID, country from countryCodeLookup ', 
+
 						orderby	=> ['ID'],
+
 						output	=> 'hash',
+
 						key	=> 'ID',
+
 					},
+
 				},
 
 		});
@@ -41,17 +79,9 @@ print $domloader->output;
 
 CGI::Lazy::Ajax::DomLoader is an object for preloading useful stuff into a page's DOM, such as lookup queries, or any javascript object that might be desired.  This is functionality that is duplicated from the internals of CGI::Lazy::Ajax::Dataset, but it's included as a separate object for preloading arbitrary values for other purposes.
 
-=cut
 
-package CGI::Lazy::Ajax::DomLoader;
+=head1 METHODS
 
-use strict;
-use warnings;
-
-use base qw(CGI::Lazy::Ajax);
-use JSON;
-
-#----------------------------------------------------------------------------------------
 =head2 new (q, vars)
 
 Constructor.
@@ -64,31 +94,10 @@ CGI::Lazy object.
 
 Hashref of object configs.
 
-=cut
 
-sub new {
-	my $class = shift;
-	my $q = shift;
-	my $vars = shift;
-
-        my $widgetID = $vars->{id};
-	return bless {_q => $q, _vars => $vars, _widgetID => $widgetID}, $class;
-}
-
-#----------------------------------------------------------------------------------------
 =head2 output ()
 
 Returns output of object for printing to the web page
 
 =cut
 
-sub output {
-	my $self = shift;
-
-	my $output = $self->preloadLookup;
-	$output .= $self->domload;
-
-	return $output;
-}
-
-1

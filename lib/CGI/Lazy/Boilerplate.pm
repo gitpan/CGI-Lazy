@@ -1,58 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
-=head1 NAME
-
-CGI::Lazy::BoilerPlate
-
-=head1 SYNOPSIS
-
-use CGI::Lazy::Boilerplate;
-
-my $b1 = CGI::Lazy::Boilerplate->new({
-                id      => 'frobnitz',
-                fieldlist       => [qw(prodCode quantity unitPrice productGross prodCodeLookup.description)],
-                type            => 'dataset, multiple',
-		style		=> 'funkystyle', #unsupported as of yet
-                });
-
-$b1->buildTemplate;
-$b1->buildCss;
-
-my $b2 = CGI::Lazy::Boilerplate->new({
-                id              => 'glortswaggle',
-                fieldlist       => [qw(merchant batch post_date cardnum tailno authCode icao invoicenum invtotal trandate country countryname)],
-                type            => 'dataset, single',
-                });
-
-$b2->buildTemplate;
-$b2->buildCss;
-
-my $b3 = CGI::Lazy::Boilerplate->new({
-		id	 	=> 'glortswaggle',
-		fieldlist	=> [qw(merchant batch post_date cardnum tailno )],
-		type		=> 'dataset, singleMulti',
-		});
-
-$b3->buildTemplate;
-
-
-=head1 DESCRIPTION
-
-CGI::Lazy::Boilerplate is a module to generate boilerplate template examples for Lazy widgets.  The templates generated can then be customized to do whatever you want, and look like whatever you want.  Some pieces of template syntax might be confusing to users of Lazy, so this will generate a nice starting point for you.
-
-=cut
-
 package CGI::Lazy::Boilerplate;
 
 use strict;
@@ -155,12 +100,6 @@ our $datasetSingleEnd = <<END;
 END
 
 #--------------------------------------------------------------------------------------------
-=head2 buildCss ()
-
-Builds a prototype css file of style set in object creation for widget in question, or a blank style if none is specified.
-
-=cut
-
 sub buildCss	{
 	my $self = shift;
 	
@@ -172,12 +111,6 @@ sub buildCss	{
 }
 
 #--------------------------------------------------------------------------------------------
-=head2 buildCssClean ()
-
-Builds clean css file for widget.
-	
-=cut
-
 sub buildCssClean {
 	my $self = shift;
 	
@@ -240,12 +173,6 @@ sub buildTmplDatasetSingleMulti {
 	$self->outputTmpl($tmpl, 'Multi');
 }
 #--------------------------------------------------------------------------------------------
-=head2 buildTemplate ()
-
-Builds a template appropriate for widget of type specified in object creation.
-
-=cut
-
 sub buildTemplate {
 	my $self = shift;
 	
@@ -355,3 +282,92 @@ sub widgetID {
 
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::BoilerPlate
+
+=head1 SYNOPSIS
+
+use CGI::Lazy::Boilerplate;
+
+my $b1 = CGI::Lazy::Boilerplate->new({
+
+                id      => 'frobnitz',
+
+                fieldlist       => [qw(prodCode quantity unitPrice productGross prodCodeLookup.description)],
+
+                type            => 'dataset, multiple',
+
+		style		=> 'funkystyle', #unsupported as of yet
+
+                });
+
+$b1->buildTemplate;
+
+$b1->buildCss;
+
+my $b2 = CGI::Lazy::Boilerplate->new({
+
+                id              => 'glortswaggle',
+
+                fieldlist       => [qw(merchant batch post_date cardnum tailno authCode icao invoicenum invtotal trandate country countryname)],
+
+                type            => 'dataset, single',
+
+                });
+
+$b2->buildTemplate;
+
+$b2->buildCss;
+
+my $b3 = CGI::Lazy::Boilerplate->new({
+
+		id	 	=> 'glortswaggle',
+
+		fieldlist	=> [qw(merchant batch post_date cardnum tailno )],
+
+		type		=> 'dataset, singleMulti',
+
+		});
+
+$b3->buildTemplate;
+
+
+=head1 DESCRIPTION
+
+CGI::Lazy::Boilerplate is a module to generate boilerplate template examples for Lazy widgets.  The templates generated can then be customized to do whatever you want, and look like whatever you want.  Some pieces of template syntax might be confusing to users of Lazy, so this will generate a nice starting point for you.
+
+=head1 METHODS
+
+=head2 buildCss ()
+
+Builds a prototype css file of style set in object creation for widget in question, or a blank style if none is specified.
+
+
+=head2 buildCssClean ()
+
+Builds clean css file for widget.
+	
+
+=head2 buildTemplate ()
+
+Builds a template appropriate for widget of type specified in object creation.
+
+=cut
+

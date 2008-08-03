@@ -1,119 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-
-=head1 NAME
-
-CGI::Lazy::Ajax::Dataset
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-our $q = CGI::Lazy->new({
-				tmplDir 	=> "/templates",
-				jsDir		=>  "/js",
-				plugins 	=> {
-					mod_perl => {
-						PerlHandler 	=> "ModPerl::Registry",
-						saveOnCleanup	=> 1,
-					},
-					ajax	=>  1,
-					dbh 	=> {
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-						dbUser 		=> "dbuser",
-						dbPasswd 	=> "letmein",
-						dbArgs 		=> {"RaiseError" => 1},
-					},
-					session	=> {
-						sessionTable	=> 'SessionData',
-						sessionCookie	=> 'frobnostication',
-						saveOnDestroy	=> 1,
-						expires		=> '+15m',
-					},
-				},
-			});
-
-my $widget = $q->ajax->dataset({
-			id		=> 'detailBlock',
-			type		=> 'multi',
-			template	=> "UsbInternalPOCDetailBlock.tmpl",
-#						nodelete	=> 1,
-			lookups		=> {
-					prodcodeLookup  => {
-						sql 		=> 'select ID, description from prodCodeLookup', 
-						preload 	=> 1,
-						orderby		=> ['ID'],
-						output		=> 'hash',
-						primarykey	=> 'ID',
-					},
-						
-			},
-			recordset	=> $q->db->recordset({
-						table		=> 'detail', 
-						fieldlist	=> [
-									{name => 'detail.ID', 
-										hidden => 1},
-									{name => 'invoiceid', 
-										hidden => 1},
-									{name => 'prodCode', 
-										label => 'Product Code', 
-										validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
-									{	name 		=> 'quantity', 
-										label 		=> 'Quantity', 
-										validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-										outputMask	=> "%.1f",
-									},
-									{name => 'unitPrice', 
-										label 		=> 'Unit Price' , 
-										validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-										inputMask	=> "%.1f",
-										},
-									{name => 'productGross', 
-										label => 'Product Gross' , 
-										validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
-									{name => 'prodCodeLookup.description', 
-										label => 'Product Description', 
-										readOnly => 1 },
-									], 
-						where 		=> '', 
-						joins		=> [
-									{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
-						],
-						orderby		=> 'detail.ID', 
-						primarykey	=> 'detail.ID',
-
-
-
-
-			}),
-	}),
-
-=head1 DESCRIPTION
-
-CGI::Lazy::Ajax::Dataset is, at present, the crown jewel of the CGI::Lazy framework, and the chief reason why the framework was written.  Lazy was written because the author has been asked to write front ends to simple databases so often that he started to realize he was writing the same damn code over and over again, and finally got sick of it.
-
-When we're talking about web-based access to a database, there really aren't many operations that we are talking about performing.  It all comes down to Select, Insert, Update, and Delete (and Ignore- but more on that later).  From the standpoint of the database, it doesn't matter what the data is pertaining to, it could be cardiac patients, or tootsie rolls- the data is still stored in tables, rows and fields, and no matter what you need to read it, modify it, extend it, or destroy it.
-
-The Dataset is designed to, given a set of records, defined by a CGI::Lazy::DB::Recordset object, display that recordset to the screen in whatever manner you like (determined by template and css)  and then keep track of the data.  It's smart enough to know if a record was retrieved from the db, and therefore should be updated or deleted, or if it came from the web, it must be inserted (or ignored, if it was created clientside, and then subsequently deleted clientside- these records will show on the screen, but will be ignored on submit).
-
-Furthermore, as much of the work as possible is done clientside to cut down on issues caused by network traffic.  It's using AJAX and JSON, but there's no eval-ing.  All data is passed into the browser as JSON, and washed though a JSON parser. 
-
-To do it's magic, the Dataset relies heavily on javascript that *should* work for Firefox and IE6.  At the time of publication, all funcitons and methods work flawlessly with FF2, FF3, and IE6.  The author has tried to write for W3C standards, and provide as much IE support as his corporate sponsors required.  YMMV.  Bug reports are always welcome, however we will not support IE to the detrement of W3C standards.  Get on board M$.
-
-
-The API for Lazy, Recordset, and Dataset allows for hooking simple widgets together to generate not-so-simple results, such as pages with Parent/Child 1 to Many relationships between the Datasets.  CGI::Lazy::Composite is a wrapper designed to connect Dataset objects together.
-
-
-=cut
-
 package CGI::Lazy::Ajax::Dataset;
 
 use strict;
@@ -154,16 +38,6 @@ sub buildvalidator {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 contents (args)
-
-Generates widget contents based on args.
-
-=head3 args
-
-Hash of arguments.  Common args are mode => 'blank', for displaying a blank data entry form, and nodiv => 1, for sending the contents back without the surrounding div tags (javascript replaces the contents of the div, and we don't want to add another div of the same name inside the div).
-
-=cut
-
 sub contents {
 	my $self = shift;
 	my %args = @_;
@@ -378,16 +252,6 @@ sub contents {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 display (args)
-
-Displays the widget initially.  Calls $self->contents, and adds preload lookups and instance specific javascript that will not be updated on subsequent ajax calls.
-
-=head3 args
-
-Hash of arguments
-
-=cut
-
 sub display {
 	my $self = shift;
 	my %args = @_;
@@ -399,16 +263,6 @@ sub display {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 displaySingleList (args)
-
-Handler for displaying data when a search returns multiple records.  Displays multipleTemplate rather than template.
-
-=head3 args
-
-Hash of arguments.
-
-=cut
-
 sub displaySingleList {
 	my $self = shift;
 	my %args = @_;
@@ -469,12 +323,6 @@ sub displaySingleList {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 empty ()
-
-Returns the empty property.  Property gets set when a search returns nothing.
-
-=cut
-
 sub empty {
 	my $self = shift;
 
@@ -482,12 +330,6 @@ sub empty {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 multi ()
-
-Returns multi property.  Multi gets set when a search returns more than one record.
-
-=cut
-
 sub multi {
 	my $self = shift;
 
@@ -495,34 +337,6 @@ sub multi {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 new (q, vars)
-
-Constructor.
-
-=head3 q
-
-CGI::Lazy object.
-
-=head3 vars
-
-Hashref of object configs.
-
-id			=> widget id 			(manditory)
-template		=> standard template		(manditory)
-multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
-recordset	=> CGI::Lazy::RecordSet			(manditory)
-lookups			=> 				(optional)
-	countryLookup =>	name of lookup 
-		sql 		=> sql
-		preload 	=> 1 (0 means no preload, will have to be run via ajax)
-		orderby		=> order by clause
-		output		=> type of output (see CGI::Lazy::DB)
-		primarykey	=> primary key
-extravars		=>  Extra variables to be output to template	(optional)  		
-			name	=> name of variable
-				value => variable, string, or reference
-=cut
-
 sub new {
 	my $class = shift;
 	my $q = shift;
@@ -565,3 +379,271 @@ sub type {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Ajax::Dataset
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+our $q = CGI::Lazy->new({
+
+				tmplDir 	=> "/templates",
+
+				jsDir		=>  "/js",
+
+				plugins 	=> {
+
+					mod_perl => {
+
+						PerlHandler 	=> "ModPerl::Registry",
+
+						saveOnCleanup	=> 1,
+
+					},
+
+					ajax	=>  1,
+
+					dbh 	=> {
+
+						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+
+						dbUser 		=> "dbuser",
+
+						dbPasswd 	=> "letmein",
+
+						dbArgs 		=> {"RaiseError" => 1},
+
+					},
+
+					session	=> {
+
+						sessionTable	=> 'SessionData',
+
+						sessionCookie	=> 'frobnostication',
+
+						saveOnDestroy	=> 1,
+
+						expires		=> '+15m',
+
+					},
+
+				},
+
+			});
+
+
+
+my $widget = $q->ajax->dataset({
+
+			id		=> 'detailBlock',
+
+			type		=> 'multi',
+
+			template	=> "UsbInternalPOCDetailBlock.tmpl",
+
+#						nodelete	=> 1,
+
+			lookups		=> {
+
+					prodcodeLookup  => {
+
+						sql 		=> 'select ID, description from prodCodeLookup', 
+
+						preload 	=> 1,
+
+						orderby		=> ['ID'],
+
+						output		=> 'hash',
+
+						primarykey	=> 'ID',
+
+					},
+
+						
+
+			},
+
+			recordset	=> $q->db->recordset({
+
+						table		=> 'detail', 
+
+						fieldlist	=> [
+
+									{name => 'detail.ID', 
+
+										hidden => 1},
+
+									{name => 'invoiceid', 
+
+										hidden => 1},
+
+									{name => 'prodCode', 
+
+										label => 'Product Code', 
+
+										validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+
+									{	name 		=> 'quantity', 
+
+										label 		=> 'Quantity', 
+
+										validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
+
+										outputMask	=> "%.1f",
+
+									},
+
+									{name => 'unitPrice', 
+
+										label 		=> 'Unit Price' , 
+
+										validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
+
+										inputMask	=> "%.1f",
+
+										},
+
+									{name => 'productGross', 
+
+										label => 'Product Gross' , 
+
+										validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+
+									{name => 'prodCodeLookup.description', 
+
+										label => 'Product Description', 
+
+										readOnly => 1 },
+
+									], 
+
+						where 		=> '', 
+
+						joins		=> [
+
+									{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
+
+						],
+
+						orderby		=> 'detail.ID', 
+
+						primarykey	=> 'detail.ID',
+
+			}),
+	}),
+
+=head1 DESCRIPTION
+
+CGI::Lazy::Ajax::Dataset is, at present, the crown jewel of the CGI::Lazy framework, and the chief reason why the framework was written.  Lazy was written because the author has been asked to write front ends to simple databases so often that he started to realize he was writing the same damn code over and over again, and finally got sick of it.
+
+When we're talking about web-based access to a database, there really aren't many operations that we are talking about performing.  It all comes down to Select, Insert, Update, and Delete (and Ignore- but more on that later).  From the standpoint of the database, it doesn't matter what the data is pertaining to, it could be cardiac patients, or tootsie rolls- the data is still stored in tables, rows and fields, and no matter what you need to read it, modify it, extend it, or destroy it.
+
+The Dataset is designed to, given a set of records, defined by a CGI::Lazy::DB::Recordset object, display that recordset to the screen in whatever manner you like (determined by template and css)  and then keep track of the data.  It's smart enough to know if a record was retrieved from the db, and therefore should be updated or deleted, or if it came from the web, it must be inserted (or ignored, if it was created clientside, and then subsequently deleted clientside- these records will show on the screen, but will be ignored on submit).
+
+Furthermore, as much of the work as possible is done clientside to cut down on issues caused by network traffic.  It's using AJAX and JSON, but there's no eval-ing.  All data is passed into the browser as JSON, and washed though a JSON parser. 
+
+To do it's magic, the Dataset relies heavily on javascript that *should* work for Firefox and IE6.  At the time of publication, all funcitons and methods work flawlessly with FF2, FF3, and IE6.  The author has tried to write for W3C standards, and provide as much IE support as his corporate sponsors required.  YMMV.  Bug reports are always welcome, however we will not support IE to the detrement of W3C standards.  Get on board M$.
+
+
+The API for Lazy, Recordset, and Dataset allows for hooking simple widgets together to generate not-so-simple results, such as pages with Parent/Child 1 to Many relationships between the Datasets.  CGI::Lazy::Composite is a wrapper designed to connect Dataset objects together.
+
+
+=head1 METHODS
+
+
+=head2 contents (args)
+
+Generates widget contents based on args.
+
+=head3 args
+
+Hash of arguments.  Common args are mode => 'blank', for displaying a blank data entry form, and nodiv => 1, for sending the contents back without the surrounding div tags (javascript replaces the contents of the div, and we don't want to add another div of the same name inside the div).
+
+
+=head2 display (args)
+
+Displays the widget initially.  Calls $self->contents, and adds preload lookups and instance specific javascript that will not be updated on subsequent ajax calls.
+
+=head3 args
+
+Hash of arguments
+
+
+=head2 displaySingleList (args)
+
+Handler for displaying data when a search returns multiple records.  Displays multipleTemplate rather than template.
+
+=head3 args
+
+Hash of arguments.
+
+
+=head2 empty ()
+
+Returns the empty property.  Property gets set when a search returns nothing.
+
+
+=head2 multi ()
+
+Returns multi property.  Multi gets set when a search returns more than one record.
+
+
+=head2 new (q, vars)
+
+Constructor.
+
+=head3 q
+
+CGI::Lazy object.
+
+=head3 vars
+
+Hashref of object configs.
+
+id			=> widget id 			(manditory)
+
+template		=> standard template		(manditory)
+
+multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
+
+recordset	=> CGI::Lazy::RecordSet			(manditory)
+
+lookups			=> 				(optional)
+
+	countryLookup =>	name of lookup 
+
+		sql 		=> sql
+
+		preload 	=> 1 (0 means no preload, will have to be run via ajax)
+
+		orderby		=> order by clause
+
+		output		=> type of output (see CGI::Lazy::DB)
+
+		primarykey	=> primary key
+
+extravars		=>  Extra variables to be output to template	(optional)  		
+
+			name	=> name of variable
+
+				value => variable, string, or reference
+=cut
+

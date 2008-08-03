@@ -1,40 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-
-=head1 NAME
-
-CGI::Lazy::Config
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-
-my $q = CGI::Lazy->new('/path/to/config/file');
-
-my $c = $q->config;
-
-my $prop = $c->property1; #getter
-$c->property1('foo'); #setter
-
-=head1 DESCRIPTION
-
-Internal module used for parsing config file and getting/ setting values from same.
-
-Configuration values are accessed by calling the property name on the config object without arguments.
-
-The same method doubles as a setter if called with arguments.
-
-=cut
-
 package CGI::Lazy::Config;
 use JSON;
 use CGI::Lazy::Globals;
@@ -59,12 +22,6 @@ sub AUTOLOAD {
 }
 
 #-------------------------------------------------------------------------------
-=head2 configfile ()
-
-Returns the name of the config file the object is based on
-
-=cut
-
 sub configfile {
 	my $self = shift;
 	
@@ -72,16 +29,6 @@ sub configfile {
 }
 
 #-------------------------------------------------------------------------------
-=head2 get ( property )
-
-Static accessor method.  Use in places where autoloading isn't appropriate.  e.g $q->widget->"somewstring".$variable  or some such nonsense.
-
-=head3 property
-
-name of the property to retrieve
-
-=cut
-
 sub get {
 	my $self = shift;
 	my $prop = shift;
@@ -90,23 +37,6 @@ sub get {
 }
 
 #-------------------------------------------------------------------------------
-=head2 new ( q vars )
-
-Constructor.  Creates and returns the config object.
-
-=head3 q
-
-CGI::Lazy object.
-
-=head3 vars
-
-Hashref containing initialization variables, or absolute path to config file.
-
-
-CGI::Lazy::Config uses an autoloader to get and set it's properties.  You can access any property by calling $q->config->var  where var is the name of the property.
-
-=cut
-
 sub new {
 	my $class = shift;
 	my $q = shift;
@@ -148,6 +78,86 @@ sub new {
 }
 
 #-------------------------------------------------------------------------------
+sub set {
+	my $self = shift;
+	my $name = shift;
+	my $value = shift;
+
+	$self->{_config}{$name} = $value;
+}
+
+1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Config
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new('/path/to/config/file');
+
+my $c = $q->config;
+
+my $prop = $c->property1; #getter
+
+$c->property1('foo'); #setter
+
+=head1 DESCRIPTION
+
+Internal module used for parsing config file and getting/ setting values from same.
+
+Configuration values are accessed by calling the property name on the config object without arguments.
+
+The same method doubles as a setter if called with arguments.
+
+=head1 METHODS
+
+=head2 configfile ()
+
+Returns the name of the config file the object is based on
+
+
+=head2 get ( property )
+
+Static accessor method.  Use in places where autoloading isn't appropriate.  e.g $q->widget->"somewstring".$variable  or some such nonsense.
+
+=head3 property
+
+name of the property to retrieve
+
+
+=head2 new ( q vars )
+
+Constructor.  Creates and returns the config object.
+
+=head3 q
+
+CGI::Lazy object.
+
+=head3 vars
+
+Hashref containing initialization variables, or absolute path to config file.
+
+
+CGI::Lazy::Config uses an autoloader to get and set it's properties.  You can access any property by calling $q->config->var  where var is the name of the property.
+
 =head3 set ( prop, value )
 
 Static property setter.  For use when autoloading isn't possible.
@@ -162,12 +172,4 @@ Value of property
 
 =cut
 
-sub set {
-	my $self = shift;
-	my $name = shift;
-	my $value = shift;
 
-	$self->{_config}{$name} = $value;
-}
-
-1

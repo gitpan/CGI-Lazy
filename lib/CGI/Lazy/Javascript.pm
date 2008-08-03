@@ -1,36 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=head1 NAME
-
-CGI::Lazy::Javascript
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-my $q = CGI::Lazy->new();
-my $widget1 = $q->ajax->activeDataSet({...});
-my $widget2 = $q->ajax->activeDataSet({...});
-
-print $q->header,
-      $q->javascript->modules($widget1, $widget2);
-
-=head2 DESCRIPTION
-
-CGI::Lazy::Javascript is predominately a javascript container.  It holds the js modules necessary for widgets to function, and outputs them for printing to the browser.
-
-It's only real method is modules() which outputs the javascript necessary to run whatever modules get passed as arguments, or in the event that there are none, it will just output the basics, such as a JSON parser, and Ajax routines
-
-=cut
-
 package CGI::Lazy::Javascript;
 
 use strict;
@@ -356,12 +323,6 @@ our %component = (
 );
 
 #-------------------------------------------------------------------------------------------------
-=head2 q ( ) 
-
-Returns CGI::Lazy object.
-
-=cut
-
 sub q {
 	my $self = shift;
 
@@ -369,22 +330,6 @@ sub q {
 }
 
 #-------------------------------------------------------------------------------------------------
-=head2 modules ( components )
-
-Returns javascript for parsing JSON and making ajax calls, as well as the clientside goodness for the ajax widgets.  This method needs to be printed on any page that is going to use JSON or the Ajax objects.
-
-It's included as a separate method as it should be sent only once per page, and would be included in the header except this would be an irritation for cases where CGI::Lazy is not using Ajax objects.  If called without components, it will send out only the defaults listed below.
-
-=head3 components
-
-List of widgets whose javascript needs to be loaded.  JSON parser, ajaxSend, and sjaxSend are exported by default, the rest is on a per widget basis.  
-
-The modules method is smart enough to only output the necessary code for a given type of module once.  Multiple widgets of the same type will not result in the same code being printed over and over.
-
-For composite widgets, it loads each constituent widget in turn.
-
-=cut
-
 sub modules {
 	my $self = shift;
 	my @args = @_;
@@ -411,6 +356,73 @@ sub modules {
 }
 
 #-------------------------------------------------------------------------------------------------
+sub new {
+	my $class = shift;
+	my $q = shift;
+
+	return bless {_q => $q}, $class;
+}
+
+1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+=head1 NAME
+
+CGI::Lazy::Javascript
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new();
+
+my $widget1 = $q->ajax->activeDataSet({...});
+
+my $widget2 = $q->ajax->activeDataSet({...});
+
+print $q->header,
+
+      $q->javascript->modules($widget1, $widget2);
+
+=head2 DESCRIPTION
+
+CGI::Lazy::Javascript is predominately a javascript container.  It holds the js modules necessary for widgets to function, and outputs them for printing to the browser.
+
+It's only real method is modules() which outputs the javascript necessary to run whatever modules get passed as arguments, or in the event that there are none, it will just output the basics, such as a JSON parser, and Ajax routines
+
+=head1 METHODS
+
+=head2 q ( ) 
+
+Returns CGI::Lazy object.
+
+=head2 modules ( components )
+
+Returns javascript for parsing JSON and making ajax calls, as well as the clientside goodness for the ajax widgets.  This method needs to be printed on any page that is going to use JSON or the Ajax objects.
+
+It's included as a separate method as it should be sent only once per page, and would be included in the header except this would be an irritation for cases where CGI::Lazy is not using Ajax objects.  If called without components, it will send out only the defaults listed below.
+
+=head3 components
+
+List of widgets whose javascript needs to be loaded.  JSON parser, ajaxSend, and sjaxSend are exported by default, the rest is on a per widget basis.  
+
+The modules method is smart enough to only output the necessary code for a given type of module once.  Multiple widgets of the same type will not result in the same code being printed over and over.
+
+For composite widgets, it loads each constituent widget in turn.
+
 =head2 new ( q )
 
 constructor.
@@ -420,13 +432,4 @@ constructor.
 CGI::Lazy object
 
 =cut
-
-sub new {
-	my $class = shift;
-	my $q = shift;
-
-	return bless {_q => $q}, $class;
-}
-
-1
 

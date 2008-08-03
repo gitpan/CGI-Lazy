@@ -1,16 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
 package CGI::Lazy::Ajax;
 
 use strict;
@@ -25,20 +12,6 @@ use CGI::Lazy::Ajax::Composite;
 
 
 #----------------------------------------------------------------------------------------
-=head2 ajaxReturn ( widgets, data )
-
-Wraps data (presumably from widget) in json format with validator from widgets for returning to browser in response to an ajax reqeust
-
-=head3 widgets
-
-List of widgets to be parsed for validators
-
-=head3 data
-
-Widget html output
-
-=cut
-
 sub ajaxReturn {
 	my $self = shift;
 	my $widgets = shift;
@@ -61,16 +34,6 @@ sub ajaxReturn {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 ajaxSelect (args)
-
-Runs select based on args and returns output.  By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for children of composite widgets.
-
-=head3 args
-
-Hash of select parameters
-
-=cut
-
 sub ajaxSelect {
 	my $self = shift;
 	my %args = @_;
@@ -119,12 +82,6 @@ sub ajaxSelect {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 ajaxBlank ()
-
-Convenience method.  Returns blank widget output
-
-=cut
-
 sub ajaxBlank {
 	my $self = shift;
 
@@ -358,18 +315,6 @@ sub jsload {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 jsonescape ( var )
-
-traverses variable and strips out single quotes to prevent JSON parser blowing up.
-
-Strips them out rather than escaping them, as at present I can't figure out how to just add a single fracking backslash to them.  s/'/\\'/g gives 2 backslashes, and s/'/\'/g gives none.  grr.  problem seems to be in either JSON or JSONPARSER
-
-=head3 var
-
-whatever variable you're going to convert to json and then parse
-
-=cut
-
 sub jsonescape {
 	my $self = shift;
 	my $target = shift;
@@ -439,14 +384,6 @@ sub postdata {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 preloadLookup
-
-Runs queries for lookup tables and parses then into JSON wrapped in javascript suitable for loading into the DOM of a page.
-
-Useful only for tables that are intended to be preloaded into a page at load. 
-
-=cut
-
 sub preloadLookup {
 	my $self = shift;
 
@@ -598,4 +535,84 @@ sub widgetjs {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Ajax
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new('/path/to/config');
+
+my $widget = $q->ajax->dataset({...});
+
+=head1 DESCRIPTION
+
+CGI::Lazy::Ajax is an abstract class for the Lazy Ajax widgets such as Dataset, Composite, and Domloader.
+
+Its methods are called internally by its child classes.  There are, at present, no real uses for the class by itself.
+
+=head1 METHODS
+
+=head2 ajaxReturn ( widgets, data )
+
+Wraps data (presumably from widget) in json format with validator from widgets for returning to browser in response to an ajax reqeust
+
+=head3 widgets
+
+List of widgets to be parsed for validators
+
+=head3 data
+
+Widget html output
+
+
+=head2 ajaxSelect (args)
+
+Runs select based on args and returns output.  By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for children of composite widgets.
+
+=head3 args
+
+Hash of select parameters
+
+
+=head2 jsonescape ( var )
+
+traverses variable and strips out single quotes to prevent JSON parser blowing up.
+
+Strips them out rather than escaping them, as at present I can't figure out how to just add a single fracking backslash to them.  s/'/\\'/g gives 2 backslashes, and s/'/\'/g gives none.  grr.  problem seems to be in either JSON or JSONPARSER
+
+=head3 var
+
+whatever variable you're going to convert to json and then parse
+
+
+=head2 preloadLookup
+
+Runs queries for lookup tables and parses then into JSON wrapped in javascript suitable for loading into the DOM of a page.
+
+Useful only for tables that are intended to be preloaded into a page at load. 
+
+
+=head2 ajaxBlank ()
+
+Convenience method.  Returns blank widget output
+
 

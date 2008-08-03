@@ -1,16 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
 package CGI::Lazy::Globals;
 
 use Exporter;
@@ -19,23 +6,7 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-=pod
-
-=head1 NAME
-
-CGI::Lazy::Globals
-
-=head1 DESCRIPTION
-
-Class to hold and export global non-configuration variables
-
-=head1 SYNOPSIS
-
-use CGI::Lazy::Globals
-
-=cut
-
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 ##CONFIGROOT value
 #if your config root is the server's document root, your apps will be more portable, however you will need to take steps to secure teh configs (with the db password et al.) from the outside world
@@ -58,3 +29,33 @@ use constant {
 our @EXPORT = qw(TRUE FALSE $CONFIGROOT $VERSION);
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Globals
+
+=head1 DESCRIPTION
+
+Class to hold and export global non-configuration variables
+
+=head1 SYNOPSIS
+
+use CGI::Lazy::Globals
+
+=cut
+

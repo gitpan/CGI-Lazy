@@ -1,25 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-
-=head1 NAME
-
-CGI::Lazy::Ajax::JSONParser
-
-=head1 DESCRIPTION
-
-JSONParser is simply a container for the JSON parser provided by www.json.org . It's used automatically when needed.
-
-=cut
-
 package CGI::Lazy::Ajax::JSONParser;
 
 use strict;
@@ -61,3 +39,29 @@ throw new SyntaxError('JSON.parse');},quote:quote};}();}
 END
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Ajax::JSONParser
+
+=head1 DESCRIPTION
+
+JSONParser is simply a container for the JSON parser provided by www.json.org . It's used automatically when needed.
+
+=cut
+

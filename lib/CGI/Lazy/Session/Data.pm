@@ -1,57 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-
-=head1 NAME
-
-CGI::Lazy::Session::Data
-
-=SYNOPSIS
-
-use CGI::Lazy;
-our $q = CGI::Lazy->new({
-				tmplDir 	=> "/templates",
-				jsDir		=>  "/js",
-				plugins 	=> {
-					mod_perl => {
-						PerlHandler 	=> "ModPerl::Registry",
-						saveOnCleanup	=> 1,
-					},
-					ajax	=>  1,
-					dbh 	=> {
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-						dbUser 		=> "dbuser",
-						dbPasswd 	=> "letmein",
-						dbArgs 		=> {"RaiseError" => 1},
-					},
-					session	=> {
-						sessionTable	=> 'SessionData',
-						sessionCookie	=> 'frobnostication',
-						saveOnDestroy	=> 1,
-						expires		=> '+15m',
-					},
-				},
-			});
-
-$q->session->data->name($q->session->sessionID);
-$q->session->data->banner($message);
-print $q->header,
-      $q->session->data->name;
-
-=DESCRIPTION
-
-CGI::Lazy::Session::Data is simply a data container for CGI::Lazy::Session.  Its a separate object just so we can cleanly use an autoloader without running into namespace problems with the Session object.  This way, you have the widest possible range of names to use for session data.
-
-=cut
-
 package CGI::Lazy::Session::Data;
 
 use strict;
@@ -108,4 +54,87 @@ sub new {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Session::Data
+
+=SYNOPSIS
+
+use CGI::Lazy;
+
+our $q = CGI::Lazy->new({
+
+				tmplDir 	=> "/templates",
+
+				jsDir		=>  "/js",
+
+				plugins 	=> {
+
+					mod_perl => {
+
+						PerlHandler 	=> "ModPerl::Registry",
+
+						saveOnCleanup	=> 1,
+
+					},
+
+					ajax	=>  1,
+
+					dbh 	=> {
+
+						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+
+						dbUser 		=> "dbuser",
+
+						dbPasswd 	=> "letmein",
+
+						dbArgs 		=> {"RaiseError" => 1},
+
+					},
+
+					session	=> {
+
+						sessionTable	=> 'SessionData',
+
+						sessionCookie	=> 'frobnostication',
+
+						saveOnDestroy	=> 1,
+
+						expires		=> '+15m',
+
+					},
+
+				},
+
+			});
+
+$q->session->data->name($q->session->sessionID);
+
+$q->session->data->banner($message);
+
+print $q->header,
+
+      $q->session->data->name;
+
+=DESCRIPTION
+
+CGI::Lazy::Session::Data is simply a data container for CGI::Lazy::Session.  Its a separate object just so we can cleanly use an autoloader without running into namespace problems with the Session object.  This way, you have the widest possible range of names to use for session data.
+
+=cut
 

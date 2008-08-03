@@ -1,70 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-
-=head1 NAME
-
-CGI::Lazy::Session
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-our $q = CGI::Lazy->new({
-				tmplDir 	=> "/templates",
-				jsDir		=>  "/js",
-				plugins 	=> {
-					mod_perl => {
-						PerlHandler 	=> "ModPerl::Registry",
-						saveOnCleanup	=> 1,
-					},
-					ajax	=>  1,
-					dbh 	=> {
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-						dbUser 		=> "dbuser",
-						dbPasswd 	=> "letmein",
-						dbArgs 		=> {"RaiseError" => 1},
-					},
-					session	=> {
-						sessionTable	=> 'SessionData',
-						sessionCookie	=> 'frobnostication',
-						saveOnDestroy	=> 1,
-						expires		=> '+15m',
-					},
-				},
-			});
-
-=head1 DESCRIPTION
-
-CGI::Lazy::Session is for maintaining state between requests.  It's enabled in the config file or config hash.  Once it's enabled, any calls to $q->header will automatically include a cookie that will be used to retrieve session data.
-
-To function, the session needs the following arguments:
-	sessionTable	=> name of table to store data in
-	sessionCookie	=> name of the cookie
-	expires		=> how long a session can sit idle before expiring
-
-By default, sessions are automatically saved when the Lazy object is destroyed, or in the cleanup stage of the request cycle for mod_perl apps.  Both mechanisms are enabled by default.  (call me paranoid)  Should you wish to disable the save on destroy:
-	saveOnDestroy	=> 0
-
-If the key is missing from the config, it's as if it was set to 1.  You will have to set it to 0 to disable this functionality.  Same goes for the mod_perl save.  See CGI::Lazy::ModPerl for details
-
-Session data is stored in the db as JSON formatted text at present.  Fancier storage (for binary data and such) will have to wait for subsequent releases.
-
-The session table must have the following fields at a bare minimum:
-
-	sessionID	not null, primary key
-	data		text (mysql) large storage (blob in oracle)
-	expired		bool (mysql) 1 digit number basically
-
-=cut
-
 package CGI::Lazy::Session;
 
 use strict;
@@ -77,12 +10,6 @@ use CGI::Lazy::Session::Data;
 use CGI::Lazy::Globals;
 
 #--------------------------------------------------------------------------------------
-=head2 cookiemonster
-
-returns reference to CGI::Lazy::CookieMonster object
-
-=cut
-
 sub cookiemonster {
 	my $self = shift;
 	
@@ -90,12 +17,6 @@ sub cookiemonster {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 config
-
-returns reference to the config object
-
-=cut
-
 sub config {
 	my $self = shift;
 	
@@ -104,24 +25,12 @@ sub config {
 }
 
 #----------------------------------------------------------------------------------------------	
-=head2 data ()
-
-returns reference to the CGI::Lazy::Session::Data object
-
-=cut
-
 sub data {
 	my $self = shift;
 	return $self->{_data};
 }
 
 #--------------------------------------------------------------------------------------
-=head2 db ()
-
-returns reference to CGI::Lazy::DB object
-
-=cut
-
 sub db {
 	my $self = shift;
 	
@@ -130,12 +39,6 @@ sub db {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 expire ()
-
-expires the session
-
-=cut
-
 sub expire {
 	my $self = shift;
 
@@ -147,24 +50,12 @@ sub expire {
 }
 
 #----------------------------------------------------------------------------------------------	
-=head2 expires ()
-
-Returns time in epoch when session expires.
-
-=cut
-
 sub expires {
 	my $self = shift;
 	return $self->{_expires};
 }
 
 #---------------------------------------------------------------------------------------
-=head2 getData ()
-
-Called internally on CGI::Lazy::Session::Data creation.  Queries db for session data
-
-=cut
-
 sub getData {
 	my $self = shift;
 
@@ -180,12 +71,6 @@ sub getData {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 id ()
-
-returns session id
-
-=cut
-
 sub id {
 	my $self = shift;
 
@@ -193,16 +78,6 @@ sub id {
 }
 
 #---------------------------------------------------------------------------------------
-=head2 new ( sessionID )
-
-Constructor.  Creates new session.
-
-=head3 sessionID
-
-valid session ID string
-
-=cut
-
 sub new {
 	my $self = shift;
 	my $sessionID = shift;
@@ -228,20 +103,6 @@ sub new {
 }
  
 #--------------------------------------------------------------------------------------
-=head2 open ( q sessionID )
-
-Opens a previous session, or creates a new one.  If it's opening an existing session, it will check to see that the session given has not expired.   If it has, it will create a new one.
-
-=head3 q
-
-CGI::Lazy object
-
-=head3 sessionID
-
-valid session ID
-
-=cut
-
 sub open {
 	my $class = shift;
 	my $q = shift;
@@ -293,17 +154,6 @@ sub open {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 parseExpiry ( time)
-
-Parses expiration string from session plugin and returns time in epoch when session should expire.
-
-Currently only can parse seconds, minutes, hours and days.  Is more really necessary?
-
-=head3 time
-epoch returned from time() function
-
-=cut 
-
 sub parseExpiry {
 	my $self = shift;
 	my $time = shift;
@@ -343,12 +193,6 @@ sub parseExpiry {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 q ()
-
-returns reference to CGI::Lazy object
-
-=cut 
-
 sub q {
 	my $self = shift;
 
@@ -356,12 +200,6 @@ sub q {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 sessionCookie ()
-
-returns name of session cookie specified by session plugin
-
-=cut
-
 sub sessionCookie {
 	my $self = shift;
 
@@ -369,12 +207,6 @@ sub sessionCookie {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 sessionID ()
-
-returns session id
-
-=cut
-
 sub sessionID {
 	my $self = shift;
 	
@@ -382,12 +214,6 @@ sub sessionID {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 sessionTable ()
-
-returns session table name specified by session plugin
-
-=cut
-
 sub sessionTable {
 	my $self = shift;
 
@@ -395,12 +221,6 @@ sub sessionTable {
 }
 
 #--------------------------------------------------------------------------------------
-=head2 save ()
-
-saves session variable to database
-
-=cut
-
 sub save {
 	my $self = shift;
 
@@ -412,3 +232,186 @@ sub save {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Session
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+our $q = CGI::Lazy->new({
+
+				tmplDir 	=> "/templates",
+
+				jsDir		=>  "/js",
+
+				plugins 	=> {
+
+					mod_perl => {
+
+						PerlHandler 	=> "ModPerl::Registry",
+
+						saveOnCleanup	=> 1,
+
+					},
+
+					ajax	=>  1,
+
+					dbh 	=> {
+
+						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+
+						dbUser 		=> "dbuser",
+
+						dbPasswd 	=> "letmein",
+
+						dbArgs 		=> {"RaiseError" => 1},
+
+					},
+
+					session	=> {
+
+						sessionTable	=> 'SessionData',
+
+						sessionCookie	=> 'frobnostication',
+
+						saveOnDestroy	=> 1,
+
+						expires		=> '+15m',
+
+					},
+
+				},
+
+			});
+
+=head1 DESCRIPTION
+
+CGI::Lazy::Session is for maintaining state between requests.  It's enabled in the config file or config hash.  Once it's enabled, any calls to $q->header will automatically include a cookie that will be used to retrieve session data.
+
+To function, the session needs the following arguments:
+
+	sessionTable	=> name of table to store data in
+
+	sessionCookie	=> name of the cookie
+
+	expires		=> how long a session can sit idle before expiring
+
+By default, sessions are automatically saved when the Lazy object is destroyed, or in the cleanup stage of the request cycle for mod_perl apps.  Both mechanisms are enabled by default.  (call me paranoid)  Should you wish to disable the save on destroy:
+	saveOnDestroy	=> 0
+
+If the key is missing from the config, it's as if it was set to 1.  You will have to set it to 0 to disable this functionality.  Same goes for the mod_perl save.  See CGI::Lazy::ModPerl for details
+
+Session data is stored in the db as JSON formatted text at present.  Fancier storage (for binary data and such) will have to wait for subsequent releases.
+
+The session table must have the following fields at a bare minimum:
+
+	sessionID	not null, primary key
+
+	data		text (mysql) large storage (blob in oracle)
+
+	expired		bool (mysql) 1 digit number basically
+
+=head1 METHODS
+
+=head2 cookiemonster
+
+returns reference to CGI::Lazy::CookieMonster object
+
+=head2 config
+
+returns reference to the config object
+
+=head2 data ()
+
+returns reference to the CGI::Lazy::Session::Data object
+
+=head2 db ()
+
+returns reference to CGI::Lazy::DB object
+
+=head2 expire ()
+
+expires the session
+
+=head2 expires ()
+
+Returns time in epoch when session expires.
+
+=head2 getData ()
+
+Called internally on CGI::Lazy::Session::Data creation.  Queries db for session data
+
+=head2 id ()
+
+returns session id
+
+=head2 new ( sessionID )
+
+Constructor.  Creates new session.
+
+=head3 sessionID
+
+valid session ID string
+
+=head2 open ( q sessionID )
+
+Opens a previous session, or creates a new one.  If it's opening an existing session, it will check to see that the session given has not expired.   If it has, it will create a new one.
+
+=head3 q
+
+CGI::Lazy object
+
+=head3 sessionID
+
+valid session ID
+
+=head2 parseExpiry ( time)
+
+Parses expiration string from session plugin and returns time in epoch when session should expire.
+
+Currently only can parse seconds, minutes, hours and days.  Is more really necessary?
+
+=head3 time
+
+epoch returned from time() function
+
+=head2 q ()
+
+returns reference to CGI::Lazy object
+
+=head2 sessionCookie ()
+
+returns name of session cookie specified by session plugin
+
+=head2 sessionID ()
+
+returns session id
+
+=head2 sessionTable ()
+
+returns session table name specified by session plugin
+
+=head2 save ()
+
+saves session variable to database
+
+=cut
+

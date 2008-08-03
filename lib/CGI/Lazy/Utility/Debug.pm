@@ -1,31 +1,3 @@
-=pod
-
-=head1 NAME
-
-CGI::Lazy::Utility::Debug
-
-=head1 DESCRIPTION
-
-CGI::Lazy::Utility::Debug is a bunch of useful CGI debugging functions that I got tired of writing by hand when I needed to figure out what wierdness is happening in a script
-
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-
-my $q = CGI::Lazy->new('/path/to/config/file');
-
-my $t = $q->utility->debug;
-
-$t->param(); 				#dumps html formatted CGI parameters to browser.
-$t->dump($ref, "some string");		#dumps html formatted output from Data::Dumper (if ref) or string (if scalar) to browser. 
-$t->cookie();				#dumps info regarding cookies to browser.
-
-$t->edump($ref, "some string");		#dumps to external file, appending at each subsequent call.
-$t->edumpreplace($ref);			#dumps to external file, overwriting at each call
-
-=cut
-
 package CGI::Lazy::Utility::Debug;
 
 use strict;
@@ -33,12 +5,6 @@ use warnings;
 use Data::Dumper;
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 cookie
-
-prints an html formatted page listing all cookies. 
-
-=cut
-
 sub cookie {
 	my $self = shift;
 	my $q = $self->q;
@@ -62,16 +28,6 @@ sub config {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 dump ( output )
-
-Outputs either a value, or a dump of a reference to the browser. 
-
-=head3 ref
-
-String consisiting of message to dump, or reference
-
-=cut
-
 sub dump {
 	my $self = shift;
 
@@ -93,20 +49,6 @@ sub dump {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 edump ( ref, message, filename )
-
-Outputs either a value, or a dump of a reference to file specified by the 'debugfile' key in the CGI::Lazy config file.  If that file isn't specified, dumps to /tmp/CGILazy.log.  Appends to dump file.
-
-=head3 output
-
-string or reference to dump into external log file
-
-=head3 message 
-
-a message to dump with the dump, if you like
-
-=cut 
-
 sub edump {
 	my $self = shift;
 
@@ -133,20 +75,6 @@ sub edump {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 edumpreplace ( output, message )
-
-Outputs either a value, or a dump of a reference to file specified by the 'debugfile' key in the CGI::Lazy config file.  If that file isn't specified, dumps to /tmp/CGILazy.log.  Replaces dump file
-
-=head3 output
-
-string or reference to dump into external log file
-
-=head3 message 
-
-a message to dump with the dump, if you like
-
-=cut
-
 sub edumpreplace {
 	my $self = shift;
 
@@ -173,16 +101,6 @@ sub edumpreplace {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 eparam ( args ) 
-
-Dumps cgi parameters to filename.  Will also print any arguments passed, or dumps of args, if the args are references.
-
-=head3 args
-
-list of additional stuff to be printed out
-
-=cut
-
 sub eparam {
 	my $self = shift;
 
@@ -227,15 +145,6 @@ sub eparam {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 param (args)
-
-Writes cgi parameters to browser
-
-=head3 args
-
-list of addional stuff to be printed.  If references are passed, prints html formatted dumps of ref contents.
-=cut
-
 sub param {
 	my $self = shift;
 
@@ -276,12 +185,6 @@ sub param {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 env
-
-writes ENV variables to browser
-
-=cut
-
 sub env {
 	my $self = shift;
 
@@ -339,12 +242,6 @@ sub q {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 new
-
-constructor
-
-=cut
-
 sub new {
 	my $class = shift;
 	my $q = shift;
@@ -355,12 +252,6 @@ sub new {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
-=head2 timestamp
-
-creates a formatted timestamp string for the log
-
-=cut
-
 sub timestamp {
  	my ($sec, $min, $hour, $mday, $mon, $year) = (localtime(time))[0..5];
         $year += 1900;
@@ -393,3 +284,113 @@ sub timestamp {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Utility::Debug
+
+=head1 DESCRIPTION
+
+CGI::Lazy::Utility::Debug is a bunch of useful CGI debugging functions that I got tired of writing by hand when I needed to figure out what wierdness is happening in a script
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new('/path/to/config/file');
+
+my $t = $q->utility->debug;
+
+$t->param(); 				#dumps html formatted CGI parameters to browser.
+
+$t->dump($ref, "some string");		#dumps html formatted output from Data::Dumper (if ref) or string (if scalar) to browser. 
+
+$t->cookie();				#dumps info regarding cookies to browser.
+
+$t->edump($ref, "some string");		#dumps to external file, appending at each subsequent call.
+
+$t->edumpreplace($ref);			#dumps to external file, overwriting at each call
+
+=head1 METHODS
+
+=head2 cookie
+
+prints an html formatted page listing all cookies. 
+
+=head2 dump ( output )
+
+Outputs either a value, or a dump of a reference to the browser. 
+
+=head3 ref
+
+String consisiting of message to dump, or reference
+
+=head2 edump ( ref, message, filename )
+
+Outputs either a value, or a dump of a reference to file specified by the 'debugfile' key in the CGI::Lazy config file.  If that file isn't specified, dumps to /tmp/CGILazy.log.  Appends to dump file.
+
+=head3 output
+
+string or reference to dump into external log file
+
+=head3 message 
+
+a message to dump with the dump, if you like
+
+=head2 edumpreplace ( output, message )
+
+Outputs either a value, or a dump of a reference to file specified by the 'debugfile' key in the CGI::Lazy config file.  If that file isn't specified, dumps to /tmp/CGILazy.log.  Replaces dump file
+
+=head3 output
+
+string or reference to dump into external log file
+
+=head3 message 
+
+a message to dump with the dump, if you like
+
+=head2 eparam ( args ) 
+
+Dumps cgi parameters to filename.  Will also print any arguments passed, or dumps of args, if the args are references.
+
+=head3 args
+
+list of additional stuff to be printed out
+
+=head2 param (args)
+
+Writes cgi parameters to browser
+
+=head3 args
+
+list of addional stuff to be printed.  If references are passed, prints html formatted dumps of ref contents.
+
+=head2 env
+
+writes ENV variables to browser
+
+=head2 new
+
+constructor
+
+=head2 timestamp
+
+creates a formatted timestamp string for the log
+
+=cut
+

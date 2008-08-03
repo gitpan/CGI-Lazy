@@ -1,16 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
 package CGI::Lazy::DB;
 
 use strict;
@@ -20,39 +7,7 @@ use DBI;
 use CGI::Lazy::Globals;
 use Carp;
 
-=head1 NAME
-
-CGI::Lazy::DB
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-
-my $q = CGI::Lazy->new('/path/to/config/');
-
-my $dbh = $q->db->dbh; #just get the dbh, and use it by hand
-
-$q->db->do('select...."); #use the db object's abstraction for queries with no return value
-
-my $value = $q->db->getarray($query, @binds); #get an array of arrays.
-
-my $value = $q->db->gethash($query, $binds, $key ); #get a hash of hashes
-
-my $value = $q->db->gethashlist($query, @binds); #get ordered array of hashrefs. (This is probably the most useful)
-
-=head1 DESCRIPTION
-
-CGI::Lazy database object.  Contains convenience methods for common db operations and holds base database handle for object.
-
-=cut
-
 #---------------------------------------------------------------------------------------
-=head2 config ()
-
-Returns config object.
-
-=cut
-
 sub config {
 	my $self = shift;
 
@@ -60,12 +15,6 @@ sub config {
 }
 
 #---------------------------------------------------------------------------------------
-=head2 dbh
-
-Returns default database handle
-
-=cut
-
 sub dbh {
 	my $self = shift;
 
@@ -73,20 +22,6 @@ sub dbh {
 }
 
 #---------------------------------------------------------------------------------------
-=head2 do ( query, binds ) 
-
-Runs a given query with bind values specified. Does not expect a return value
-
-=head3 query
-
-raw sql to be run
-
-=head3 binds
-
-array or literal values to be bound
-
-=cut
-
 sub do { #run query with no return value
 	my $self = shift;
 	my $query = shift;
@@ -109,20 +44,6 @@ sub do { #run query with no return value
 }
 
 #---------------------------------------------------------------------------------------
-=head2 getarray ( query, binds ) 
-
-Runs a given query with bind values specified. Returns array of arrays from DBI::fetchall_arrayref
-
-=head3 query
-
-raw sql to be run
-
-=head3 binds
-
-array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
-
-=cut
-
 sub getarray { #run query with return value
 	my $self = shift;
 	my $query = shift;
@@ -154,24 +75,6 @@ sub getarray { #run query with return value
 }
 
 #---------------------------------------------------------------------------------------
-=head2 gethash ( query, binds, key ) 
-
-Runs a given query with bind values specified. Returns hashref from DBI::fetchall_hashref
-
-=head3 query
-
-raw sql to be run
-
-=head3 binds
-
-array ref to values to be bound
-
-=head3 key
-
-field to use as key for main hash
-
-=cut
-
 sub gethash { #run query with return value
 	my $self = shift;
 	my $query = shift;
@@ -195,20 +98,6 @@ sub gethash { #run query with return value
 }
 
 #---------------------------------------------------------------------------------------
-=head2 gethashlist ( query, binds ) 
-
-Runs a given query with bind values specified. Returns array of hashrefs
-
-=head3 query
-
-raw sql to be run
-
-=head3 binds
-
-array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
-
-=cut
-
 sub gethashlist { #run query with return value
 	my $self = shift;
 	my $query = shift;
@@ -244,26 +133,6 @@ sub gethashlist { #run query with return value
 }
 
 #---------------------------------------------------------------------------------------
-=head2 new ( q )
-
-Constructor.  Builds or inherits database handle and returns DB object.
-
-Database handles may be handled in one of 3 ways:  
-
-1) built from username, password, and connect string specified in the config file
-
-2) build in the cgi and explicitly passed to the Lazy object on object creation.
-
-3) a known variable that is in scope in the cgi can be specified, in which case the program will look for this variable, and pick it up.
-
-Note:  with mod_perl option 3 is a little more hairy.  You will need to specify the mod_perl request handler being used, e.g. ModPerl::Registry  or ModPerl::PerlRun in the apache config.
-
-=head3 q
-
-Lazy Object
-
-=cut
-
 sub new {
 	my $class = shift;
 	my $q = shift;
@@ -318,12 +187,6 @@ sub new {
 }
 
 #---------------------------------------------------------------------------------------
-=head2 q ()
-
-Returns CGI::Lazy object
-
-=cut
-
 sub q {
 	my $self = shift;
 	
@@ -331,6 +194,145 @@ sub q {
 }
 
 #---------------------------------------------------------------------------------------
+sub recordset {
+	my $self = shift;
+	my $args = shift;
+
+	return CGI::Lazy::DB::RecordSet->new($self, $args);
+
+}
+	
+#---------------------------------------------------------------------------------------
+sub type {
+	my $self = shift;
+
+	return $self->{_dbh}->{Driver}->{Name};
+}
+1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::DB
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new('/path/to/config/');
+
+my $dbh = $q->db->dbh; #just get the dbh, and use it by hand
+
+$q->db->do('select...."); #use the db object's abstraction for queries with no return value
+
+my $value = $q->db->getarray($query, @binds); #get an array of arrays.
+
+my $value = $q->db->gethash($query, $binds, $key ); #get a hash of hashes
+
+my $value = $q->db->gethashlist($query, @binds); #get ordered array of hashrefs. (This is probably the most useful)
+
+=head1 DESCRIPTION
+
+CGI::Lazy database object.  Contains convenience methods for common db operations and holds base database handle for object.
+
+=head1 METHODS
+
+=head2 config ()
+
+Returns config object.
+
+=head2 dbh
+
+Returns default database handle
+
+=head2 do ( query, binds ) 
+
+Runs a given query with bind values specified. Does not expect a return value
+
+=head3 query
+
+raw sql to be run
+
+=head3 binds
+
+array or literal values to be bound
+
+=head2 getarray ( query, binds ) 
+
+Runs a given query with bind values specified. Returns array of arrays from DBI::fetchall_arrayref
+
+=head3 query
+
+raw sql to be run
+
+=head3 binds
+
+array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
+
+=head2 gethash ( query, binds, key ) 
+
+Runs a given query with bind values specified. Returns hashref from DBI::fetchall_hashref
+
+=head3 query
+
+raw sql to be run
+
+=head3 binds
+
+array ref to values to be bound
+
+=head3 key
+
+field to use as key for main hash
+
+=head2 gethashlist ( query, binds ) 
+
+Runs a given query with bind values specified. Returns array of hashrefs
+
+=head3 query
+
+raw sql to be run
+
+=head3 binds
+
+array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
+
+=head2 new ( q )
+
+Constructor.  Builds or inherits database handle and returns DB object.
+
+Database handles may be handled in one of 3 ways:  
+
+1) built from username, password, and connect string specified in the config file
+
+2) build in the cgi and explicitly passed to the Lazy object on object creation.
+
+3) a known variable that is in scope in the cgi can be specified, in which case the program will look for this variable, and pick it up.
+
+Note:  with mod_perl option 3 is a little more hairy.  You will need to specify the mod_perl request handler being used, e.g. ModPerl::Registry  or ModPerl::PerlRun in the apache config.
+
+=head3 q
+
+Lazy Object
+
+=head2 q ()
+
+Returns CGI::Lazy object
+
 =head2 recordset ( args )
 
 Creates and returns a CGI::Lazy::DB::RecordSet object.
@@ -341,26 +343,9 @@ See CGI::Lazy::DB::RecordSet for more information.
 
 hashref of RecordSet properties
 
-=cut
-
-sub recordset {
-	my $self = shift;
-	my $args = shift;
-
-	return CGI::Lazy::DB::RecordSet->new($self, $args);
-
-}
-	
-#---------------------------------------------------------------------------------------
 =head2 type ()
 
 Returns driver type from database handle object.  Necessary for specifying different behaviors dependant on databse capabilities.
 
 =cut
 
-sub type {
-	my $self = shift;
-
-	return $self->{_dbh}->{Driver}->{Name};
-}
-1

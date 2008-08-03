@@ -1,34 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-=cut
-
-=head1 NAME
-
-CGI::Lazy::Template
-
-=head1 SYNOPSIS
-
-use CGI::Lazy;
-
-my $q = CGI::Lazy->new('/path/to/config/file');
-
-print $q->template('topbanner1.tmpl')->process({ mainTitle => 'Main Title', secondaryTitle => 'Secondary Title', versionTitle => 'version 0.1', messageTitle => 'blah blah blah', });
-
-=head1 DESCRIPTION
-
-CGI::Lazy::Template is pretty much just a wrapper to HTML::Template.  It takes a template name as it's single argument, and has a single useful method: process, which takes a hashref of variables to shuffle together with the template for subsequent printing to the browser.
-
-=cut
-
 package CGI::Lazy::Template;
 
 use strict;
@@ -38,12 +7,6 @@ use HTML::Template;
 use CGI::Lazy::Globals;
 
 #----------------------------------------------------------------------------------------
-=head2 config
-
-Returns CGI::Lazy::Config object
-
-=cut
-
 sub config {
 	my $self = shift;
 
@@ -51,12 +14,6 @@ sub config {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 q
-
-Returns CGI::Lazy object.
-
-=cut
-
 sub q {
 	my $self = shift;
 
@@ -64,20 +21,6 @@ sub q {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 new (q, template)
-
-Constructor.
-
-=head3 q
-
-CGI::Lazy object
-
-=head3 template
-
-Template file name.  File must be in the template directory as specified by the config file.
-
-=cut
-
 sub new {
 	my $class = shift;
 	my $q = shift;
@@ -104,16 +47,6 @@ sub new {
 }
 
 #----------------------------------------------------------------------------------------
-=head2 process (vars)
-
-Shuffles values contained in vars together with template for output.
-
-=head3 vars
-
-hashref of variables expected by template
-
-=cut
-
 sub process {
 	my $self = shift;
 	my $vars = shift;
@@ -156,3 +89,67 @@ sub tmplName {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::Template
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new('/path/to/config/file');
+
+print $q->template('topbanner1.tmpl')->process({ mainTitle => 'Main Title', secondaryTitle => 'Secondary Title', versionTitle => 'version 0.1', messageTitle => 'blah blah blah', });
+
+=head1 DESCRIPTION
+
+CGI::Lazy::Template is pretty much just a wrapper to HTML::Template.  It takes a template name as it's single argument, and has a single useful method: process, which takes a hashref of variables to shuffle together with the template for subsequent printing to the browser.
+
+=head1 METHODS
+
+=head2 config
+
+Returns CGI::Lazy::Config object
+
+=head2 q
+
+Returns CGI::Lazy object.
+
+=head2 new (q, template)
+
+Constructor.
+
+=head3 q
+
+CGI::Lazy object
+
+=head3 template
+
+Template file name.  File must be in the template directory as specified by the config file.
+
+=head2 process (vars)
+
+Shuffles values contained in vars together with template for output.
+
+=head3 vars
+
+hashref of variables expected by template
+
+=cut
+

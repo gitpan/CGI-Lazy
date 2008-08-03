@@ -1,42 +1,3 @@
-=head1 LEGAL
-
-#===========================================================================
-Copyright (C) 2008 by Nik Ogura. All rights reserved.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-Bug reports and comments to nik.ogura@gmail.com. 
-
-#===========================================================================
-
-=head1 NAME
-
-CGI::Lazy::ErrorHandler
-
-=head1 SYNOPSIS
-
-
-use CGI::Lazy;
-
-my $q = CGI::Lazy->new('/path/to/config/');
-
-eval {
-	something();
-};
-
-if ($@) {
-	$q->errorHandler->funkyErrorMethod;
-}
-
-=head1 DESCRIPTION
-CGI::Lazy::ErrorHandler is simply a bunch of canned error messages for displaying errors to the user.
-
-At some point in the future, it will display them in a neater and more unified way, but for now, it's just a convenience object.
-
-
-=cut
-
 package CGI::Lazy::ErrorHandler;
 
 use strict;
@@ -148,7 +109,6 @@ sub noConfig {
 		messageTitle	=> "Couldn't open config file $filename : $@",
 	};
 
-#	print $self->q->template('topbanner1.tmpl')->process($headervars);
 	print $self->q->header, "Couldn't open config file $filename : $@";
 	exit;
 }
@@ -184,3 +144,46 @@ sub tmplParamError {
 }
 
 1
+
+__END__
+
+=head1 LEGAL
+
+#===========================================================================
+
+Copyright (C) 2008 by Nik Ogura. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Bug reports and comments to nik.ogura@gmail.com. 
+
+#===========================================================================
+
+=head1 NAME
+
+CGI::Lazy::ErrorHandler
+
+=head1 SYNOPSIS
+
+use CGI::Lazy;
+
+my $q = CGI::Lazy->new('/path/to/config/');
+
+eval {
+	something();
+};
+
+if ($@) {
+	$q->errorHandler->funkyErrorMethod;
+}
+
+=head1 DESCRIPTION
+
+CGI::Lazy::ErrorHandler is simply a bunch of canned error messages for displaying errors to the user.
+
+At some point in the future, it will display them in a neater and more unified way, but for now, it's just a convenience object.
+
+
+=cut
+
