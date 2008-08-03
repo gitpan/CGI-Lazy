@@ -76,61 +76,61 @@ CGI::Lazy::Session::Data
 
 =SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-our $q = CGI::Lazy->new({
+	our $q = CGI::Lazy->new({
 
-				tmplDir 	=> "/templates",
+					tmplDir 	=> "/templates",
 
-				jsDir		=>  "/js",
+					jsDir		=>  "/js",
 
-				plugins 	=> {
+					plugins 	=> {
 
-					mod_perl => {
+						mod_perl => {
 
-						PerlHandler 	=> "ModPerl::Registry",
+							PerlHandler 	=> "ModPerl::Registry",
 
-						saveOnCleanup	=> 1,
+							saveOnCleanup	=> 1,
+
+						},
+
+						ajax	=>  1,
+
+						dbh 	=> {
+
+							dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+
+							dbUser 		=> "dbuser",
+
+							dbPasswd 	=> "letmein",
+
+							dbArgs 		=> {"RaiseError" => 1},
+
+						},
+
+						session	=> {
+
+							sessionTable	=> 'SessionData',
+
+							sessionCookie	=> 'frobnostication',
+
+							saveOnDestroy	=> 1,
+
+							expires		=> '+15m',
+
+						},
 
 					},
 
-					ajax	=>  1,
+				});
 
-					dbh 	=> {
+	$q->session->data->name($q->session->sessionID);
 
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+	$q->session->data->banner($message);
 
-						dbUser 		=> "dbuser",
+	print $q->header,
 
-						dbPasswd 	=> "letmein",
-
-						dbArgs 		=> {"RaiseError" => 1},
-
-					},
-
-					session	=> {
-
-						sessionTable	=> 'SessionData',
-
-						sessionCookie	=> 'frobnostication',
-
-						saveOnDestroy	=> 1,
-
-						expires		=> '+15m',
-
-					},
-
-				},
-
-			});
-
-$q->session->data->name($q->session->sessionID);
-
-$q->session->data->banner($message);
-
-print $q->header,
-
-      $q->session->data->name;
+	      $q->session->data->name;
 
 =DESCRIPTION
 

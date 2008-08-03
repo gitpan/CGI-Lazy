@@ -51,11 +51,11 @@ CGI::Lazy::Utility
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/file');
+	my $q = CGI::Lazy->new('/path/to/config/file');
 
-my $t = $q->util->debug;
+	my $t = $q->util->debug;
 
 =head1 DESCRIPTION
 

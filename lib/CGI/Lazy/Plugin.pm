@@ -69,9 +69,9 @@ CGI::Lazy::Plugin
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/file');
+	my $q = CGI::Lazy->new('/path/to/config/file');
 
 =head1 DESCRIPTION
 

@@ -61,11 +61,11 @@ CGI::Lazy::CookieMonster
 
 =head1 SYNOPSIS
 
-use CGI::Lazy::CookieMonster;
+	use CGI::Lazy::CookieMonster;
 
-my $cm = CGI::Lazy::CookieMonster->new;
+	my $cm = CGI::Lazy::CookieMonster->new;
 
-$cm->getCookie($cookieName);
+	$cm->getCookie($cookieName);
 
 =head1 DESCRIPTION
 

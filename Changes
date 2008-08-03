@@ -9,3 +9,7 @@ Revision history for Perl extension CGI::Lazy.
 	-reformatted POD so it will display on cpan
 	-pulled ModPerl.pm from distribution so tests pass.  ModPerl will be distributed separately
 
+0.02-r2 -uploaded partial distro to CPAN  oops.
+
+0.02-r3 -fixed pod formatting again.  no changes to code
+

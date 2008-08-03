@@ -49,31 +49,31 @@ CGI::Lazy::Ajax::DomLoader
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('frobnitz.conf');
+	my $q = CGI::Lazy->new('frobnitz.conf');
 
-my $domloader = $q->domloader({
+	my $domloader = $q->domloader({
 
-			lookups =>  {
+				lookups =>  {
 
-					countryLookup => {  #name of resultant DOM object
+						countryLookup => {  #name of resultant DOM object
 
-						sql 	=> 'select ID, country from countryCodeLookup ', 
+							sql 	=> 'select ID, country from countryCodeLookup ', 
 
-						orderby	=> ['ID'],
+							orderby	=> ['ID'],
 
-						output	=> 'hash',
+							output	=> 'hash',
 
-						key	=> 'ID',
+							key	=> 'ID',
+
+						},
 
 					},
 
-				},
+			});
 
-		});
-
-print $domloader->output;
+	print $domloader->output;
 
 =head1 DESCRIPTION
 

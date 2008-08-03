@@ -66,7 +66,7 @@ CGI::Lazy::ID
 
 =head1 SYNOPSIS
 
-my $id = $session->id->generate();
+	my $id = $session->id->generate();
 
 =head1 DESCRIPTION
 

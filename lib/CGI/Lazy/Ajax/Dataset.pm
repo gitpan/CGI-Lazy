@@ -401,154 +401,154 @@ CGI::Lazy::Ajax::Dataset
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-our $q = CGI::Lazy->new({
+	our $q = CGI::Lazy->new({
 
-				tmplDir 	=> "/templates",
+					tmplDir 	=> "/templates",
 
-				jsDir		=>  "/js",
+					jsDir		=>  "/js",
 
-				plugins 	=> {
+					plugins 	=> {
 
-					mod_perl => {
+						mod_perl => {
 
-						PerlHandler 	=> "ModPerl::Registry",
+							PerlHandler 	=> "ModPerl::Registry",
 
-						saveOnCleanup	=> 1,
+							saveOnCleanup	=> 1,
+
+						},
+
+						ajax	=>  1,
+
+						dbh 	=> {
+
+							dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+
+							dbUser 		=> "dbuser",
+
+							dbPasswd 	=> "letmein",
+
+							dbArgs 		=> {"RaiseError" => 1},
+
+						},
+
+						session	=> {
+
+							sessionTable	=> 'SessionData',
+
+							sessionCookie	=> 'frobnostication',
+
+							saveOnDestroy	=> 1,
+
+							expires		=> '+15m',
+
+						},
 
 					},
 
-					ajax	=>  1,
-
-					dbh 	=> {
-
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-
-						dbUser 		=> "dbuser",
-
-						dbPasswd 	=> "letmein",
-
-						dbArgs 		=> {"RaiseError" => 1},
-
-					},
-
-					session	=> {
-
-						sessionTable	=> 'SessionData',
-
-						sessionCookie	=> 'frobnostication',
-
-						saveOnDestroy	=> 1,
-
-						expires		=> '+15m',
-
-					},
-
-				},
-
-			});
+				});
 
 
 
-my $widget = $q->ajax->dataset({
+	my $widget = $q->ajax->dataset({
 
-			id		=> 'detailBlock',
+				id		=> 'detailBlock',
 
-			type		=> 'multi',
+				type		=> 'multi',
 
-			template	=> "UsbInternalPOCDetailBlock.tmpl",
+				template	=> "UsbInternalPOCDetailBlock.tmpl",
 
 #						nodelete	=> 1,
 
-			lookups		=> {
+				lookups		=> {
 
-					prodcodeLookup  => {
+						prodcodeLookup  => {
 
-						sql 		=> 'select ID, description from prodCodeLookup', 
+							sql 		=> 'select ID, description from prodCodeLookup', 
 
-						preload 	=> 1,
+							preload 	=> 1,
 
-						orderby		=> ['ID'],
+							orderby		=> ['ID'],
 
-						output		=> 'hash',
+							output		=> 'hash',
 
-						primarykey	=> 'ID',
+							primarykey	=> 'ID',
 
-					},
+						},
 
-						
+							
 
-			},
+				},
 
-			recordset	=> $q->db->recordset({
+				recordset	=> $q->db->recordset({
 
-						table		=> 'detail', 
+							table		=> 'detail', 
 
-						fieldlist	=> [
+							fieldlist	=> [
 
-									{name => 'detail.ID', 
+										{name => 'detail.ID', 
 
-										hidden => 1},
+											hidden => 1},
 
-									{name => 'invoiceid', 
+										{name => 'invoiceid', 
 
-										hidden => 1},
+											hidden => 1},
 
-									{name => 'prodCode', 
+										{name => 'prodCode', 
 
-										label => 'Product Code', 
+											label => 'Product Code', 
 
-										validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+											validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
 
-									{	name 		=> 'quantity', 
+										{	name 		=> 'quantity', 
 
-										label 		=> 'Quantity', 
+											label 		=> 'Quantity', 
 
-										validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
+											validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
 
-										outputMask	=> "%.1f",
-
-									},
-
-									{name => 'unitPrice', 
-
-										label 		=> 'Unit Price' , 
-
-										validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-
-										inputMask	=> "%.1f",
+											outputMask	=> "%.1f",
 
 										},
 
-									{name => 'productGross', 
+										{name => 'unitPrice', 
 
-										label => 'Product Gross' , 
+											label 		=> 'Unit Price' , 
 
-										validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+											validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
 
-									{name => 'prodCodeLookup.description', 
+											inputMask	=> "%.1f",
 
-										label => 'Product Description', 
+											},
 
-										readOnly => 1 },
+										{name => 'productGross', 
 
-									], 
+											label => 'Product Gross' , 
 
-						where 		=> '', 
+											validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
 
-						joins		=> [
+										{name => 'prodCodeLookup.description', 
 
-									{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
+											label => 'Product Description', 
 
-						],
+											readOnly => 1 },
 
-						orderby		=> 'detail.ID', 
+										], 
 
-						primarykey	=> 'detail.ID',
+							where 		=> '', 
 
-			}),
-	}),
+							joins		=> [
+
+										{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
+
+							],
+
+							orderby		=> 'detail.ID', 
+
+							primarykey	=> 'detail.ID',
+
+				}),
+		}),
 
 =head1 DESCRIPTION
 

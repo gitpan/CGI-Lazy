@@ -557,11 +557,11 @@ CGI::Lazy::Ajax
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config');
+	my $q = CGI::Lazy->new('/path/to/config');
 
-my $widget = $q->ajax->dataset({...});
+	my $widget = $q->ajax->dataset({...});
 
 =head1 DESCRIPTION
 

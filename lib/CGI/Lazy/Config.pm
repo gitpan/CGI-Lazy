@@ -109,15 +109,15 @@ CGI::Lazy::Config
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/file');
+	my $q = CGI::Lazy->new('/path/to/config/file');
 
-my $c = $q->config;
+	my $c = $q->config;
 
-my $prop = $c->property1; #getter
+	my $prop = $c->property1; #getter
 
-$c->property1('foo'); #setter
+	$c->property1('foo'); #setter
 
 =head1 DESCRIPTION
 

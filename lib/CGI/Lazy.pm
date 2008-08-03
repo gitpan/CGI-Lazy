@@ -216,92 +216,92 @@ CGI::Lazy
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-our $q = CGI::Lazy->new({
+	our $q = CGI::Lazy->new({
 
-				tmplDir 	=> "/templates",
+					tmplDir 	=> "/templates",
 
-				jsDir		=>  "/js",
+					jsDir		=>  "/js",
 
-				plugins 	=> {
+					plugins 	=> {
 
-					mod_perl => {
+						mod_perl => {
 
-						PerlHandler 	=> "ModPerl::Registry",
+							PerlHandler 	=> "ModPerl::Registry",
 
-						saveOnCleanup	=> 1,
+							saveOnCleanup	=> 1,
+
+						},
+
+						ajax	=>  1,
+
+						dbh 	=> {
+
+							dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
+							
+							dbUser 		=> "dbuser",
+
+							dbPasswd 	=> "letmein",
+
+							dbArgs 		=> {"RaiseError" => 1},
+
+						},
+
+						session	=> {
+
+							sessionTable	=> 'SessionData',
+
+							sessionCookie	=> 'frobnostication',
+
+							saveOnDestroy	=> 1,
+
+							expires		=> '+15m',
+
+						},
 
 					},
 
-					ajax	=>  1,
-
-					dbh 	=> {
-
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-						
-						dbUser 		=> "dbuser",
-
-						dbPasswd 	=> "letmein",
-
-						dbArgs 		=> {"RaiseError" => 1},
-
-					},
-
-					session	=> {
-
-						sessionTable	=> 'SessionData',
-
-						sessionCookie	=> 'frobnostication',
-
-						saveOnDestroy	=> 1,
-
-						expires		=> '+15m',
-
-					},
-
-				},
-
-			});
+				});
 
 
-print $q->header,
+	print $q->header,
 
-      $q->start_html({-style => {-src => '/css/style.css'}}),
+	      $q->start_html({-style => {-src => '/css/style.css'}}),
 
-      $q->javascript->modules(); 
+	      $q->javascript->modules(); 
 
 
 
-print $q->template('topbanner2.tmpl')->process({ logo => '/images/funkyimage.png', mainTitle => 'Funktastic', secondaryTitle => $message, versionTitle => '0.0.1', messageTitle => 'w00t!', });
+	print $q->template('topbanner2.tmpl')->process({ logo => '/images/funkyimage.png', mainTitle => 'Funktastic', secondaryTitle => $message, versionTitle => '0.0.1', messageTitle => 'w00t!', });
 
 
 
-print $q->template('navbar1.tmpl')->process({
+	print $q->template('navbar1.tmpl')->process({
 
-					one 		=> 'link one',
+						one 		=> 'link one',
 
-					one_link	=> '/blah.html',
+						one_link	=> '/blah.html',
 
-					two		=> 'link two',
+						two		=> 'link two',
 
-					two_link	=> '/blah.html',
+						two_link	=> '/blah.html',
 
-					three		=> 'link three',
+						three		=> 'link three',
 
-					three_link	=> '/blah.html',
+						three_link	=> '/blah.html',
 
-					four		=> 'link four',
+						four		=> 'link four',
 
-					four_link	=> '/blah.html',
+						four_link	=> '/blah.html',
 
-					});
+						});
 
-print $q->template('fileMonkeyHelp.tmpl')->process({helpMessage => 'help text here'});
+	print $q->template('fileMonkeyHelp.tmpl')->process({helpMessage => 'help text here'});
 
-print $q->template('fileMonkeyMain.tmpl')->process({mainmessage => "session info: <br> name: ".$q->session->data->name . "<br> time: ".$q->session->data->time});
+	print $q->template('fileMonkeyMain.tmpl')->process({mainmessage => "session info: <br> name: ".$q->session->data->name . "<br> time: ".$q->session->data->time});
 
-print $q->template('footer1.tmpl')->process({version => $q->lazyversion});
+	print $q->template('footer1.tmpl')->process({version => $q->lazyversion});
 
 
 

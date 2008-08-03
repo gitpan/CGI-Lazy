@@ -697,155 +697,155 @@ CGI::Lazy::RecordSet
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-our $q = CGI::Lazy->new({
+	our $q = CGI::Lazy->new({
 
-				tmplDir 	=> "/templates",
+					tmplDir 	=> "/templates",
 
-				jsDir		=>  "/js",
+					jsDir		=>  "/js",
 
-				plugins 	=> {
+					plugins 	=> {
 
-					mod_perl => {
+						mod_perl => {
 
-						PerlHandler 	=> "ModPerl::Registry",
+							PerlHandler 	=> "ModPerl::Registry",
 
-						saveOnCleanup	=> 1,
-
-					},
-
-					ajax	=>  1,
-
-					dbh 	=> {
-
-						dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
-
-						dbUser 		=> "dbuser",
-
-						dbPasswd 	=> "letmein",
-
-						dbArgs 		=> {"RaiseError" => 1},
-
-					},
-
-					session	=> {
-
-						sessionTable	=> 'SessionData',
-
-						sessionCookie	=> 'frobnostication',
-
-						saveOnDestroy	=> 1,
-
-						expires		=> '+15m',
-
-					},
-
-				},
-
-			});
-
-my $recordset = $q->db->recordset({
-
-		table		=> 'detail',  #table where records are coming from
-
-		fieldlist	=> [
-
-					{name => 'detail.ID', #name of field
-
-						hidden => 1}, #do not display to screen.  Recordset cant do any operations on fields that are not a part of itself, however all fields need not be displayed
-
-					{name => 'invoiceid', 
-
-						hidden => 1},
-
-					{name => 'prodCode', 
-
-						label => 'Product Code', 
-
-						validator => {rules => ['/\d+/'], msg => 'number only, and is required'}}, #validator for filed.  msg is not implemented at present.
-
-					{name 		=> 'quantity', 
-
-						label 		=> 'Quantity', 
-
-						validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-
-						outputMask	=> "%.1f", #formatting to data applied on output to browser
-
-					},
-
-					{name => 'unitPrice', 
-
-						label 		=> 'Unit Price' , 
-
-						validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
-
-						inputMask	=> "%.1f", #formatting to data applied on input to database
+							saveOnCleanup	=> 1,
 
 						},
 
-					{name => 'productGross', 
+						ajax	=>  1,
 
-						label => 'Product Gross' , 
+						dbh 	=> {
 
-						validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+							dbDatasource 	=> "dbi:mysql:somedatabase:localhost",
 
-					{name => 'prodCodeLookup.description', 
+							dbUser 		=> "dbuser",
 
-						label => 'Product Description', 
+							dbPasswd 	=> "letmein",
 
-						readOnly => 1 }, #readOnly values display to the screen, but never get written to the db
+							dbArgs 		=> {"RaiseError" => 1},
 
-					], 
+						},
 
-		basewhere 	=> '',  #baseline where clause for the select query.  this is used in all selects, even if 'where is set later.
+						session	=> {
 
-		joins		=> [ #table joins
+							sessionTable	=> 'SessionData',
 
-					{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
+							sessionCookie	=> 'frobnostication',
 
-		],
+							saveOnDestroy	=> 1,
 
-		orderby		=> 'detail.ID',  #order by clause for select wuery
+							expires		=> '+15m',
 
-		primarykey	=> 'detail.ID', #primary key for recordset.  This value is looked for for all updates and deletes
+						},
 
-	});
+					},
 
+				});
 
-my $thing = $q->ajax->dataset({
+	my $recordset = $q->db->recordset({
 
-		id		=> 'detailBlock',
+			table		=> 'detail',  #table where records are coming from
 
-		type		=> 'multi',
+			fieldlist	=> [
 
-		template	=> "UsbInternalPOCDetailBlock.tmpl",
+						{name => 'detail.ID', #name of field
 
-		lookups		=> {
+							hidden => 1}, #do not display to screen.  Recordset cant do any operations on fields that are not a part of itself, however all fields need not be displayed
 
-				prodcodeLookup  => {
+						{name => 'invoiceid', 
 
-					sql 		=> 'select ID, description from prodCodeLookup', 
+							hidden => 1},
 
-					preload 	=> 1,
+						{name => 'prodCode', 
 
-					orderby		=> ['ID'],
+							label => 'Product Code', 
 
-					output		=> 'hash',
+							validator => {rules => ['/\d+/'], msg => 'number only, and is required'}}, #validator for filed.  msg is not implemented at present.
 
-					primarykey	=> 'ID',
+						{name 		=> 'quantity', 
 
-				},
+							label 		=> 'Quantity', 
 
-					
+							validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
 
-		},
+							outputMask	=> "%.1f", #formatting to data applied on output to browser
 
-		recordset	=> $recordset,
+						},
+
+						{name => 'unitPrice', 
+
+							label 		=> 'Unit Price' , 
+
+							validator 	=> {rules => ['/\d+/'], msg => 'number only, and is required'},
+
+							inputMask	=> "%.1f", #formatting to data applied on input to database
+
+							},
+
+						{name => 'productGross', 
+
+							label => 'Product Gross' , 
+
+							validator => {rules => ['/\d+/'], msg => 'number only, and is required'}},
+
+						{name => 'prodCodeLookup.description', 
+
+							label => 'Product Description', 
+
+							readOnly => 1 }, #readOnly values display to the screen, but never get written to the db
+
+						], 
+
+			basewhere 	=> '',  #baseline where clause for the select query.  this is used in all selects, even if 'where is set later.
+
+			joins		=> [ #table joins
+
+						{type => 'inner', table	=> 'prodCodeLookup', field1 => 'prodCode', field2 => 'prodCodeLookup.ID',},
+
+			],
+
+			orderby		=> 'detail.ID',  #order by clause for select wuery
+
+			primarykey	=> 'detail.ID', #primary key for recordset.  This value is looked for for all updates and deletes
 
 		});
-		
+
+
+	my $thing = $q->ajax->dataset({
+
+			id		=> 'detailBlock',
+
+			type		=> 'multi',
+
+			template	=> "UsbInternalPOCDetailBlock.tmpl",
+
+			lookups		=> {
+
+					prodcodeLookup  => {
+
+						sql 		=> 'select ID, description from prodCodeLookup', 
+
+						preload 	=> 1,
+
+						orderby		=> ['ID'],
+
+						output		=> 'hash',
+
+						primarykey	=> 'ID',
+
+					},
+
+						
+
+			},
+
+			recordset	=> $recordset,
+
+			});
+			
 
 =head1 DESCRIPTION
 
@@ -1067,11 +1067,11 @@ If where clause is set up with bind placeholders, and select is called with bind
 
 =head2 table( tablename )
 	
-	gets or sets the table queried
+gets or sets the table queried
 	
 =head3 table
 	
-	string.
+string.
 
 =head2 update ( data, vars )
 
@@ -1117,11 +1117,11 @@ Returns array or arrayref of field names that are not hidden
 
 =head2 where($where)
 	
-	gets or sets the where clause
+gets or sets the where clause
 	
 =head3 $where
 	
-	string.
+string.
 
 =head2 writefunc ( field )
 

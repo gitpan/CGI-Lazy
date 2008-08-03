@@ -111,11 +111,11 @@ CGI::Lazy::Template
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/file');
+	my $q = CGI::Lazy->new('/path/to/config/file');
 
-print $q->template('topbanner1.tmpl')->process({ mainTitle => 'Main Title', secondaryTitle => 'Secondary Title', versionTitle => 'version 0.1', messageTitle => 'blah blah blah', });
+	print $q->template('topbanner1.tmpl')->process({ mainTitle => 'Main Title', secondaryTitle => 'Secondary Title', versionTitle => 'version 0.1', messageTitle => 'blah blah blah', });
 
 =head1 DESCRIPTION
 

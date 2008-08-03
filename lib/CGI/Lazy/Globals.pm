@@ -55,7 +55,7 @@ Class to hold and export global non-configuration variables
 
 =head1 SYNOPSIS
 
-use CGI::Lazy::Globals
+	use CGI::Lazy::Globals
 
 =cut
 

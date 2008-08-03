@@ -310,21 +310,23 @@ CGI::Lazy::Utility::Debug is a bunch of useful CGI debugging functions that I go
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/file');
+	my $q = CGI::Lazy->new('/path/to/config/file');
 
-my $t = $q->utility->debug;
+	my $t = $q->utility->debug;
 
-$t->param(); 				#dumps html formatted CGI parameters to browser.
+	$t->param(); 				#dumps html formatted CGI parameters to browser.
 
-$t->dump($ref, "some string");		#dumps html formatted output from Data::Dumper (if ref) or string (if scalar) to browser. 
+	$t->env();				#dumps html formatted %ENV to browser.
 
-$t->cookie();				#dumps info regarding cookies to browser.
+	$t->dump($ref, "some string");		#dumps html formatted output from Data::Dumper (if ref) or string (if scalar) to browser. 
 
-$t->edump($ref, "some string");		#dumps to external file, appending at each subsequent call.
+	$t->cookie();				#dumps info regarding cookies to browser.
 
-$t->edumpreplace($ref);			#dumps to external file, overwriting at each call
+	$t->edump($ref, "some string");		#dumps to external file, appending at each subsequent call.
+
+	$t->edumpreplace($ref);			#dumps to external file, overwriting at each call
 
 =head1 METHODS
 

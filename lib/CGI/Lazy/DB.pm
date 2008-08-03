@@ -231,19 +231,19 @@ CGI::Lazy::DB
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/');
+	my $q = CGI::Lazy->new('/path/to/config/');
 
-my $dbh = $q->db->dbh; #just get the dbh, and use it by hand
+	my $dbh = $q->db->dbh; #just get the dbh, and use it by hand
 
-$q->db->do('select...."); #use the db object's abstraction for queries with no return value
+	$q->db->do('select...."); #use the db object's abstraction for queries with no return value
 
-my $value = $q->db->getarray($query, @binds); #get an array of arrays.
+	my $value = $q->db->getarray($query, @binds); #get an array of arrays.
 
-my $value = $q->db->gethash($query, $binds, $key ); #get a hash of hashes
+	my $value = $q->db->gethash($query, $binds, $key ); #get a hash of hashes
 
-my $value = $q->db->gethashlist($query, @binds); #get ordered array of hashrefs. (This is probably the most useful)
+	my $value = $q->db->gethashlist($query, @binds); #get ordered array of hashrefs. (This is probably the most useful)
 
 =head1 DESCRIPTION
 

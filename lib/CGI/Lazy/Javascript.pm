@@ -385,17 +385,17 @@ CGI::Lazy::Javascript
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new();
+	my $q = CGI::Lazy->new();
 
-my $widget1 = $q->ajax->activeDataSet({...});
+	my $widget1 = $q->ajax->activeDataSet({...});
 
-my $widget2 = $q->ajax->activeDataSet({...});
+	my $widget2 = $q->ajax->activeDataSet({...});
 
-print $q->header,
+	print $q->header,
 
-      $q->javascript->modules($widget1, $widget2);
+	      $q->javascript->modules($widget1, $widget2);
 
 =head2 DESCRIPTION
 

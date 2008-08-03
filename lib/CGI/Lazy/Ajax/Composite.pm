@@ -109,14 +109,13 @@ CGI::Lazy::Ajax::Composite
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-
-our $q = CGI::Lazy->new('/path/to/config/file');
-our $composite = $q->ajax->composite({
-	id		=> 'stuff',
-       	children 	=> [],
-	);
+	our $q = CGI::Lazy->new('/path/to/config/file');
+	our $composite = $q->ajax->composite({
+			id		=> 'stuff',
+			children 	=> [],
+		);
 
 =head1 DESCRIPTION
 

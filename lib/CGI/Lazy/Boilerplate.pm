@@ -304,49 +304,49 @@ CGI::Lazy::BoilerPlate
 
 =head1 SYNOPSIS
 
-use CGI::Lazy::Boilerplate;
+	use CGI::Lazy::Boilerplate;
 
-my $b1 = CGI::Lazy::Boilerplate->new({
+	my $b1 = CGI::Lazy::Boilerplate->new({
 
-                id      => 'frobnitz',
+			id      => 'frobnitz',
 
-                fieldlist       => [qw(prodCode quantity unitPrice productGross prodCodeLookup.description)],
+			fieldlist       => [qw(prodCode quantity unitPrice productGross prodCodeLookup.description)],
 
-                type            => 'dataset, multiple',
+			type            => 'dataset, multiple',
 
-		style		=> 'funkystyle', #unsupported as of yet
+			style		=> 'funkystyle', #unsupported as of yet
 
-                });
+			});
 
-$b1->buildTemplate;
+	$b1->buildTemplate;
 
-$b1->buildCss;
+	$b1->buildCss;
 
-my $b2 = CGI::Lazy::Boilerplate->new({
+	my $b2 = CGI::Lazy::Boilerplate->new({
 
-                id              => 'glortswaggle',
+			id              => 'glortswaggle',
 
-                fieldlist       => [qw(merchant batch post_date cardnum tailno authCode icao invoicenum invtotal trandate country countryname)],
+			fieldlist       => [qw(merchant batch post_date cardnum tailno authCode icao invoicenum invtotal trandate country countryname)],
 
-                type            => 'dataset, single',
+			type            => 'dataset, single',
 
-                });
+			});
 
-$b2->buildTemplate;
+	$b2->buildTemplate;
 
-$b2->buildCss;
+	$b2->buildCss;
 
-my $b3 = CGI::Lazy::Boilerplate->new({
+	my $b3 = CGI::Lazy::Boilerplate->new({
 
-		id	 	=> 'glortswaggle',
+			id	 	=> 'glortswaggle',
 
-		fieldlist	=> [qw(merchant batch post_date cardnum tailno )],
+			fieldlist	=> [qw(merchant batch post_date cardnum tailno )],
 
-		type		=> 'dataset, singleMulti',
+			type		=> 'dataset, singleMulti',
 
-		});
+			});
 
-$b3->buildTemplate;
+	$b3->buildTemplate;
 
 
 =head1 DESCRIPTION

@@ -166,17 +166,17 @@ CGI::Lazy::ErrorHandler
 
 =head1 SYNOPSIS
 
-use CGI::Lazy;
+	use CGI::Lazy;
 
-my $q = CGI::Lazy->new('/path/to/config/');
+	my $q = CGI::Lazy->new('/path/to/config/');
 
-eval {
-	something();
-};
+	eval {
+		something();
+	};
 
-if ($@) {
-	$q->errorHandler->funkyErrorMethod;
-}
+	if ($@) {
+		$q->errorHandler->funkyErrorMethod;
+	}
 
 =head1 DESCRIPTION
 
