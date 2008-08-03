@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 11;
+use Test::More tests => 10;
 BEGIN { 
 	use_ok('HTML::Template');
     	use_ok('HTML::Template', 2.9);
@@ -20,7 +20,6 @@ BEGIN {
 
 #########################
 ok(baseConfig(), 'basic configuration- no db');
-ok(mod_perl(), 'OPTIONAL: mod_perl config- no db');
 
 #-----------------------------------------------------------------------------
 sub baseConfig {
@@ -33,17 +32,3 @@ sub baseConfig {
 			}) or die;
 }
 
-#-----------------------------------------------------------------------------
-sub mod_perl {
-	my $q = CGI::Lazy->new({
-				tmplDir 	=> "/templates",
-				jsDir		=>  "/js",
-				plugins 	=> {
-					mod_perl => {
-						PerlHandler 	=> "ModPerl::Registry",
-						saveOnCleanup	=> 1,
-					},
-					ajax	=>  1,
-				},
-			}) or die;
-}

@@ -19,7 +19,6 @@ lib/CGI/Lazy/ErrorHandler.pm
 lib/CGI/Lazy/Globals.pm
 lib/CGI/Lazy/ID.pm
 lib/CGI/Lazy/Javascript.pm
-lib/CGI/Lazy/ModPerl.pm
 lib/CGI/Lazy/Plugin.pm
 lib/CGI/Lazy/Session.pm
 lib/CGI/Lazy/Session/Data.pm

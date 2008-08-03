@@ -1,6 +1,6 @@
-CGI-Lazy version 0.01
+CGI-Lazy version 0.02
 =====================
-CGI::Lazy was designed to simply abstract some of the more common cgi scripting tasks because the author finally got sick of writing the same code by hand for every new site or client that comes along.  It is my attemp to extend the wonderful CGI.pm with things that just about every modern website needs or wants, and to do it in a fairly portable manner.
+CGI::Lazy was designed to simply abstract some of the more common cgi scripting tasks because the author finally got sick of writing the same code by hand for every new site or client that comes along.  It is my attempt to extend the wonderful CGI.pm with things that just about every modern website needs or wants, and to do it in a fairly portable manner.
 
 There are plenty of webdev frameworks out there, many are far more full- featured.  Often these solutions are so monstrous that they are overkill for small apps, or so optimized that they require full admin rights on the server they run on.  CGI::Lazy was intended to be lightweight enough to run on any given server that could run perl cgis.  Of course, the more power you have, the fancier you will be able to get, so Lazy was written to be extensible and to (hopefully) play nice with whatever magic you have up your sleeve. In short, it was made to easily do things for which the author has had need, while not getting in the way of things that the author hasn't thought of yet.
 

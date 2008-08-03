@@ -5,3 +5,7 @@ Revision history for Perl extension CGI::Lazy.
 		-X CGI::Lazy
 	then added teh real code... here goes...
 
+0.02	Sat Aug 2
+	-reformatted POD so it will display on cpan
+	-pulled ModPerl.pm from distribution so tests pass.  ModPerl will be distributed separately
+
