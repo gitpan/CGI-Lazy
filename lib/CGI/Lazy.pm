@@ -17,8 +17,6 @@ use CGI::Lazy::Globals;
 use CGI::Lazy::ErrorHandler;
 use CGI::Lazy::Utility;
 use CGI::Lazy::Javascript;
-use CGI::Lazy::Auth;
-use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
@@ -133,14 +131,22 @@ sub new {
 	$self->{_plugin}	= CGI::Lazy::Plugin->new($self);
 	$self->{_db} 		= CGI::Lazy::DB->new($self);
 
+	$self->{_session} 	= CGI::Lazy::Session->open($self, $sessionID) if $self->plugin->session;
+
 	if ($self->plugin->mod_perl) {
 		require CGI::Lazy::ModPerl;
 		$self->{_mod_perl} = CGI::Lazy::ModPerl->new($self);
 	}
 
-	$self->{_session} 	= CGI::Lazy::Session->open($self, $sessionID) if $self->plugin->session;
-	$self->{_auth} 		= CGI::Lazy::Auth->new($self) if $self->plugin->auth;
-	$self->{_authz}		= CGI::Lazy::Authz->new($self) if $self->plugin->authz;
+	if ($self->plugin->auth) {
+		require CGI::Lazy::Auth;
+		$self->{_auth}	= CGI::Lazy::Auth->new($self);
+	}
+
+	if ($self->plugin->authz) {
+		require CGI::Lazy::Authz;
+		$self->{_authz}	= CGI::Lazy::Authz->new($self);
+	}
 
 	return $self; 
 }

@@ -6,7 +6,7 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 ##CONFIGROOT value
 #if your config root is the server's document root, your apps will be more portable, however you will need to take steps to secure teh configs (with the db password et al.) from the outside world

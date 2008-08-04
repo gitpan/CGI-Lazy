@@ -9,8 +9,6 @@ lib/CGI/Lazy/Ajax/Composite.pm
 lib/CGI/Lazy/Ajax/Dataset.pm
 lib/CGI/Lazy/Ajax/DomLoader.pm
 lib/CGI/Lazy/Ajax/JSONParser.pm
-lib/CGI/Lazy/Auth.pm
-lib/CGI/Lazy/Authz.pm
 lib/CGI/Lazy/Config.pm
 lib/CGI/Lazy/CookieMonster.pm
 lib/CGI/Lazy/DB.pm

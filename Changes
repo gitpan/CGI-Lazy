@@ -13,3 +13,6 @@ Revision history for Perl extension CGI::Lazy.
 
 0.02-r3 -fixed pod formatting again.  no changes to code
 
+0.03	-split Auth.pm and Authz.pm ito separate distros
+	-lowered requirements in Makefile.PL  they were unnecessarily high
+

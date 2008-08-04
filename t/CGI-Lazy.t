@@ -5,15 +5,14 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 10;
+use Test::More tests => 9;
 BEGIN { 
-	use_ok('HTML::Template');
     	use_ok('HTML::Template', 2.9);
-	use_ok('JSON',	2.11);
-	use_ok('DBI', 1.60);
+	use_ok('JSON',	2.07);
+	use_ok('DBI', 1.5);
 	use_ok('JavaScript::Minifier', 1.05);
 	use_ok('Tie::IxHash', 1.21);
-	use_ok('Digest::MD5', 2.36);
+	use_ok('Digest::MD5', 2.3);
 	use_ok('Time::HiRes');
 	use_ok('CGI::Lazy');
 };
