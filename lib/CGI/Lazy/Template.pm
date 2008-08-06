@@ -35,7 +35,10 @@ sub new {
 	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
 
 	eval {
-		$self->{_template} = HTML::Template->new( filename => $docroot.$self->config->tmplDir."/".$tmplname,);
+		$self->{_template} = HTML::Template->new( 
+							filename => $docroot.$self->config->tmplDir."/".$tmplname, 
+							die_on_bad_params => 0,
+						);
 	};
 
 	if ($@) {

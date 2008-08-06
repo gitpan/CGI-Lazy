@@ -6,8 +6,6 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
-
 ##CONFIGROOT value
 #if your config root is the server's document root, your apps will be more portable, however you will need to take steps to secure teh configs (with the db password et al.) from the outside world
 
@@ -26,7 +24,7 @@ use constant {
 	FALSE	=> !1,
 	};
 
-our @EXPORT = qw(TRUE FALSE $CONFIGROOT $VERSION);
+our @EXPORT = qw(TRUE FALSE $CONFIGROOT);
 
 1
 

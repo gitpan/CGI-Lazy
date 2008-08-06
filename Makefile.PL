@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => 'CGI::Lazy',
-    VERSION_FROM      => 'lib/CGI/Lazy/Globals.pm', # finds $VERSION
+    VERSION_FROM      => 'lib/CGI/Lazy.pm', # finds $VERSION
     PREREQ_PM         => {
     			'HTML::Template'	=> 2.9,
 			'JSON'			=> 2.07,

@@ -20,6 +20,8 @@ use CGI::Lazy::Javascript;
 
 use base qw(CGI::Pretty);
 
+our $VERSION = '0.04';
+
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
 #------------------------------------------------------------
@@ -439,4 +441,12 @@ See CGI::Lazy::Utility for details.
 
 Returns hashref to the variables used in creating the object.
 
+=head1 Subversion
+
+Subversion repository available at:
+
+	http://www.nikogura.com/svn/CGI/trunk
+
 =cut
+
+

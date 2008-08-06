@@ -16,3 +16,9 @@ Revision history for Perl extension CGI::Lazy.
 0.03	-split Auth.pm and Authz.pm ito separate distros
 	-lowered requirements in Makefile.PL  they were unnecessarily high
 
+0.04	-moved $VERSION into Lazy.pm 'cos ModPerl and Auth versions were overwriting it
+	-fixed bug in Boilerplate.pm where __WIDGETID__ tag wasn't being parsed.
+	-cleaned up deprecated code in Ajax.pm and Dataset.pm for parsing widget-specific javascript.  No real change, but build mechanism and naming convention much clearer now.
+	-added readonly mode to Dataset
+	-set Template.pm to die_on_bad_params => 0  It won't care now if you output a parameter to a template that doesn't contain that tag- will just ignore it
+

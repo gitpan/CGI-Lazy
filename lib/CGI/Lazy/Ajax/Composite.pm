@@ -9,9 +9,6 @@ use CGI::Lazy::Globals;
 use Tie::IxHash;
 use base qw(CGI::Lazy::Ajax);
 
-our $widgetjs = <<END;
-END
-
 our $widgetprefix = 'CMP';
 
 #----------------------------------------------------------------------------------------
@@ -51,11 +48,8 @@ sub contents {
 		$output .= $child->display(%args);
 	}
 
-	my $widgetjs = $self->jswrap(minify(input => $self->widgetjs)) unless $self->vars->{decouplejs};
-
 	return $divopen.
 		$formOpenTag.
-		$widgetjs.
 		$output.
 		$formCloseTag.
 		$divclose;
@@ -83,7 +77,12 @@ sub new {
 		$children->{$_->widgetID} = $_;
 	}
 
-	return bless {_q => $q, _vars => $vars, _widgetjs => $widgetjs, _widgetprefix => $widgetprefix, _children => $children, _widgetID => $widgetID}, $class;
+	return bless {_q => $q, 
+		_vars => $vars, 
+		_widgetprefix => $widgetprefix, 
+		_children => $children, 
+		_widgetID => $widgetID
+	}, $class;
 }
 
 1

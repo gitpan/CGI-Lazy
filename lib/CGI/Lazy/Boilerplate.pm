@@ -17,7 +17,7 @@ our $datasetMultipleStart = <<END;
 		<tr id="<tmpl_var name="ROW">">
 END
 
-our $tdPrototype = <<END;
+our $tdPrototypeMulti = <<END;
 				<td>
 					<input 
 						type="text" 
@@ -30,7 +30,13 @@ our $tdPrototype = <<END;
 				</td>
 END
 
-our $tdPrototype2 = <<END;
+our $tdPrototypeMultiRO = <<END;
+				<td>
+					<tmpl_var name='VALUE.__FIELDNAME__'>
+				</td>
+END
+
+our $tdPrototypeSingle = <<END;
 		<td>
 			<input 
 				type="text" 
@@ -121,12 +127,23 @@ sub buildTmplDatasetMultiple {
 	my $self = shift;
 
 	my $tmpl = $self->parse4ID($datasetMultipleStart);
-	$tmpl .= $self->parse4Field($_, $tdPrototype) for @{$self->fieldlist};
+	$tmpl .= $self->parse4FieldAndID($_, $tdPrototypeMulti) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetDeleteTd);
 	$tmpl .= $self->parse4ID($datasetMultipleEnd);
 	$tmpl .= $self->parse4ID($datasetMultipleSubmit);
 
 	$self->outputTmpl($tmpl);
+}
+
+#--------------------------------------------------------------------------------------------
+sub buildTmplDatasetMultipleRO {
+	my $self = shift;
+
+	my $tmpl = $self->parse4ID($datasetMultipleStart);
+	$tmpl .= $self->parse4FieldAndID($_, $tdPrototypeMultiRO) for @{$self->fieldlist};
+	$tmpl .= $self->parse4ID($datasetMultipleEnd);
+
+	$self->outputTmpl($tmpl, 'RO');
 }
 
 #--------------------------------------------------------------------------------------------
@@ -147,7 +164,7 @@ sub buildTmplDatasetSingle {
 		while ($column < 6) {
 			if ($fieldlist->[$field]) {
 				$tmpl .= $self->parse4Field($fieldlist->[$field], $datasetSingleLableTd);
-				$tmpl .= $self->parse4Field($fieldlist->[$field], $self->parse4ID($tdPrototype2));
+				$tmpl .= $self->parse4Field($fieldlist->[$field], $self->parse4ID($tdPrototypeSingle));
 			}
 			$column++;
 			$field++;
@@ -167,7 +184,7 @@ sub buildTmplDatasetSingleMulti {
 	my $self = shift;
 
 	my $tmpl = $self->parse4ID($datasetMultipleStart);
-	$tmpl .= $self->parse4Field($_, $tdPrototype) for @{$self->fieldlist};
+	$tmpl .= $self->parse4Field($_, $tdPrototypeMulti) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetMultipleEnd);
 
 	$self->outputTmpl($tmpl, 'Multi');
@@ -256,6 +273,18 @@ sub parse4Field {
 	my $text 	= shift;
 
 	$text =~ s/__FIELDNAME__/$fieldname/gs;
+
+	return $text;
+}
+
+#--------------------------------------------------------------------------------------------
+sub parse4FieldAndID {
+	my $self 	= shift;
+	my $fieldname	= shift;
+	my $text 	= shift;
+
+	$text = $self->parse4Field($fieldname, $text);
+	$text = $self->parse4ID($text);
 
 	return $text;
 }

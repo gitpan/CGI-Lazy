@@ -77,15 +77,15 @@ function sjaxSend(request, outgoing, returnHandler) {
 
 #javascript for Ajax::Dataset
 our $ADSJS = <<END;
-function adsController(ID, validator, ParentID) {
+function datasetController(ID, validator, ParentID) {
 	this.widgetID = ID;
 	this.validator = validator;
 	this.parentID = ParentID;
 }
 
-adsController.prototype.constructor = adsController;
+datasetController.prototype.constructor = datasetController;
 
-adsController.prototype.deleteRow = function(caller) {
+datasetController.prototype.deleteRow = function(caller) {
 	var myRow = caller.parentNode.parentNode;
 	var deleter;
 
@@ -147,7 +147,7 @@ adsController.prototype.deleteRow = function(caller) {
 	}
 }
 
-adsController.prototype.pushRow = function(caller) {
+datasetController.prototype.pushRow = function(caller) {
 	var callername = caller.name;
 	var callervalue = caller.value;
 	var callerid = caller.id;
@@ -216,7 +216,7 @@ adsController.prototype.pushRow = function(caller) {
 	}
 }
 
-adsController.prototype.validate = function () {
+datasetController.prototype.validate = function () {
 	var errorMsg = null;
 	for (fieldname in this.validator) {
 		errorMsg += this.tester(fieldname);
@@ -228,7 +228,7 @@ adsController.prototype.validate = function () {
 	return true;
 };
 
-adsController.prototype.tester = function(fieldname) {
+datasetController.prototype.tester = function(fieldname) {
 	var field = document.getElementById(fieldname);
 	var insert = /INSERT/;
 	var update = /UPDATE/;
@@ -260,17 +260,16 @@ adsController.prototype.tester = function(fieldname) {
 	}
 };
 
-adsController.prototype.flag = function(fieldname) {
+datasetController.prototype.flag = function(fieldname) {
 	var field = document.getElementById(fieldname);
 	field.style.backgroundColor = "red";
 };
 
-adsController.prototype.unflag = function(field) {
+datasetController.prototype.unflag = function(field) {
 	field.style.backgroundColor = "white";
 };
 
-adsController.prototype.searchResults = function(text){
-//	var incoming = eval('(' + text + ')'); //less secure handling
+datasetController.prototype.searchResults = function(text){
 	var incoming = JSON.parse(text);
 	for (widgetname in incoming.validator) {
 		var controller = eval(widgetname + 'Controller');
@@ -282,8 +281,7 @@ adsController.prototype.searchResults = function(text){
 	document.getElementById(this.widgetID).innerHTML = html;
 }; 
 
-adsController.prototype.multiSearchResults = function(text, target) {
-//	var incoming = eval('(' + text + ')');  //less secure handling
+datasetController.prototype.multiSearchResults = function(text, target) {
 	var incoming = JSON.parse(text);
 	for (widgetname in incoming.validator) {
 		var controller = eval(widgetname + 'Controller');
@@ -298,7 +296,7 @@ adsController.prototype.multiSearchResults = function(text, target) {
 
 };
 
-adsController.prototype.multiSearch = function(id) {
+datasetController.prototype.multiSearch = function(id) {
 	var primaryKey = eval(this.widgetID + 'MultiSearchPrimaryKey');
 	var outgoing = {CGILazyID : this.widgetID};
 	outgoing[primaryKey] = id;

@@ -283,20 +283,6 @@ sub inserts {
 }
 
 #----------------------------------------------------------------------------------------
-sub javascript {
-	my $self = shift;
-
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		my $script = $self->jswrap(minify(input => $self->widgetjs));
-		foreach (@{$self->childarray}) {
-			$script .= $_->javascript;
-		}
-		return $script;
-	}
-	return $self->jswrap(minify(input => $self->widgetjs));
-}
-
-#----------------------------------------------------------------------------------------
 sub jsload {
 	my $self = shift;
 	my $file = shift;
@@ -525,13 +511,6 @@ sub widgetID {
 	my $self = shift;
 
 	return $self->{_widgetID};
-}
-
-#----------------------------------------------------------------------------------------
-sub widgetjs {
-	my $self = shift;
-
-	return $self->{_widgetjs};
 }
 
 1

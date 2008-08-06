@@ -9,13 +9,6 @@ use CGI::Lazy::Globals;
 
 use base qw(CGI::Lazy::Ajax);
 
-our $widgetjs = <<END;
-var __WIDGETID__Validator;
-var __WIDGETID__Controller = new adsController('__WIDGETID__', __WIDGETID__Validator, '__PARENTID__');
-var __WIDGETID__MultiSearchPrimaryKey = '__PRIMARYKEY__';
-
-END
-
 #----------------------------------------------------------------------------------------
 sub buildvalidator {
 	my $self = shift;
@@ -44,16 +37,21 @@ sub contents {
 
         my $widgetID		= $self->widgetID;
 	my $vars 		= $self->vars;
+	my $template;
+
+	if ($args{mode} eq 'readonly') {
+        	$template            = $vars->{readOnlyTemplate}; #required
+	} else {
+        	$template            = $vars->{template}; #required
+	}
 
 	my $type 		= $vars->{type};
 	my $multiType	 	= $vars->{multiType};
-	my $parentID 		= $vars->{parentId};
+	my $parentID 		= $vars->{parentId} || '';
         my $submitArgs          = $vars->{submit};
         my $tableCaptionValue   = $vars->{tableCaption}; #can be blank
         my $recset              = $vars->{recordset}; #required
-        my $template            = $vars->{template}; #required
         my $lookups             = $vars->{lookups}; #if this isn't set, then new records will only contain what's on the screen
-        my $tdHandling          = $vars->{tdHandling} || 'manual';
         my $standalone          = $vars->{standalone};
 	my $defaults 		= $vars->{defaultvalues}; #if this isn't set, then new records will only contain what's on the screen
 	my $nodelete		= $vars->{nodelete};
@@ -235,16 +233,21 @@ sub contents {
 	$validator = $self->jswrap("var ".$self->widgetID ."Validator = ".to_json($self->validator).";");
 	my $primarykey = $self->recordset->primarykey;
 
-	my $rawwidgetjs = $self->widgetjs;
-	$rawwidgetjs =~ s/__WIDGETID__/$widgetID/g;
-	$rawwidgetjs =~ s/__PARENTID__/$parentID/g;
-	$rawwidgetjs =~ s/__PRIMARYKEY__/$primarykey/;
+	my $jsvalidatorname = $widgetID."Validator";
+	my $jscontrollername = $widgetID."Controller";
+	my $jsmultisearchname = $widgetID."MultiSearchPrimaryKey";
 
-	my $widgetjs = $self->jswrap(minify(input => $rawwidgetjs));
+	my $javascript = <<END;
+		var $jsvalidatorname;
+		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$parentID');
+		var $jsmultisearchname = '$primarykey';
+END
+
+	my $js = $self->jswrap(minify(input => $javascript));
 
 	return $divopen.
 		$validator.
-		$widgetjs.
+		$js.
 		$formOpenTag.
 		$self->q->template($template)->process($tmplvars).
 		$formCloseTag.
@@ -348,7 +351,6 @@ sub new {
 			_type => $vars->{type}, 
 			_multiType => $vars->{multiType}, 
 			_recordset => $vars->{recordset}, 
-			_widgetjs => $widgetjs, 
 			_widgetID => $vars->{id}
 	};
 
