@@ -23,7 +23,6 @@ our $tdPrototypeMulti = <<END;
 						type="text" 
 						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
 						value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
-						size="20" 
 						id="<tmpl_var name='ID.__FIELDNAME__'>"
 						onchange="__WIDGETID__Controller.unflag(this);__WIDGETID__Controller.pushRow(this);" 
 					/>
@@ -42,9 +41,8 @@ our $tdPrototypeSingle = <<END;
 				type="text" 
 				name="<tmpl_var name='NAME.__FIELDNAME__'>" 
 				value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
-				size="20" 
 				id="<tmpl_var name='ID.__FIELDNAME__'>"
-				onchange="__WIDGETID__Controller.unflag(this);__WIDGETID__Controller.pushRow(this);" 
+				onchange="__WIDGETID__Controller.unflag(this);" 
 			/>
 		</td>
 END
@@ -56,7 +54,7 @@ our $datasetDeleteTd = <<END;
 						type = 'checkbox' 
 						tabindex=-1 
 						id = "<tmpl_var name = 'DELETE.ID'>" 
-						onclick="_WIDGETID__Controller.deleteRow(this);"
+						onclick="__WIDGETID__Controller.deleteRow(this);"
 					>
 				</td>
 				</tmpl_if>

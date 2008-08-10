@@ -20,7 +20,7 @@ use CGI::Lazy::Javascript;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 

@@ -204,6 +204,10 @@ sub insert {
 				unless ($self->displayOnly($field) || $self->readOnly($field)) {
 					push @fieldlist, $field;
 
+					if ($vars->{$field}->{handle}) {
+						${$vars->{$field}->{handle}} = $data->{$row}->{$field};
+					}
+
 					if ($self->inputMask($field)) {
 						push @bindvalues, sprintf $self->inputMask($field), $data->{$row}->{$field};
 					} else {
@@ -449,6 +453,7 @@ sub select {
 	eval {
 		$sth = $self->db->dbh->prepare($query);
 		$sth->execute(@bindvars);
+#		$self->q->util->debug->edump($query, @bindvars);
 	};
 
 	if ($@) {
@@ -540,6 +545,10 @@ sub update {
 
 			if ($field) {
 				unless ($self->displayOnly($field) || $self->readOnly($field)) {
+					if ($vars->{$field}->{handle}) {
+						${$vars->{$field}->{handle}} = $data->{$ID}->{$field};
+					}
+
 					if ($self->inputMask($field)) {
 						push @binds, sprintf $self->inputMask($field), $data->{$ID}->{$field};
 					} else {
@@ -615,10 +624,22 @@ sub verify {
 	my $self = shift;
 	my $value = shift;
 
-	$value =~ /^([\w\d-]+)$/; #letters, numbers, underscores, and dashes only please.
+	$value =~ /^([\w\d\-\.]+)$/; #letters, numbers, underscores, dots, and dashes only please.
 	my $field = $1;
 
-	return $field if exists $self->fieldlist->{$field};
+	if (exists $self->fieldlist->{$field}) { #fieldname has to be in recordset
+		if ($field =~ /\./) {		 #if there's a . in the fieldname
+			my $table = $self->table;
+			if ($field =~ /^$table/) { #the first part has to be the recordset's table
+				return $field;
+			} else {		# its a joined field, no modification allowed
+				return;
+			}
+		}
+		return $field;
+	}
+
+	return;
 }
 
 #-----------------------------------------------------------------------------

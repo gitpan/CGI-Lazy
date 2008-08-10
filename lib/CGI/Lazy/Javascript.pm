@@ -76,7 +76,7 @@ function sjaxSend(request, outgoing, returnHandler) {
 ];
 
 #javascript for Ajax::Dataset
-our $ADSJS = <<END;
+our $DatasetJS = <<END;
 function datasetController(ID, validator, ParentID) {
 	this.widgetID = ID;
 	this.validator = validator;
@@ -175,7 +175,7 @@ datasetController.prototype.pushRow = function(caller) {
 	//		var oldWidget 		= oldRow.cells[i].childNodes[0]; //firefox
 	//		var oldWidget 		= oldRow.cells[i].childNodes[1]; //ie
 
-			oldWidget.name 		= oldWidget.name.replace(/(.+)-(\\w+)(\\d+\$)/, "\$1-:INSERT:\$2\$3");
+			oldWidget.name 		= oldWidget.name.replace(/(.+)-(.+)--(\\d+\$)/, "\$1-:INSERT:\$2--\$3");
 			var fieldName 		= oldWidget.id.replace(/\\d+\$/, ''); 
 			var newCell 		= newRow.insertCell(newRow.cells.length);
 			newCell.align 		= oldCell.align;
@@ -184,8 +184,11 @@ datasetController.prototype.pushRow = function(caller) {
 			newWidget.value 	= '';
 			newWidget.name		= fieldName + newRownum;
 			newWidget.id 		= fieldName + newRownum;
-			
-			this.validator[newWidget.id] = this.validator[oldWidget.id];
+		
+			try {	
+				this.validator[newWidget.id] = this.validator[oldWidget.id];
+			} catch (e) {
+			}
 
 			newWidget.type 		= oldWidget.type;
 			newWidget.size 		= oldWidget.size;
@@ -315,7 +318,7 @@ our $DOMLOADJS;
 our $COMPJS;
 
 our %component = (
-		'CGI::Lazy::Ajax::Dataset'		=> $ADSJS,
+		'CGI::Lazy::Ajax::Dataset'		=> $DatasetJS,
 		'CGI::Lazy::Ajax::DomLoader'		=> $DOMLOADJS,
 		'CGI::Lazy::Ajax::Composite'		=> $COMPJS,
 );
@@ -339,7 +342,7 @@ sub modules {
 		foreach my $widget (@args) {
 			if (ref $widget eq 'CGI::Lazy::Ajax::Composite') {
 				$inc{ref $widget} = 1;
-				foreach my $subwidget (@{$widget->childarray}) {
+				foreach my $subwidget (@{$widget->memberarray}) {
 					$inc{ref $subwidget} = 1;
 				}
 			} else {

@@ -10,7 +10,6 @@ use CGI::Lazy::Ajax::Dataset;
 use CGI::Lazy::Ajax::DomLoader;
 use CGI::Lazy::Ajax::Composite;
 
-
 #----------------------------------------------------------------------------------------
 sub ajaxReturn {
 	my $self = shift;
@@ -41,24 +40,52 @@ sub ajaxSelect {
 	my $incoming = $args{incoming} || from_json(($self->q->param('POSTDATA') || $self->q->param('keywords') || $self->q->param('XForms:Model')));
 	my $div = $args{div};
 	my $vars = $args{vars};
+	my $like = $args{like};
+	my $likevars = $args{likevars};
 
-	my @fields;
-	my $binds = [];
+
 	my $widgetID = $self->widgetID;
+	my @fields;
+	my $bind;
+	my $binds = [];
 
 #	$self->q->util->debug->edump($incoming);
 
-	delete $incoming->{CGILazyID}; #key/value pair only used at cgi level, will cause problems here
+	delete $incoming->{CGILazyID}; #key/value pair only used at cgi level, will cause problems here (set automatically by Dataset with name of widget)
+
+	if ($like) {
+		$bind = " like ? ";
+
+	} else {
+		$bind = " = ? ";
+	}
+
+	my %likemap = (
+			'%?%'	=> sub {return '%'.$_[0].'%';},
+			'?%'	=> sub {return $_[0].'%';},
+			'%?'	=> sub {return '%'.$_[0];},
+
+		      );
 
 	foreach my $field (keys %$incoming) {
-		unless ($field =~ /['"&;]/) {
+		unless ($field =~ /['"&;]\(\)/) {
 			if ($incoming->{$field}) {
 				(my $fieldname = $field) =~ s/^$widgetID-//;
-				push @fields, $fieldname." = ? ";
+				push @fields, $fieldname.$bind;
 				if (ref $incoming->{$field}) {
-					push @$binds, ${$incoming->{$field}};
+					if ($likevars) {
+						my $value = $likemap{$likevars}->(${$incoming->{$field}});
+						push @$binds, $value;
+					} else {
+						push @$binds, ${$incoming->{$field}};
+					}
 				} else {
-					push @$binds, $incoming->{$field};
+					if ($like) {
+						my $value = $likemap{$like}->($incoming->{$field});
+						push @$binds, $value;
+					} else {
+						push @$binds, $incoming->{$field};
+					}
 				}
 			}
 		}
@@ -124,7 +151,7 @@ sub dbwrite {
 	my %args = @_;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->dbwrite;
 		}
 		return;
@@ -188,7 +215,7 @@ sub deletes {
 	my $self = shift;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->deletes;
 		}
 		return;
@@ -245,7 +272,7 @@ sub insert {
 	my %vars = @_;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->insert(%vars);
 		}
 		return;
@@ -260,7 +287,7 @@ sub inserts {
 	my $self = shift;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->inserts;
 		}
 		return;
@@ -270,15 +297,17 @@ sub inserts {
 	my $widgetID = $self->vars->{id};
 
         foreach my $key (grep {/^$widgetID-:INSERT:/} $self->q->param) {
-                if ($key =~ /^($widgetID-:INSERT:)(.+)(\d+)$/) {
+                if ($key =~ /^($widgetID-:INSERT:)(.+)--(\d+)$/) {
 			my ($pre, $field, $row) = ($1, $2, $3);
 			$data->{$row}->{$field} = $self->q->param($key) if $self->q->param($key);
-		} elsif ($key =~ /^($widgetID-:INSERT:)(.+)$/) {
+#			$self->q->util->debug->edump($field, $self->q->param($key)) if $self->q->param($key);
+		} elsif ($key =~ /^($widgetID-:INSERT:)--(.+)$/) {
 			my ($pre, $field) = ($1, $2);
 			$data->{1}->{$field} = $self->q->param($key) if $self->q->param($key);
 		}
         }
 
+#	$self->q->util->debug->edump($data);
         return $data;
 }
 
@@ -351,7 +380,7 @@ sub postdata {
         my $self = shift;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->postdata;
 		}
 		return;
@@ -437,7 +466,7 @@ sub rundelete {
 	my %vars = @_;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->rundelete(%vars);
 		}
 		return;
@@ -454,12 +483,13 @@ sub update {
 	my %vars = @_;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->update(%vars);
 		}
 		return;
 	}
 
+#	$self->q->util->debug->edump('fromupdate', $self->updates, \%vars);
 	$self->recordset->update($self->updates, \%vars);
 
 	return;
@@ -470,7 +500,7 @@ sub updates {
 	my $self = shift;
 
 	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
-		foreach (@{$self->childarray}) {
+		foreach (@{$self->memberarray}) {
 			$_->updates;
 		}
 		return;
@@ -565,11 +595,37 @@ Widget html output
 
 =head2 ajaxSelect (args)
 
-Runs select based on args and returns output.  By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for children of composite widgets.
+Runs select based on args and returns output.  
+
 
 =head3 args
 
-Hash of select parameters
+Hash of select parameters.  Expects to see a key called 'incoming' that contains the incoming parameters in widgetID-fieldname => value format.  
+
+Widgets such as Dataset will also have a parameter called CGILazyID which will contain the name of the widget (for doing different things at the cgi level based on which widget is talking to the app). This key/value will be stripped automatically.
+
+The rest of the hash supports the following options:
+
+	div 		=> 1  #By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for members of composite widgets.
+	
+	like		=> '%?%' # search will be like %value%, in other words anything containing 'value'. Like is applied only to searches coming in from web, not vars added in cgi
+
+	like	 	=> '?%'  # search will be on value%
+
+	like		=> '%?'  # search on %v
+
+	vars 		=> {fieldname => {optionname => optionvalue}}
+
+	vars 		=> {fieldname => {value => 'bar'}} #extra search parameter.
+
+	vars		=> {foo => {handle => $ref}}} # when retrieved $$ref will have the value of field foo. ('handle' is a 'handle' on that value for use in tying things together.)
+	
+	likevars	=> '%?%' # search will be like %value%, in other words anything containing 'value'.  like is applied to vars specified from cgi
+
+	likevars 	=> '?%'  # search will be on value%
+
+	likevars	=> '%?'  # search on %v
+
 
 
 =head2 jsonescape ( var )

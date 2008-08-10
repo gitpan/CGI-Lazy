@@ -22,3 +22,14 @@ Revision history for Perl extension CGI::Lazy.
 	-added readonly mode to Dataset
 	-set Template.pm to die_on_bad_params => 0  It won't care now if you output a parameter to a template that doesn't contain that tag- will just ignore it
 
+0.05	-removed bad js call to pushRow in Boilerplate Dataset single template
+	-added some more error trapping to Javascript
+	-extended Recordset to allow for table.field if table is recordset's native table
+	-fixed bug between Ajax, Dataset, and Javascript that prevented insert of records > 9
+	-added client side javascript example for Composite, Dataset.
+	-added full Composite example to Composite.pm
+	-improved documentation of Ajax.pm
+	-extended ajaxSearch method of Ajax objects to allow for like queries.  can set like => 'liketype' to apply to web inputs or likevars => 'liketype' to do likes off of cgi vars
+	-changed children and childarray methods of Composite to members and memberarray for accuracy sake, and to prevent confusion for parent/child relationships between member widgets
+	-likewise changed Dataset property parentId to containerId
+	-added 'type' to Composite, and added type parentChild which, when set up correctly, will handle select/insert/update on member widgets based on configureation.  delete will wait for further pondering.

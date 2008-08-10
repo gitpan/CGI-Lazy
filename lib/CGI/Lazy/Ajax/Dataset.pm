@@ -47,7 +47,7 @@ sub contents {
 
 	my $type 		= $vars->{type};
 	my $multiType	 	= $vars->{multiType};
-	my $parentID 		= $vars->{parentId} || '';
+	my $containerID 	= $vars->{containerId} || '';
         my $submitArgs          = $vars->{submit};
         my $tableCaptionValue   = $vars->{tableCaption}; #can be blank
         my $recset              = $vars->{recordset}; #required
@@ -108,6 +108,7 @@ sub contents {
 			$row->{$bodyRowName} = "row$rownum";
 			$row->{$deleteID} = "$widgetID-$rownum" unless $nodelete;
 			$row->{$deleteFlag} = 1 unless $nodelete;
+			$row->{PRIMARYKEY} = $ID;
 
 			foreach my $fieldname (keys %{$recset->data->[$i]}) {
 				if ($recset->handle($fieldname)) { #if we've been given a handle for this field, set it
@@ -145,8 +146,8 @@ sub contents {
 		$blankrow->{$deleteID} = "$widgetID-$newrecordindex" unless $nodelete;
 		$blankrow->{$deleteFlag} = 1 unless $nodelete;
 		foreach my $field ( @{$recset->visibleFields}) {
-			$blankrow->{"NAME.".$field} = "$widgetID-".$field.$newrecordindex;
-			$blankrow->{"ID.".$field} = "$widgetID-".$field.$newrecordindex;
+			$blankrow->{"NAME.".$field} = "$widgetID-".$field."--".$newrecordindex;
+			$blankrow->{"ID.".$field} = "$widgetID-".$field."--".$newrecordindex;
 			$blankrow->{"VALUE.".$field} = '';
 
 			if ($recset->validator($field)) {
@@ -191,7 +192,7 @@ sub contents {
 			foreach my $fieldname (keys %{$recset->fieldlist}) {
 				unless ($recset->hidden($fieldname)) {
 					$tmplvars->{'LABEL.'.$fieldname} = $recset->label($fieldname) unless $recset->noLabel($fieldname);
-					$tmplvars->{'NAME.'.$fieldname} = "$widgetID-:INSERT:".$fieldname;
+					$tmplvars->{'NAME.'.$fieldname} = "$widgetID-:INSERT:".$fieldname."--";
 					$tmplvars->{"ID.".$fieldname} = "$widgetID-".$fieldname;
 				}
 			}
@@ -204,6 +205,7 @@ sub contents {
 					$tmplvars->{'LABEL.'.$fieldname} = $recset->label($fieldname) unless $recset->noLabel($fieldname);
 					$tmplvars->{'NAME.'.$fieldname} = "$widgetID-:UPDATE:".$fieldname."-:-".$ID;
 					$tmplvars->{"ID.".$fieldname} = "$widgetID-".$fieldname;
+					$tmplvars->{PRIMARYKEY} = $ID;
 
 					if ($recset->outputMask($fieldname)) {
 						$tmplvars->{"VALUE.".$fieldname} = sprintf $recset->outputMask($fieldname), $recset->data->[$recordnum]->{$fieldname}; 
@@ -239,7 +241,7 @@ sub contents {
 
 	my $javascript = <<END;
 		var $jsvalidatorname;
-		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$parentID');
+		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$containerID');
 		var $jsmultisearchname = '$primarykey';
 END
 
@@ -303,6 +305,7 @@ sub displaySingleList {
 		foreach my $field (keys %{$record}) {
 			if ($recset->multipleField($field)) {
 				$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".$record->{$field}."</a>";
+				$row->{PRIMARYKEY} = $ID;
 			}
 		}
 
@@ -647,5 +650,6 @@ extravars		=>  Extra variables to be output to template	(optional)
 			name	=> name of variable
 
 				value => variable, string, or reference
+
 =cut
 
