@@ -44,3 +44,8 @@ Revision history for Perl extension CGI::Lazy.
 	-fixed bug in Dataset where singles couldn't insert.
 	-fixed bug in Dataset where headings method didn't have any data till after a select.
 	-fixed bug in Composite ParentChild where a search on the parent that returned no data put things into an endless loop
+
+0.07	-fixed bug in errorhandler where it was calling lazyversion incorrectly.
+	-added ajaxBlank method to Composite widget
+	-fixed bug in Composite where providing no type causes deep recursion
+	-fixed bug in Dataset where field id not set correctly causing searchMulti to bomb

@@ -105,7 +105,7 @@ sub noConfig {
 	my $headervars = {
 		mainTitle 	=> "Config Error",
 		secondaryTitle	=> "A problem occured in creating the Config object",
-		versionTitle	=> "version ".$self->lazyversion,
+		versionTitle	=> "version ".$self->q->lazyversion,
 		messageTitle	=> "Couldn't open config file $filename : $@",
 	};
 

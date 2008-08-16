@@ -134,7 +134,7 @@ sub contents {
 
 				unless ($recset->hidden($fieldname)) { #don't add hidden fields
 					$row->{"NAME.".$fieldname} = "$widgetID-:UPDATE:".$fieldname."-:-".$ID."::".$rownum; 
-					$row->{"ID.".$fieldname} = "$widgetID-".$fieldname.$rownum;
+					$row->{"ID.".$fieldname} = "$widgetID-".$fieldname."--".$rownum;
 
 					if ($recset->outputMask($fieldname)) {
 						$row->{"VALUE.".$fieldname} = sprintf $recset->outputMask($fieldname), $recset->data->[$i]->{$fieldname}; 

@@ -8,7 +8,20 @@ use JSON;
 use CGI::Lazy::Globals;
 use base qw(CGI::Lazy::Ajax);
 
-our $widgetprefix = 'CMP';
+#----------------------------------------------------------------------------------------
+sub ajaxBlank {
+	my $self = shift;
+
+	my $widgets 	= [];
+	my $output 	= [];
+
+	foreach (@{$self->memberarray}) {
+		push @$widgets, $_;
+		push @$widgets, $_->ajaxBlank;
+	}
+
+	return $self->ajaxReturn($widgets, $output);
+}
 
 #----------------------------------------------------------------------------------------
 sub ajaxSelect {
@@ -20,6 +33,15 @@ sub ajaxSelect {
 	my $method = 'ajaxSelect'.$type;
 
 	return $self->$method;
+}
+
+#----------------------------------------------------------------------------------------
+sub ajaxSelectManual {
+	my $self = shift;
+	my %args = shift;
+
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -120,6 +142,14 @@ sub dbwrite {
 }
 
 #----------------------------------------------------------------------------------------
+sub dbwriteManual {
+	my $self = shift;
+	my %args = @_;
+	
+	return;
+}
+
+#----------------------------------------------------------------------------------------
 sub dbwriteParentChild {
        	my $self = shift;
 	my %args = @_;
@@ -190,10 +220,9 @@ sub new {
 	return bless {
 		_q 		=> $q, 
 		_vars 		=> $vars, 
-		_widgetprefix 	=> $widgetprefix, 
 		_members 	=> $members, 
 		_widgetID 	=> $widgetID,
-		_type		=> $vars->{type},
+		_type		=> $vars->{type} || 'manual',
 		_relationship	=> $vars->{relationship},
 	}, $class;
 }
@@ -283,6 +312,10 @@ parentChild is a widget that has one widget as the parent, and one or more set u
 parentChild is pretty experimental.  The configuration given in the example works fine, but I'm not yet convinced the structure is abstracted enough to work for any given group of widgets.  Time will tell, and bugreports/comments.
 
 =head1 METHODS
+
+=head2 ajaxBlank ()
+
+returns blank versions of all member widgets.
 
 =head2 ajaxSelect ()
 
