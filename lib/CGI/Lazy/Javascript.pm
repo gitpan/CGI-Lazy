@@ -77,10 +77,12 @@ function sjaxSend(request, outgoing, returnHandler) {
 
 #javascript for Ajax::Dataset
 our $DatasetJS = <<END;
-function datasetController(ID, validator, ParentID) {
+function datasetController(ID, validator, ParentID, flagcolor) {
 	this.widgetID = ID;
 	this.validator = validator;
 	this.parentID = ParentID;
+	this.flagcolor = flagcolor;
+	this.fieldcolor = null;
 }
 
 datasetController.prototype.constructor = datasetController;
@@ -213,6 +215,7 @@ datasetController.prototype.pushRow = function(caller) {
 			newWidget.onselect	= oldWidget.onselect;
 			newWidget.onsubmit	= oldWidget.onsubmit;
 			newWidget.onunload	= oldWidget.onunload;
+			newWidget.className	= oldWidget.className;
 
 			newCell.appendChild(newWidget);
 		}
@@ -233,6 +236,7 @@ datasetController.prototype.validate = function () {
 
 datasetController.prototype.tester = function(fieldname) {
 	var field = document.getElementById(fieldname);
+	//alert("fieldname: "+fieldname+" field: "+field);
 	var insert = /INSERT/;
 	var update = /UPDATE/;
 	var re = /^\\/.+\\/\$/;
@@ -265,11 +269,15 @@ datasetController.prototype.tester = function(fieldname) {
 
 datasetController.prototype.flag = function(fieldname) {
 	var field = document.getElementById(fieldname);
-	field.style.backgroundColor = "red";
+	this.fieldcolor = field.style.backgroundColor;
+
+	var flagBackgroundColor = this.flagcolor ? this.flagcolor : "red";
+
+	field.style.backgroundColor = flagBackgroundColor;
 };
 
 datasetController.prototype.unflag = function(field) {
-	field.style.backgroundColor = "white";
+	field.style.backgroundColor = this.fieldcolor;
 };
 
 datasetController.prototype.searchResults = function(text){

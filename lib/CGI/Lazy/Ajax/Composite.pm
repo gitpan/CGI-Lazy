@@ -48,6 +48,7 @@ sub ajaxSelectParentChild {
 	$parentParams{like} = $self->relationship->{parent}->{searchLike} if $self->relationship->{parent}->{searchLike};
 
         my $parentOutput = $parent->ajaxSelect(%parentParams); 
+
 #	$self->q->util->debug->edump(\%parentParams);
 
         if ($parent->multi) {
@@ -58,14 +59,15 @@ sub ajaxSelectParentChild {
 		my $output 	= [$parentOutput];
 
 		foreach my $child (keys %{$self->relationship->{children}}) {
-			my %childParams = (
-						$self->relationship->{children}->{$child}->{childKey} => ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}},
-					);
-#			$self->q->util->debug->edump(\%parentKeys);
-#			$self->q->util->debug->edump(\%childParams);
+			my %childParams = ($self->relationship->{children}->{$child}->{childKey} => ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}});
 
 			push @$widgets, $self->members->{$child};
-			push @$output, $self->members->{$child}->ajaxSelect(incoming => {%childParams}, div=>1);
+			
+			if ($parent->empty) {
+				push @$output, $self->members->{$child}->ajaxBlank(div=>1);
+			} else {
+				push @$output, $self->members->{$child}->ajaxSelect(incoming => {%childParams}, div=>1);
+			}
 		}
 
 		return $self->ajaxReturn($widgets, $output);
@@ -113,36 +115,33 @@ sub dbwrite {
 	$type = ucfirst $type;
 	my $method = 'dbwrite'.$type;
 
-	return $self->$method;
+	return $self->$method(%args);;
 
 }
 
 #----------------------------------------------------------------------------------------
 sub dbwriteParentChild {
        	my $self = shift;
-	my %args = shift;
+	my %args = @_;
 
         my $parent = $self->members->{$self->relationship->{parent}->{name}};
 
 	my %parentKeys;
 
 	foreach my $child (keys %{$self->relationship->{children}}){
-		my $handle;
-		$parentKeys{$self->relationship->{children}->{$child}->{parentKey}} = {handle => \$handle};
+		if (($self->relationship->{children}->{$child}->{parentKey} eq $parent->recordset->primarykey) && $parent->recordset->mysqlAuto) {
+			$parentKeys{$self->relationship->{children}->{$child}->{parentKey}} = {handle => $parent->recordset->primarykeyhandle};
+		} else {
+			my $handle;
+			$parentKeys{$self->relationship->{children}->{$child}->{parentKey}} = {handle => \$handle};
+		}
 
 	}
 
-	$parent->dbwrite(
-				insert	=> {%parentKeys},
-				update	=> {%parentKeys},
-			);
+	$parent->dbwrite(insert => {%parentKeys}, update => {%parentKeys});
 
 	foreach my $child (keys %{$self->relationship->{children}}) {
-		my %childParams = (
-					$self->relationship->{children}->{$child}->{childKey} => {value => ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}}},
-				);
-#			$self->q->util->debug->edump(\%parentKeys);
-#			$self->q->util->debug->edump(\%childParams);
+		my %childParams = ($self->relationship->{children}->{$child}->{childKey} => {value => ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}}});
 
 		$self->members->{$child}->dbwrite(
 					insert	=> {%childParams},
@@ -264,8 +263,6 @@ CGI::Lazy::Ajax::Composite
                                                         parentKey       => 'advertiser.ID',
 
                                                         childKey        => 'advertiserID',
-
-							parentKeyHandle	=> '$ref',
 
                                                 },
 
@@ -414,8 +411,6 @@ Perl:
                                                         parentKey       => 'advertiser.ID',
 
                                                         childKey        => 'advertiserID',
-
-							parentKeyHandle	=> '$ref',
 
                                                 },
 

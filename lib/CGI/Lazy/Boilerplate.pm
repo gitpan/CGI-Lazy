@@ -66,10 +66,6 @@ our $datasetMultipleEnd = <<END;
 </table>
 END
 
-our $datasetMultipleSubmit = <<END;
-	<tmpl_if name='SUBMIT'> <tr id='__WIDGETID__SubmitRow'><td id='submititem' colspan=5 align='center'><tmpl_var name='SUBMIT'></td></tr></tmpl_if>
-END
-
 our $cssClean = <<END;
 div#__WIDGETID__ {
 
@@ -103,6 +99,37 @@ our $datasetSingleEnd = <<END;
 
 END
 
+our $datasetMultipleHeaderStart = <<END;
+<div id="__WIDGETID__">
+	<table>
+		<caption> <tmpl_var name="CAPTION"> </caption>
+		<tr>
+
+END
+
+our $datasetMultipleHeaderTd = <<END;
+			<th class="pathwidgetheader"> 
+				<tmpl_var name="HEADING.ITEM.__FIELDNAME__"> 
+			</th>
+
+END
+
+our $datasetMultipleHeaderDeleteTd = <<END;
+			<th class="pathwidgetheader"> 
+				<tmpl_var name="HEADING.ITEM.DELETE"> 
+			</th>
+
+END
+
+our $datasetMultipleHeaderEnd = <<END;
+		</tr>
+
+
+	</table>
+</div>
+
+
+END
 #--------------------------------------------------------------------------------------------
 sub buildCss	{
 	my $self = shift;
@@ -121,6 +148,7 @@ sub buildCssClean {
 	$self->outputCss($self->parse4ID($cssClean));
 }
 
+#--------------------------------------------------------------------------------------------
 sub buildTmplDatasetMultiple {
 	my $self = shift;
 
@@ -128,9 +156,20 @@ sub buildTmplDatasetMultiple {
 	$tmpl .= $self->parse4FieldAndID($_, $tdPrototypeMulti) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetDeleteTd);
 	$tmpl .= $self->parse4ID($datasetMultipleEnd);
-	$tmpl .= $self->parse4ID($datasetMultipleSubmit);
 
 	$self->outputTmpl($tmpl);
+}
+
+#--------------------------------------------------------------------------------------------
+sub buildTmplDatasetMultipleHeadings {
+	my $self = shift;
+
+	my $tmpl = $self->parse4ID($datasetMultipleHeaderStart);
+	$tmpl .= $self->parse4Field($_, $datasetMultipleHeaderTd) for @{$self->fieldlist};
+	$tmpl .= $self->parse4ID($datasetMultipleHeaderDeleteTd);
+	$tmpl .= $self->parse4ID($datasetMultipleHeaderEnd);
+
+	$self->outputTmpl($tmpl, 'HDR');
 }
 
 #--------------------------------------------------------------------------------------------

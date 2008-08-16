@@ -11,6 +11,16 @@ use CGI::Lazy::Ajax::DomLoader;
 use CGI::Lazy::Ajax::Composite;
 
 #----------------------------------------------------------------------------------------
+sub ajaxBlank {
+	my $self = shift;
+	my %args = @_;
+
+	$args{mode} = 'blank';
+
+	return $self->rawContents(%args);
+}
+
+#----------------------------------------------------------------------------------------
 sub ajaxReturn {
 	my $self = shift;
 	my $widgets = shift;
@@ -106,13 +116,6 @@ sub ajaxSelect {
 	$parameters{nodiv} = 1 unless $div; #pass the div tag if we prefer
 
 	return $self->rawContents(%parameters);
-}
-
-#----------------------------------------------------------------------------------------
-sub ajaxBlank {
-	my $self = shift;
-
-	return $self->rawContents(mode => 'blank', nodiv => 1);
 }
 
 #----------------------------------------------------------------------------------------
@@ -301,7 +304,8 @@ sub inserts {
 			my ($pre, $field, $row) = ($1, $2, $3);
 			$data->{$row}->{$field} = $self->q->param($key) if $self->q->param($key);
 #			$self->q->util->debug->edump($field, $self->q->param($key)) if $self->q->param($key);
-		} elsif ($key =~ /^($widgetID-:INSERT:)--(.+)$/) {
+		} elsif ($key =~ /^($widgetID-:INSERT:)(.+)--$/) {
+#			$self->q->util->debug->edump($key);
 			my ($pre, $field) = ($1, $2);
 			$data->{1}->{$field} = $self->q->param($key) if $self->q->param($key);
 		}

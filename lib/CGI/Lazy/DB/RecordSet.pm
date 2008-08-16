@@ -192,7 +192,11 @@ sub insert {
 					$data->{$row}->{$field} = $value;
 
 					if ($vars->{$field}->{handle}) {
-						${$vars->{$field}->{handle}} = $value ;
+						${$vars->{$field}->{handle}} = $value;
+					}
+
+					if ($vars->{$field}->{primarykey}) {
+						${$self->primarykeyhandle} = $value;
 					}
 				}
 			}
@@ -229,6 +233,11 @@ sub insert {
 #		$self->q->util->debug->edump($query."\n".join ',', @bindvalues);
 
 		$self->db->do($query, @bindvalues);
+
+		if ($self->mysqlAuto) {
+			my $query = 'select LAST_INSERT_ID()';
+			${$self->primarykeyhandle} = $self->db->get($query);
+		}
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
@@ -282,7 +291,9 @@ sub new {
 	my $class = shift;
 	my $db = shift;
 	my $args = shift;
-	
+
+	my $var = undef;	
+
 	my $self = {
 		_data 			=> [],
 		_db			=> $db,
@@ -296,6 +307,8 @@ sub new {
 		_updatedefaults		=> $args->{updatedefaults},
 		_updateadditional	=> $args->{updateadditional},
 		_where			=> '',
+		_mysqlAuto		=> $args->{mysqlAuto},
+		_primarykeyhandle	=> \$var,
 
 	};
 	
@@ -393,6 +406,14 @@ sub multipleFieldLabels {
 }
 
 #------------------------------------------------------------------------------
+sub mysqlAuto {
+	my $self = shift;
+
+	return $self->{_mysqlAuto};
+
+}
+
+#------------------------------------------------------------------------------
 sub primarykey {
 	my $self = shift;
 	my $value = shift;
@@ -402,6 +423,13 @@ sub primarykey {
 	} else {
 		return $self->{_primarykey};
 	}
+}
+
+#------------------------------------------------------------------------------
+sub primarykeyhandle {
+	my $self = shift;
+
+	return $self->{_primarykeyhandle};
 }
 
 #------------------------------------------------------------------
@@ -832,7 +860,27 @@ CGI::Lazy::RecordSet
 
 			primarykey	=> 'detail.ID', #primary key for recordset.  This value is looked for for all updates and deletes
 
-		});
+			insertdefaults  => {
+
+				unitprice        => {
+
+					value => 'lots',
+
+					handle	=> $ref,
+
+				},
+
+				invoiceid         => {
+
+					sql     => 'select something.nextval from dual',
+					
+					primarykey	=> 1,
+
+				},
+
+			},
+
+	});
 
 
 	my $thing = $q->ajax->dataset({

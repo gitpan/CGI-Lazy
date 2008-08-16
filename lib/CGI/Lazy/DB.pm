@@ -44,6 +44,38 @@ sub do { #run query with no return value
 }
 
 #---------------------------------------------------------------------------------------
+sub get { #run query returning single value
+	my $self = shift;
+	my $query = shift;
+	my @bindvars = @_;
+
+	if (ref $bindvars[0]) {
+		if (ref $bindvars[0] eq 'ARRAY') {
+			@bindvars = @{$bindvars[0]};
+		} else {
+			$self->q->errorHandler->getWithOtherThanArray;
+		}
+	} 
+
+	my $dbh = $self->dbh;
+	my $sth;
+
+	eval {
+		$sth = $dbh->prepare($query);
+		$sth->execute(@bindvars);
+	};
+
+	if ($@) {
+		$self->q->errorHandler->dbError;
+		return;
+	}
+
+	my @results = $sth->fetchrow_array;
+
+	return $results[0];
+}
+
+#---------------------------------------------------------------------------------------
 sub getarray { #run query with return value
 	my $self = shift;
 	my $query = shift;
@@ -270,6 +302,18 @@ raw sql to be run
 =head3 binds
 
 array or literal values to be bound
+
+=head2 get ( query, binds ) 
+
+Runs a given query with bind values specified. Returns first value found.
+
+=head3 query
+
+raw sql to be run
+
+=head3 binds
+
+array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
 
 =head2 getarray ( query, binds ) 
 

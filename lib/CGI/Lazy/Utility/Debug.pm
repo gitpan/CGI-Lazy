@@ -31,7 +31,7 @@ sub config {
 sub dump {
 	my $self = shift;
 
-	print $self->q->header;
+	my $fulloutput = "<div id='debug'>\n";
 
 	foreach my $thing (@_) {
 		if (ref $thing) {
@@ -41,11 +41,15 @@ sub dump {
 			$output =~ s/ /&nbsp;/g;
 			$output =~ s/\t/&nbsp;&nbsp&nbsp;&nbsp;&nbsp;/g;
 
-			print $output;
+			$fulloutput .= $output;
 		} else {
-			print $thing;
+			$fulloutput .= $thing;
 		}
 	}
+
+	$fulloutput .= "\n</div>";
+
+	return $fulloutput;
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -158,15 +162,18 @@ sub param {
 		$param{$_} = \@values;
 	}
 
-	print $q->header,
-	      $q->start_html({-title => 'CGI Test Page'}),
-	      $q->h1('CGI Parameters'),
-	      $q->table({-border => 1}, $q->th('Param'), $q->th('Value'),
+	my $fulloutput;
+
+	$fulloutput .= $q->div({-id => 'debug'}, 
+			$q->start_html({-title => 'CGI Test Page'}),
+		       	$q->h1('CGI Parameters'),
+		       	$q->table({-border => 1}, $q->th('Param'), $q->th('Value'),
 			      map { 	my $name = $_; 
 			      		map { $q->TR($q->th({-style => "text-align:center"}, $name), $q->td({-style => "text-align:center"}, $_))} @{$param{$name}};
 					
 					} keys %param
-		       );
+		       		)
+			);
 
 	foreach my $thing (@_) {
 		if (ref $thing) {
@@ -176,12 +183,13 @@ sub param {
 			$output =~ s/ /&nbsp;/g;
 			$output =~ s/\t/&nbsp;&nbsp&nbsp;&nbsp;&nbsp;/g;
 
-			print $output;
+			$fulloutput .= $output;
 		} else {
-			print $thing;
+			$fulloutput .= $thing;
 		}
 	}
 
+	return $fulloutput;
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -221,17 +229,18 @@ sub env {
 		unless exists $env_info{$name};
 	}
 
-	print $q->header,
-	      $q->start_html({-title => 'A List of Envirornment Variables'}),
-	      $q->h1('CGI Enviornment Variables'),
-	      $q->table({-border => 1},
-			      $q->Tr($q->th('Variable Name'), $q->th('Description'), $q->th('Value')),
-			      map {
-			      	$q->Tr($q->td($q->b($_)),$q->td($env_info{$_}), $q->i($q->td(($ENV{$_} || 'Not Defined'))))
-			      } sort keys %env_info,
-		       ),
-	      $q->end_html();
+	my $fulloutput;
 
+	$fulloutput .= $q->div({-id => 'debug'}, $q->start_html({-title => 'A List of Envirornment Variables'}), 
+			$q->h1('CGI Enviornment Variables'),
+		       	$q->table({-border => 1},
+			       	$q->Tr($q->th('Variable Name'), $q->th('Description'), $q->th('Value')),
+			       		map { $q->Tr($q->td($q->b($_)),$q->td($env_info{$_}), $q->i($q->td(($ENV{$_} || 'Not Defined')))) } 
+						sort keys %env_info,
+		       		)
+			);
+
+	return $fulloutput;
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------

@@ -33,3 +33,14 @@ Revision history for Perl extension CGI::Lazy.
 	-changed children and childarray methods of Composite to members and memberarray for accuracy sake, and to prevent confusion for parent/child relationships between member widgets
 	-likewise changed Dataset property parentId to containerId
 	-added 'type' to Composite, and added type parentChild which, when set up correctly, will handle select/insert/update on member widgets based on configureation.  delete will wait for further pondering.
+
+0.06	-removed submit from boilerplate and dataset.  not flexible enough.  add it to the template as needed
+	-changed non-external methods in Debug to return text, not print, and to print them to a div of id="debug"
+	-added ability for dataset multiple to have no headers
+	-added headings method to dataset to return tmpl vars with header strings
+	-added header tmpl to boilerplate
+	-fixed bug in Composite ParentChild for inserting records with autoincrement primary keys
+	-added get mehtod to DB for returning only a single value
+	-fixed bug in Dataset where singles couldn't insert.
+	-fixed bug in Dataset where headings method didn't have any data till after a select.
+	-fixed bug in Composite ParentChild where a search on the parent that returned no data put things into an endless loop

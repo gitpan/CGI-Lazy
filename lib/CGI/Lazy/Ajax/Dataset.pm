@@ -9,6 +9,30 @@ use CGI::Lazy::Globals;
 
 use base qw(CGI::Lazy::Ajax);
 
+our $tableCaptionVar     = "CAPTION";
+our $headingLoopVar      = "HEADING.LOOP";
+our $headingItemVar      = "HEADING.ITEM";
+our $bodyRowLoopVar      = "ROW.LOOP";
+our $bodyRowName         = "ROW";
+our $surroundingDivName  = "DIV.MAIN";
+our $deleteID		 = "DELETE.ID";
+our $deleteFlag		 = "DELETE.FLAG";
+our $deletename;
+
+#----------------------------------------------------------------------------------------
+sub buildHeadings {
+	my $self = shift;
+
+	$deletename = $self->vars->{deleteName} || 'Delete';
+	my $headings = {};
+	my $recset = $self->recordset;
+
+	$headings->{$headingItemVar.".".$_}  = $recset->label($_) for $recset->visibleFields;
+	$headings->{$headingItemVar."."."DELETE"} = $deletename unless $self->vars->{nodelete};
+
+	return $headings;
+}
+	
 #----------------------------------------------------------------------------------------
 sub buildvalidator {
 	my $self = shift;
@@ -20,7 +44,7 @@ sub buildvalidator {
 			my $rules = $self->recordset->validator($_);
 			$rules->{label} = $self->recordset->label($_);
 			if ($self->type eq "multi") {
-				$validator->{$self->widgetID."-".$_.1} = $rules;
+				$validator->{$self->widgetID."-".$_."--".1} = $rules;
 			} elsif ($self->type eq "single") {
 				$validator->{$self->widgetID."-".$_} = $rules;
 			}
@@ -40,39 +64,27 @@ sub contents {
 	my $template;
 
 	if ($args{mode} eq 'readonly') {
-        	$template            = $vars->{readOnlyTemplate}; #required
+        	$template            = $vars->{readOnlyTemplate}; #some form of template is required
 	} else {
-        	$template            = $vars->{template}; #required
+        	$template            = $vars->{template};
 	}
 
 	my $type 		= $vars->{type};
 	my $multiType	 	= $vars->{multiType};
 	my $containerID 	= $vars->{containerId} || '';
-        my $submitArgs          = $vars->{submit};
-        my $tableCaptionValue   = $vars->{tableCaption}; #can be blank
-        my $recset              = $vars->{recordset}; #required
-        my $lookups             = $vars->{lookups}; #if this isn't set, then new records will only contain what's on the screen
-        my $standalone          = $vars->{standalone};
-	my $defaults 		= $vars->{defaultvalues}; #if this isn't set, then new records will only contain what's on the screen
+        my $tableCaptionValue   = $vars->{tableCaption}; 	#can be blank
+        my $recset              = $vars->{recordset}; 		#required
+        my $lookups             = $vars->{lookups}; 		#if this isn't set, then new records will only contain what's on the screen
+        my $standalone          = $vars->{standalone};		#if set, widget will include its own open and close tags
+	my $defaults 		= $vars->{defaultvalues}; 	#if this isn't set, then new records will only contain what's on the screen
 	my $nodelete		= $vars->{nodelete};
-	my $deletename		= $vars->{deleteName} || 'Delete';
-
-        my $tableCaptionVar     = "CAPTION";
-        my $headingLoopVar      = "HEADING.LOOP";
-        my $headingItemVar      = "HEADING.ITEM";
-        my $bodyRowLoopVar      = "ROW.LOOP";
-        my $bodyRowName         = "ROW";
-        my $surroundingDivName  = "DIV.MAIN";
-        my $submitFlag		= "SUBMIT";
-	my $deleteID		= "DELETE.ID";
-	my $deleteFlag		= "DELETE.FLAG";
+	my $flagcolor		= $vars->{flagColor};
+	my $noHeadings		= $vars->{noHeadings};
 
         my $formOpenTag 	= '';
         my $formCloseTag 	= '';
 	my $validator 		= {};
 	my $tmplvars 		= {};
-
-	$tmplvars->{$submitFlag} = 1 if $vars->{submit};
 
 	$type = 'multi' unless $type;
 
@@ -90,12 +102,17 @@ sub contents {
 #	$self->q->util->debug->edump($recset->data);
 
 	$self->{_multi} = 0;
-	$self->{_empty} = 0;
+	$self->{_empty} = scalar @{$recset->data} ? 0 : 1;;
 
 	if ($type eq 'multi') {
-		my @headings = map {{$headingItemVar => $_}} $recset->visibleFieldLabels;
-		push @headings, {$headingItemVar => $deletename} unless $nodelete;
-		
+
+		my @headings;
+
+		unless ($noHeadings) {
+			@headings = map {{$headingItemVar => $_}} $recset->visibleFieldLabels;
+			push @headings, {$headingItemVar => $deletename} unless $nodelete;
+		}
+
 		my $bodyRowLoop = [];
 
 		my $newrecordindex = 0;
@@ -128,7 +145,7 @@ sub contents {
 					if ($recset->validator($fieldname)) {
 						my $rule = $recset->validator($fieldname);
 						$rule->{label} = $recset->label($fieldname);
-						$validator->{"$widgetID-".$fieldname.$rownum} =  $rule;
+						$validator->{"$widgetID-".$fieldname."--".$rownum} =  $rule;
 					}
 				}
 			}
@@ -153,7 +170,7 @@ sub contents {
 			if ($recset->validator($field)) {
 				my $rule = $recset->validator($field);
 				$rule->{label} = $recset->label($field);
-				$validator->{"$widgetID-".$field.$newrecordindex} = $rule;
+				$validator->{"$widgetID-".$field."--".$newrecordindex} = $rule;
 			}
 		}
 
@@ -241,11 +258,12 @@ sub contents {
 
 	my $javascript = <<END;
 		var $jsvalidatorname;
-		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$containerID');
+		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$containerID', '$flagcolor');
 		var $jsmultisearchname = '$primarykey';
 END
 
 	my $js = $self->jswrap(minify(input => $javascript));
+#	my $js = $self->jswrap($javascript);
 
 	return $divopen.
 		$validator.
@@ -336,6 +354,13 @@ sub empty {
 }
 
 #----------------------------------------------------------------------------------------
+sub headings {
+	my $self = shift;
+
+	return $self->{_headings};
+}
+
+#----------------------------------------------------------------------------------------
 sub multi {
 	my $self = shift;
 
@@ -349,15 +374,17 @@ sub new {
 	my $vars = shift;
 	
 	my $self = {
-			_q => $q,
-			_vars => $vars, 
-			_type => $vars->{type}, 
-			_multiType => $vars->{multiType}, 
-			_recordset => $vars->{recordset}, 
-			_widgetID => $vars->{id}
+			_q 		=> $q,
+			_vars 		=> $vars, 
+			_type 		=> $vars->{type}, 
+			_multiType 	=> $vars->{multiType}, 
+			_recordset 	=> $vars->{recordset}, 
+			_widgetID 	=> $vars->{id},
 	};
 
 	bless $self, $class;
+
+	$self->{_headings} = $self->buildHeadings;
 
 	$self->buildvalidator;
 	
@@ -381,6 +408,14 @@ sub type {
 	my $self = shift;
 
 	return $self->{_type};
+}
+
+#----------------------------------------------------------------------------------------
+sub vars {
+	my $self = shift;
+
+	return $self->{_vars};
+
 }
 
 1
@@ -630,6 +665,8 @@ template		=> standard template		(manditory)
 multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
 
 recordset	=> CGI::Lazy::RecordSet			(manditory)
+
+flagColor	=> color to flag fields that fail validation (defaults to red)   (optional)
 
 lookups			=> 				(optional)
 
