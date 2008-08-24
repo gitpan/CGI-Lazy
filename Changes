@@ -1,26 +1,25 @@
 Revision history for Perl extension CGI::Lazy.
 
-0.01  Tue Jul 29 15:37:23 2008
-	- original version; created by h2xs 1.23 with options
-		-X CGI::Lazy
-	then added teh real code... here goes...
+0.08	-updated documentation in Recordset
+	-added ability in Dataset to have multi headers in div separate from data, so a scrolling div won't lose headings on scroll
+	-fixed issue in Boilerplate where dataset, singleMulti stubs were building with text inputs, not links
+	-added ability to use binds in $recordset->where method
 
-0.02	Sat Aug 2
-	-reformatted POD so it will display on cpan
-	-pulled ModPerl.pm from distribution so tests pass.  ModPerl will be distributed separately
+0.07	-fixed bug in errorhandler where it was calling lazyversion incorrectly.
+	-added ajaxBlank method to Composite widget
+	-fixed bug in Composite where providing no type causes deep recursion
+	-fixed bug in Dataset where field id not set correctly causing searchMulti to bomb
 
-0.02-r2 -uploaded partial distro to CPAN  oops.
-
-0.02-r3 -fixed pod formatting again.  no changes to code
-
-0.03	-split Auth.pm and Authz.pm ito separate distros
-	-lowered requirements in Makefile.PL  they were unnecessarily high
-
-0.04	-moved $VERSION into Lazy.pm 'cos ModPerl and Auth versions were overwriting it
-	-fixed bug in Boilerplate.pm where __WIDGETID__ tag wasn't being parsed.
-	-cleaned up deprecated code in Ajax.pm and Dataset.pm for parsing widget-specific javascript.  No real change, but build mechanism and naming convention much clearer now.
-	-added readonly mode to Dataset
-	-set Template.pm to die_on_bad_params => 0  It won't care now if you output a parameter to a template that doesn't contain that tag- will just ignore it
+0.06	-removed submit from boilerplate and dataset.  not flexible enough.  add it to the template as needed
+	-changed non-external methods in Debug to return text, not print, and to print them to a div of id="debug"
+	-added ability for dataset multiple to have no headers
+	-added headings method to dataset to return tmpl vars with header strings
+	-added header tmpl to boilerplate
+	-fixed bug in Composite ParentChild for inserting records with autoincrement primary keys
+	-added get mehtod to DB for returning only a single value
+	-fixed bug in Dataset where singles couldn't insert.
+	-fixed bug in Dataset where headings method didn't have any data till after a select.
+	-fixed bug in Composite ParentChild where a search on the parent that returned no data put things into an endless loop
 
 0.05	-removed bad js call to pushRow in Boilerplate Dataset single template
 	-added some more error trapping to Javascript
@@ -34,18 +33,25 @@ Revision history for Perl extension CGI::Lazy.
 	-likewise changed Dataset property parentId to containerId
 	-added 'type' to Composite, and added type parentChild which, when set up correctly, will handle select/insert/update on member widgets based on configureation.  delete will wait for further pondering.
 
-0.06	-removed submit from boilerplate and dataset.  not flexible enough.  add it to the template as needed
-	-changed non-external methods in Debug to return text, not print, and to print them to a div of id="debug"
-	-added ability for dataset multiple to have no headers
-	-added headings method to dataset to return tmpl vars with header strings
-	-added header tmpl to boilerplate
-	-fixed bug in Composite ParentChild for inserting records with autoincrement primary keys
-	-added get mehtod to DB for returning only a single value
-	-fixed bug in Dataset where singles couldn't insert.
-	-fixed bug in Dataset where headings method didn't have any data till after a select.
-	-fixed bug in Composite ParentChild where a search on the parent that returned no data put things into an endless loop
+0.04	-moved $VERSION into Lazy.pm 'cos ModPerl and Auth versions were overwriting it
+	-fixed bug in Boilerplate.pm where __WIDGETID__ tag wasn't being parsed.
+	-cleaned up deprecated code in Ajax.pm and Dataset.pm for parsing widget-specific javascript.  No real change, but build mechanism and naming convention much clearer now.
+	-added readonly mode to Dataset
+	-set Template.pm to die_on_bad_params => 0  It won't care now if you output a parameter to a template that doesn't contain that tag- will just ignore it
 
-0.07	-fixed bug in errorhandler where it was calling lazyversion incorrectly.
-	-added ajaxBlank method to Composite widget
-	-fixed bug in Composite where providing no type causes deep recursion
-	-fixed bug in Dataset where field id not set correctly causing searchMulti to bomb
+0.03	-split Auth.pm and Authz.pm ito separate distros
+	-lowered requirements in Makefile.PL  they were unnecessarily high
+
+0.02-r3 -fixed pod formatting again.  no changes to code
+
+0.02-r2 -uploaded partial distro to CPAN  oops.
+
+0.02	Sat Aug 2
+	-reformatted POD so it will display on cpan
+	-pulled ModPerl.pm from distribution so tests pass.  ModPerl will be distributed separately
+
+0.01  Tue Jul 29 15:37:23 2008
+	- original version; created by h2xs 1.23 with options
+		-X CGI::Lazy
+	then added teh real code... here goes...
+

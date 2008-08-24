@@ -19,12 +19,27 @@ sub createSelect {
 
 	my $joinstring = '';
 	my $orderbystring = $self->orderby ? ' order by '.$self->orderby : '';
+
 	my $wherestring;
-       
-	if ($self->basewhere) {
-		$wherestring = $self->where ? ' where '.$self->basewhere. ' and '.$self->where : ' where '.$self->basewhere;
+	my @binds;
+
+	if (ref $self->where) {
+		my @wherelist = @{$self->where};
+		my $where = shift @wherelist;
+		@binds = @wherelist;
+		
+		if ($self->basewhere) {
+			$wherestring = $self->where ? ' where '.$self->basewhere. ' and '.$where : ' where '.$self->basewhere;
+		} else {
+			$wherestring = $self->where ? ' where '.$where : '';
+		}
+
 	} else {
-		$wherestring = $self->where ? ' where '.$self->where : '';
+		if ($self->basewhere) {
+			$wherestring = $self->where ? ' where '.$self->basewhere. ' and '.$self->where : ' where '.$self->basewhere;
+		} else {
+			$wherestring = $self->where ? ' where '.$self->where : '';
+		}
 	}
 
 	my @fieldlist;
@@ -53,7 +68,7 @@ sub createSelect {
 		}
 	}
 	
-	return "select ". join (', ', @fieldlist)." from ".$self->table.$joinstring.$wherestring.$orderbystring;
+	return "select ". join (', ', @fieldlist)." from ".$self->table.$joinstring.$wherestring.$orderbystring, @binds;
 }
 
 #------------------------------------------------------------------
@@ -472,7 +487,12 @@ sub select {
 	my $self = shift;
 	my @bindvars = @_;
 
-	my $query = $self->createSelect;
+	my ($query, @wherebinds)  = $self->createSelect;
+
+	if (@wherebinds) {
+		unshift @bindvars, $_ for @wherebinds;
+	}
+
 	my @data;
 	my $sth;
 	
@@ -685,7 +705,7 @@ sub visibleFieldLabels {
 
 }
 
-#----------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 sub visibleFields {
 	my $self = shift;
 
@@ -702,10 +722,15 @@ sub visibleFields {
 #-----------------------------------------------------------------------------
 sub where {
 	my $self = shift;
-	my $value = shift;
+	my @values = @_;
 	
-	if ($value) {
-		return $self->{_where} = $value;
+	if (@values) {
+		if (scalar @values > 1) {
+			return $self->{_where} = \@values; #theres a list, store an arrayref
+
+		} else {
+			return $self->{_where} = $values[0]; #where is a single string, store a scalar
+		}
 	} else {
 		return $self->{_where};
 	}
@@ -797,6 +822,8 @@ CGI::Lazy::RecordSet
 	my $recordset = $q->db->recordset({
 
 			table		=> 'detail',  #table where records are coming from
+
+			mysqlAuto	=> 1,
 
 			fieldlist	=> [
 
@@ -1023,19 +1050,102 @@ Constructor
 
 Hashref with construction properties.  
 
-Minimum:
+Options:
 
 	{
 
-		table=>$table, 
+		table		=> $table, 
 
-		where => $where, 
+		mysqlAuto	=> 1,
 
-		orderby => $order by, 
+		basewhere 	=> $where,
 
-		primarykey => $keyfield, 
+		orderby 	=> $order by, 
 
-		fieldlist => [{name => 'fieldname', label => 'some field'}] 
+		primarykey 	=> $keyfield, 
+
+		fieldlist 	=> [
+
+			{
+
+				name 		=> 'field1', 
+
+				label 		=> 'some field',
+
+				validator 	=> { rules => ['/\d+/'},
+
+				outputMask	=> "%1.f",
+
+				inputMask	=> "%1.f",
+
+			},
+
+			{
+
+				name 		=> 'field2', 
+
+				label 		=> 'some other field',
+
+				outputMask	=> "%1.f",
+
+				readOnly	=> 1,
+
+			},
+
+ 			{
+
+                        	name            => 'post_date',
+
+				label           => 'Post Date',
+
+				readfunc        => "to_char(post_date, 'YYYY-MM-DD')",
+
+				writefunc       => "to_date(?, 'YYYY-MM-DD')",
+
+			},
+
+		],
+
+		insertdefaults	=> {
+
+			field1 => {
+
+				value	=> 'some value',
+
+			},
+
+			field2 => {
+
+				sql	=> 'select foo from bar',
+			},
+
+			field3	=> {
+
+				sql	=> 'select foo.nextvar from dual',
+				handle	=> $ref,
+			}
+
+		updatedefaults 	=> {
+
+			field1 => {
+
+				value	=> 'some value',
+
+			},
+
+			field2 => {
+
+				sql	=> 'select foo from bar',
+			},
+
+			field3	=> {
+
+				sql	=> 'select foo.nextvar from dual',
+				handle	=> $ref,
+			}
+
+		}
+
 
 	}
 
@@ -1044,9 +1154,13 @@ Minimum:
 
 string.  name of table
 
-=head3 where
+=head3 mysqlAuto
 
-string. where clause
+set flag if primary key for this recordset is created by mysql auto_increment column.  If set, composite widgets will automatically make this value available to member widgets on insert.
+
+=head3 basewhere
+
+Sql string. This forms the base where clause for all selects.  This string should not contain any variables from the outside world, as it is NOT bound, and could be used in sql injection attacks were cgi parameters used here.  If you want to use cgi params, see the 'where' method which is intended to be dynamic, and can take binds.
 
 =head3 orderby
 
@@ -1060,6 +1174,57 @@ field name of primary key for table
 
 array ref. list of fields with their attributes
 
+=head4 Fieldlist Options
+
+	name		=> name of field
+
+	hidden		=> if true, field is never displayed, but is selected
+
+	readOnly	=> if true, field is displayed, but never written
+
+	label		=> displayed label of field.  if blank label defaults to fieldname
+
+	noLabel		=> if true, no label is displayed for field.
+
+	oututMask	=> sprintf string that transforms data on the way out of db to screen
+
+	inputMask	=> sprintf string that transforms data on the way into db
+
+	validator	=> rules for field validation
+
+			rules	=>  arrayref of tests to check.  if all return true, field is valid. Currently only supports regexes. 
+
+			message	=> canned error message to display onerror.  (not currently used by anything, but you can grab this in your own code and display it)
+
+	readfunc	=> database function to perform on read
+
+	writefunc	=> db function to perform on write	
+
+	insertdefaults 	=> default values inserted on insert
+		
+		value	=> value to insert
+
+		sql	=> sql to generate value to insert
+
+		handle	=> reference whose referrent will contain whatever value is set into db.  Useful for later use in cgi.
+
+	updatedefaults	=> default values updated on update
+		
+		value	=> value to insert
+
+		sql	=> sql to generate value to insert
+
+		handle	=> reference whose referrent will contain whatever value is set into db.  Useful for later use in cgi.
+
+
+=head3 updatedefaults 
+
+means for setting default values on any update
+
+=head3 insertdefaults
+
+means for setting default values on any insert
+
 =head2 noLabel ( field )
 
 Returns true if field in question has been set with the noLabel option
@@ -1067,7 +1232,6 @@ Returns true if field in question has been set with the noLabel option
 =head3 field
 
 Name of field to test.
-
 =head2 orderby ( sql )
 
 returns or sets the order by clause
@@ -1107,6 +1271,14 @@ returns or sets the primary key for the object
 =head3 fieldname
 
 The name of the field in the database
+
+=head2 primarykeyhandle ()
+
+Returns scalar ref to primary key if set via default or mysqlAuto.
+
+=head2 mysqlAuto ()
+
+Returns true if recordset was created with mysqlAuto => 1 .
 
 =head2 q ()
 
@@ -1184,13 +1356,17 @@ Returns array or arrayref of labels for non-hidden fields.
 
 Returns array or arrayref of field names that are not hidden
 
-=head2 where($where)
+=head2 where($sql, binds)
 	
-gets or sets the where clause
+Gets or sets the where clause.  If called with a single argument, argument is assumed to be sql string for the where clause.  If called with multiple args, first element is sql string, everything else is bind values.  When called without arguments, it returns whatever's been set.  This could be a single string, or an array ref, depending on how it was last called.
 	
-=head3 $where
+=head3 sql
 	
 string.
+
+=head3 binds
+
+list of bind vars
 
 =head2 writefunc ( field )
 

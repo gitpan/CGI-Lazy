@@ -35,6 +35,12 @@ our $tdPrototypeMultiRO = <<END;
 				</td>
 END
 
+our $tdPrototypeSingleMulti = <<END;
+				<td>
+					<tmpl_var name='VALUE.__FIELDNAME__'>
+				</td>
+END
+
 our $tdPrototypeSingle = <<END;
 		<td>
 			<input 
@@ -221,7 +227,7 @@ sub buildTmplDatasetSingleMulti {
 	my $self = shift;
 
 	my $tmpl = $self->parse4ID($datasetMultipleStart);
-	$tmpl .= $self->parse4Field($_, $tdPrototypeMulti) for @{$self->fieldlist};
+	$tmpl .= $self->parse4Field($_, $tdPrototypeSingleMulti) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetMultipleEnd);
 
 	$self->outputTmpl($tmpl, 'Multi');
@@ -434,6 +440,30 @@ Builds clean css file for widget.
 =head2 buildTemplate ()
 
 Builds a template appropriate for widget of type specified in object creation.
+
+=head2 new (args)
+
+Constructor
+
+=head3 args
+
+id		=> 'some unique id'		#id of the resulting template div
+
+fieldlist	=> [qw(field1 field2 field3)]	# list of field names
+
+type		=> 'widgetype, templatetype' 	#which widget and template type stub to build
+
+=head3 types
+
+dataset, multi		# multiple rows of text boxes corresponding to records of a select query		
+
+dataset, single		# One record of a query
+
+dataset, singleMulti	# template to display when a search returns more than one record, that allows the user to pick the specific record desired
+
+dataset, multiRO	# multiple rows of text- no input fields  read only view of dataset
+
+dataset, multiHeadings 	# column headings for a multi or multiRO  split into a separate div so scrolling of a long list doesn't make you loose the headings in the scroll.
 
 =cut
 

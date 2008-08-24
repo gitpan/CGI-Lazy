@@ -79,7 +79,7 @@ sub contents {
 	my $defaults 		= $vars->{defaultvalues}; 	#if this isn't set, then new records will only contain what's on the screen
 	my $nodelete		= $vars->{nodelete};
 	my $flagcolor		= $vars->{flagColor};
-	my $noHeadings		= $vars->{noHeadings};
+	my $headings		= $vars->{headings};
 
         my $formOpenTag 	= '';
         my $formCloseTag 	= '';
@@ -104,13 +104,21 @@ sub contents {
 	$self->{_multi} = 0;
 	$self->{_empty} = scalar @{$recset->data} ? 0 : 1;;
 
+	my @headings;
+	my $headingsdiv;
+
 	if ($type eq 'multi') {
 
-		my @headings;
 
-		unless ($noHeadings) {
+		if ($headings && $headings eq 'none') {
+
+		} elsif ($headings) {
+			$headingsdiv .= $self->q->template($headings)->process($self->headings);
+
+		} else {
 			@headings = map {{$headingItemVar => $_}} $recset->visibleFieldLabels;
 			push @headings, {$headingItemVar => $deletename} unless $nodelete;
+
 		}
 
 		my $bodyRowLoop = [];
@@ -265,7 +273,8 @@ END
 	my $js = $self->jswrap(minify(input => $javascript));
 #	my $js = $self->jswrap($javascript);
 
-	return $divopen.
+	return $headingsdiv.
+		$divopen.
 		$validator.
 		$js.
 		$formOpenTag.
@@ -497,9 +506,15 @@ CGI::Lazy::Ajax::Dataset
 
 				type		=> 'multi',
 
-				template	=> "UsbInternalPOCDetailBlock.tmpl",
+				template	=> "lazydemoDetailBlock.tmpl",
 
-#						nodelete	=> 1,
+				headings 	=> {
+							template 	=> 'pathwidgetheader.tmpl',
+
+							id		=> 'pathwidgetheader',
+						},
+
+	#					nodelete	=> 1,
 
 				lookups		=> {
 
@@ -626,7 +641,6 @@ Displays the widget initially.  Calls $self->contents, and adds preload lookups 
 
 Hash of arguments
 
-
 =head2 displaySingleList (args)
 
 Handler for displaying data when a search returns multiple records.  Displays multipleTemplate rather than template.
@@ -663,6 +677,10 @@ id			=> widget id 			(manditory)
 template		=> standard template		(manditory)
 
 multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
+
+headings		=> 'none'			No headings displayed on a multi dataset.  If it's anyting other than 'none' its assumed to be the name of a template
+
+headings		=> 'template name'		template to use for headings.  Integral div tags assumed.  
 
 recordset	=> CGI::Lazy::RecordSet			(manditory)
 
