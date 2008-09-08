@@ -110,15 +110,15 @@ sub getarray { #run query with return value
 sub gethash { #run query with return value
 	my $self = shift;
 	my $query = shift;
-	my $bindvars = shift || [];
 	my $key = shift;
+	my @bindvars = @_;
 
 	my $dbh = $self->dbh;
 	my $sth;
 
 	eval {
 		$sth = $dbh->prepare($query);
-		$sth->execute(@$bindvars);
+		$sth->execute(@bindvars);
 	};
 
 	if ($@) {
@@ -273,7 +273,7 @@ CGI::Lazy::DB
 
 	my $value = $q->db->getarray($query, @binds); #get an array of arrays.
 
-	my $value = $q->db->gethash($query, $binds, $key ); #get a hash of hashes
+	my $value = $q->db->gethash($query, $key, @binds); #get a hash of hashes
 
 	my $value = $q->db->gethashlist($query, @binds); #get ordered array of hashrefs. (This is probably the most useful)
 
@@ -327,7 +327,7 @@ raw sql to be run
 
 array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
 
-=head2 gethash ( query, binds, key ) 
+=head2 gethash ( query, key, binds ) 
 
 Runs a given query with bind values specified. Returns hashref from DBI::fetchall_hashref
 
@@ -335,13 +335,13 @@ Runs a given query with bind values specified. Returns hashref from DBI::fetchal
 
 raw sql to be run
 
-=head3 binds
-
-array ref to values to be bound
-
 =head3 key
 
 field to use as key for main hash
+
+=head3 binds
+
+array of values to be bound
 
 =head2 gethashlist ( query, binds ) 
 
@@ -353,7 +353,7 @@ raw sql to be run
 
 =head3 binds
 
-array ref to values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
+array of values to be bound or list of binds.  If first element is a reference, it will be assumed that that is an array ref and it is all of the binds
 
 =head2 new ( q )
 

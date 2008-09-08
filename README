@@ -1,4 +1,4 @@
-CGI-Lazy version 0.08
+CGI-Lazy version 0.09
 =====================
 CGI::Lazy was designed to simply abstract some of the more common cgi scripting tasks because the author finally got sick of writing the same code by hand for every new site or client that comes along.  It is my attempt to extend the wonderful CGI.pm with things that just about every modern website needs or wants, and to do it in a fairly portable manner.
 

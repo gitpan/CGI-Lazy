@@ -1,4 +1,8 @@
 Revision history for Perl extension CGI::Lazy.
+0.09	-added ability to do sql binds in updateadditional and insertadditional in RecordSet
+	-added insertIds deleteIds updateIds methods to Ajax for easy retrieval of primary keys on which each operation will be performed.
+	-reworked DB.pm so gethash method takes query, id, @binds
+	-Fixed Ajax to deal with above change
 
 0.08	-updated documentation in Recordset
 	-added ability in Dataset to have multi headers in div separate from data, so a scrolling div won't lose headings on scroll

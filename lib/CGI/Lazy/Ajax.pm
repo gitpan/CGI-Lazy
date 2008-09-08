@@ -240,6 +240,19 @@ sub deletes {
 }
 
 #----------------------------------------------------------------------------------------
+sub deleteIds {
+	my $self = shift;
+
+	my @deletes = sort keys %{$self->deletes};
+
+	if (wantarray) {
+		return @deletes;
+	} else {
+		return \@deletes;
+	}
+}
+
+#----------------------------------------------------------------------------------------
 sub displayblank {
 	my $self = shift;
 
@@ -313,6 +326,19 @@ sub inserts {
 
 #	$self->q->util->debug->edump($data);
         return $data;
+}
+
+#----------------------------------------------------------------------------------------
+sub insertIds {
+	my $self = shift;
+
+	my @inserts = sort keys %{$self->inserts};
+
+	if (wantarray) {
+		return @inserts;
+	} else {
+		return \@inserts;
+	}
 }
 
 #----------------------------------------------------------------------------------------
@@ -428,10 +454,10 @@ sub preloadLookup {
                         my $results;
 
                         if ($lookuptype{$output} eq 'gethash') {
-                                $results = $self->db->gethash($query, $binds, $lookups->{$queryname}->{primarykey});
+                                $results = $self->db->gethash($query, $lookups->{$queryname}->{primarykey}, @$binds);
                         } else {
                                 my $type = $lookuptype{$output};
-                                $results = $self->db->$type($query, $binds);
+                                $results = $self->db->$type($query, @$binds);
                         }
 
                         $results = [] unless ref $results;
@@ -524,6 +550,19 @@ sub updates {
         }
 #	$self->q->util->debug->edump($data);
         return $data;
+}
+
+#----------------------------------------------------------------------------------------
+sub updateIds {
+	my $self = shift;
+
+	my @updates = sort keys %{$self->updates};
+
+	if (wantarray) {
+		return @updates;
+	} else {
+		return \@updates;
+	}
 }
 
 #----------------------------------------------------------------------------------------

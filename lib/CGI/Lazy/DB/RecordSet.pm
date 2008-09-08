@@ -256,7 +256,12 @@ sub insert {
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
-				my $result = $self->db->getarray($additional->{$field}->{sql});
+				my $result;
+				if (ref $additional->{$field}->{sql}) {
+					$result = $self->db->getarray(@{$additional->{$field}->{sql}});
+				} else {
+					$result = $self->db->getarray($additional->{$field}->{sql});
+				}
 
 				if (defined $result->[1] || defined $result->[0]->[1]) { #we got more than a single value, better warn
 					$self->q->errorHandler->dbReturnedMoreThanSingleValue;
@@ -622,7 +627,12 @@ sub update {
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
-				my $result = $self->db->getarray($additional->{$field}->{sql});
+				my $result;
+				if (ref $additional->{$field}->{sql}) {
+					$result = $self->db->getarray(@{$additional->{$field}->{sql}});
+				} else {
+					$result = $self->db->getarray($additional->{$field}->{sql});
+				}
 
 				if (defined $result->[1] || defined $result->[0]->[1]) { #we got more than a single value, better warn
 					$self->q->errorHandler->dbReturnedMoreThanSingleValue;
