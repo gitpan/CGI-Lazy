@@ -269,7 +269,7 @@ sub domload {
 		$objectJs .= "var $object = JSON.parse('".to_json($self->vars->{objects}->{$object})."');\n";
         }
 
-        $objectJs = $self->jswrap($objectJs) if $objectJs;
+        $objectJs = $self->q->jswrap($objectJs) if $objectJs;
 
 	return $objectJs;
 }
@@ -342,24 +342,6 @@ sub insertIds {
 }
 
 #----------------------------------------------------------------------------------------
-sub jsload {
-	my $self = shift;
-	my $file = shift;
-	
-	my $jsdir = $self->q->config->jsDir;
-	my $docroot = $ENV{DOCUMENT_ROOT};
-	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
-
-	open IF, "< $docroot$jsdir/$file" or $self->q->errorHandler->couldntOpenJsFile($docroot, $jsdir, $file, $!);
-	my $script = minify(input => *IF);
-
-	close IF;
-
-	return $self->jswrap($script);
-
-}
-
-#----------------------------------------------------------------------------------------
 sub jsonescape {
 	my $self = shift;
 	my $target = shift;
@@ -379,15 +361,6 @@ sub jsonescape {
 	} else {
 
 	}
-}
-
-#----------------------------------------------------------------------------------------
-sub jswrap {
-	my $self = shift;
-	my $js = shift;
-	my $jspre = "\n<script type='text/javascript'>\n<!--\n";
-	my $jspost = "\n-->\n</script>\n";
-	return $jspre.$js.$jspost;
 }
 
 #----------------------------------------------------------------------------------------
@@ -466,7 +439,7 @@ sub preloadLookup {
                         $preloadLookupJs .= "var $queryname = JSON.parse('".to_json($results)."');\n";
                 }
         }
-        $preloadLookupJs = $self->jswrap($preloadLookupJs) if $preloadLookupJs;
+        $preloadLookupJs = $self->q->jswrap($preloadLookupJs) if $preloadLookupJs;
 
 	return $preloadLookupJs;
 }

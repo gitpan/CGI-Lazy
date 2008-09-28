@@ -1,4 +1,11 @@
 Revision history for Perl extension CGI::Lazy.
+
+0.10	-added Image and CSS modules
+	-moved jsload into Javascript module from Ajax, renamed it to just 'load'.
+	-removed redundant jswrap method from Ajax
+	-fixed typos in Boilerplate
+	-fixed header function in Lazy so can pass hash or hashref as you please
+
 0.09	-added ability to do sql binds in updateadditional and insertadditional in RecordSet
 	-added insertIds deleteIds updateIds methods to Ajax for easy retrieval of primary keys on which each operation will be performed.
 	-reworked DB.pm so gethash method takes query, id, @binds

@@ -106,7 +106,7 @@ our $datasetSingleEnd = <<END;
 END
 
 our $datasetMultipleHeaderStart = <<END;
-<div id="__WIDGETID__">
+<div id="__WIDGETID__HDR">
 	<table>
 		<caption> <tmpl_var name="CAPTION"> </caption>
 		<tr>
@@ -114,7 +114,7 @@ our $datasetMultipleHeaderStart = <<END;
 END
 
 our $datasetMultipleHeaderTd = <<END;
-			<th class="pathwidgetheader"> 
+			<th> 
 				<tmpl_var name="HEADING.ITEM.__FIELDNAME__"> 
 			</th>
 

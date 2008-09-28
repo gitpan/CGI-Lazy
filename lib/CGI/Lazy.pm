@@ -17,10 +17,12 @@ use CGI::Lazy::Globals;
 use CGI::Lazy::ErrorHandler;
 use CGI::Lazy::Utility;
 use CGI::Lazy::Javascript;
+use CGI::Lazy::CSS;
+use CGI::Lazy::Image;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -43,8 +45,35 @@ sub ajax {
 }
 
 #------------------------------------------------------------
+sub css	{
+	my $self = shift;
+
+	return CGI::Lazy::CSS->new($self);
+
+}
+
+#------------------------------------------------------------
+sub csswrap {
+	my $self = shift;
+	my $css = shift;
+
+	my $csspre = "\n<style type='text/css'>\n<!--\n";
+	my $csspost = "\n-->\n</style>\n";
+
+	return $csspre.$css.$csspost;
+}
+
+#------------------------------------------------------------
+sub image {
+	my $self = shift;
+
+	return CGI::Lazy::Image->new($self);
+}
+
+#------------------------------------------------------------
 sub javascript {
 	my $self = shift;
+
 	return CGI::Lazy::Javascript->new($self);
 }
 
@@ -79,7 +108,15 @@ sub errorHandler {
 #------------------------------------------------------------
 sub header {
 	my $self = shift;
-	my %args = @_;
+
+	my %args;
+
+	if (scalar @_ % 2 == 0) {
+		%args = @_;
+	} else {
+		my $ref = shift;
+		%args = %$ref;
+	}
 
 	my $explicitcookies = $args{-cookie} || []; #cookies set explictly in the instance
 	my $lazycookie;
@@ -241,8 +278,6 @@ CGI::Lazy
 							saveOnCleanup	=> 1,
 
 						},
-
-						ajax	=>  1,
 
 						dbh 	=> {
 

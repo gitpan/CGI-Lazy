@@ -663,7 +663,7 @@ Perl:
 		      $q->hidden({-name => 'nav', -value => 'dbwrite'});
 
 		print $composite->display(mode => $mode);
-		print $composite->jsload('somejavascript.js');
+		print $composite->q->jsload('somejavascript.js');
 
 		print $q->end_form;
 

@@ -257,7 +257,7 @@ sub contents {
 
 	my $divopen = $args{nodiv} ? '' : "<div id='$widgetID'>";
 	my $divclose = $args{nodiv} ? '' : "</div>";
-	$validator = $self->jswrap("var ".$self->widgetID ."Validator = ".to_json($self->validator).";");
+	$validator = $self->q->jswrap("var ".$self->widgetID ."Validator = ".to_json($self->validator).";");
 	my $primarykey = $self->recordset->primarykey;
 
 	my $jsvalidatorname = $widgetID."Validator";
@@ -270,8 +270,8 @@ sub contents {
 		var $jsmultisearchname = '$primarykey';
 END
 
-	my $js = $self->jswrap(minify(input => $javascript));
-#	my $js = $self->jswrap($javascript);
+	my $js = $self->q->jswrap(minify(input => $javascript));
+#	my $js = $self->q->jswrap($javascript);
 
 	return $headingsdiv.
 		$divopen.

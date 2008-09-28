@@ -364,12 +364,41 @@ sub modules {
 	return $self->q->jswrap($output);
 }
 
+#----------------------------------------------------------------------------------------
+sub load {
+	my $self = shift;
+	my $file = shift;
+	
+	my $jsdir = $self->dir;
+	my $docroot = $ENV{DOCUMENT_ROOT};
+	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
+
+	open IF, "< $docroot$jsdir/$file" or $self->q->errorHandler->couldntOpenJsFile($docroot, $jsdir, $file, $!);
+	my $script = minify(input => *IF);
+
+	close IF;
+
+	return $self->q->jswrap($script);
+
+}
+
 #-------------------------------------------------------------------------------------------------
 sub new {
 	my $class = shift;
 	my $q = shift;
 
-	return bless {_q => $q}, $class;
+	return bless {
+		_q 		=> $q,
+		_dir		=> $q->config->jsDir,
+	
+	}, $class;
+}
+
+#-------------------------------------------------------------------------------------------------
+sub dir {
+	my $self = shift;
+
+	return $self->{_dir};
 }
 
 1
@@ -406,13 +435,17 @@ CGI::Lazy::Javascript
 
 	      $q->javascript->modules($widget1, $widget2);
 
+	print $q->javascript->load('somefile.js');
+
 =head2 DESCRIPTION
 
-CGI::Lazy::Javascript is predominately a javascript container.  It holds the js modules necessary for widgets to function, and outputs them for printing to the browser.
-
-It's only real method is modules() which outputs the javascript necessary to run whatever modules get passed as arguments, or in the event that there are none, it will just output the basics, such as a JSON parser, and Ajax routines
+CGI::Lazy::Javascript is predominately a javascript container.  It holds the js modules necessary for widgets to function, and outputs them for printing to the browser.  It also has some convenience methods for loading javascript files
 
 =head1 METHODS
+
+=head2 dir ()
+
+Returns directory path where javascript files can be found as specified on Lazy object creation.
 
 =head2 q ( ) 
 
@@ -431,6 +464,14 @@ List of widgets whose javascript needs to be loaded.  JSON parser, ajaxSend, and
 The modules method is smart enough to only output the necessary code for a given type of module once.  Multiple widgets of the same type will not result in the same code being printed over and over.
 
 For composite widgets, it loads each constituent widget in turn.
+
+=head2 load (file)
+
+Wraps, minifies, and loads file from javascript directory for output to browser
+
+=head3 file
+
+filename of javascript file
 
 =head2 new ( q )
 
