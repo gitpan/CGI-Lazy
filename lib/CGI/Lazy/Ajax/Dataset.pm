@@ -20,6 +20,24 @@ our $deleteFlag		 = "DELETE.FLAG";
 our $deletename;
 
 #----------------------------------------------------------------------------------------
+sub buildCheckbox {
+	my $self = shift;
+	my $fieldname = shift;
+	my $webcontrol = shift;
+	my $value = shift;
+
+	if ($webcontrol->{value}) {
+		if ($value eq $webcontrol->{value}) {
+			return ($webcontrol->{value}, ' checked ');
+		} else {
+			return ($webcontrol->{value});
+		}
+
+	}
+
+}
+
+#----------------------------------------------------------------------------------------
 sub buildHeadings {
 	my $self = shift;
 
@@ -33,6 +51,89 @@ sub buildHeadings {
 	return $headings;
 }
 	
+#----------------------------------------------------------------------------------------
+sub buildSelect {
+	my $self = shift;
+	my $fieldname = shift;
+	my $webcontrol = shift;
+	my $value = shift;
+
+	my $list = [];
+
+	if ($webcontrol->{values} ) {
+		my $vals = {};
+
+		if (ref $webcontrol->{values} eq 'HASH') {
+			$vals = $webcontrol->{values};
+		} elsif (ref $webcontrol->{values} eq 'ARRAY') {
+			$vals->{$_} = $_ for @{$webcontrol->{values}};
+		} else {
+			return;
+		}
+
+		foreach (sort keys %$vals) {
+			if ($vals->{$_} eq $value) {
+				push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}, 'ITEM.SELECTED' => ' selected '};
+
+			} else {
+				push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}};
+			}
+		}
+
+	}
+
+	return $list;
+}
+
+#----------------------------------------------------------------------------------------
+sub buildRadio {
+	my $self = shift;
+	my $fieldname = shift;
+	my $webcontrol = shift;
+	my $webname = shift;
+	my $webID  = shift;
+	my $value = shift;
+
+	my $list = [];
+
+	if ($webcontrol->{values} ) {
+		my $vals = {};
+
+		if (ref $webcontrol->{values} eq 'HASH') {
+			$vals = $webcontrol->{values};
+		} elsif (ref $webcontrol->{values} eq 'ARRAY') {
+			$vals->{$_} = $_ for @{$webcontrol->{values}};
+		} else {
+			return;
+		}
+
+		foreach (sort keys %$vals) {
+			if ($vals->{$_} eq $value) {
+				push @$list, {
+					"ID.".$fieldname 		=> $webID."-$_", 
+					'NAME.'.$fieldname 		=> $webname, 
+					'VALUELABEL.'.$fieldname 	=> $vals->{$_}, 
+					'VALUE.'.$fieldname 		=> $vals->{$_}, 
+					'CHECKED.'.$fieldname 		=> ' checked ',
+				};
+
+			} else {
+				push @$list, {
+					"ID.".$fieldname 		=> $webID."-$_", 
+					'NAME.'.$fieldname 		=> $webname, 
+					'VALUELABEL.'.$fieldname 	=> $vals->{$_},
+					'VALUE.'.$fieldname 		=> $vals->{$_},
+				};
+
+			}
+		}
+
+	}
+
+	return $list;
+
+}
+
 #----------------------------------------------------------------------------------------
 sub buildvalidator {
 	my $self = shift;
@@ -108,8 +209,6 @@ sub contents {
 	my $headingsdiv;
 
 	if ($type eq 'multi') {
-
-
 		if ($headings && $headings eq 'none') {
 
 		} elsif ($headings) {
@@ -130,7 +229,7 @@ sub contents {
 			my $rownum = $i + 1; 
 			my $ID = $recset->data->[$i]->{$recset->primarykey};
 
-			$row->{$bodyRowName} = "row$rownum";
+			$row->{$bodyRowName} = $widgetID."Row".$rownum;
 			$row->{$deleteID} = "$widgetID-$rownum" unless $nodelete;
 			$row->{$deleteFlag} = 1 unless $nodelete;
 			$row->{PRIMARYKEY} = $ID;
@@ -141,13 +240,37 @@ sub contents {
 				}
 
 				unless ($recset->hidden($fieldname)) { #don't add hidden fields
-					$row->{"NAME.".$fieldname} = "$widgetID-:UPDATE:".$fieldname."-:-".$ID."::".$rownum; 
-					$row->{"ID.".$fieldname} = "$widgetID-".$fieldname."--".$rownum;
+					my $webname = "$widgetID-:UPDATE:".$fieldname."-:-".$ID."::".$rownum;
+					my $webID = "$widgetID-".$fieldname."--".$rownum;
+
+					$row->{"NAME.".$fieldname} = $webname; 
+					$row->{"ID.".$fieldname} = $webID;
+
+					my $value;
 
 					if ($recset->outputMask($fieldname)) {
-						$row->{"VALUE.".$fieldname} = sprintf $recset->outputMask($fieldname), $recset->data->[$i]->{$fieldname}; 
+						$value = sprintf $recset->outputMask($fieldname), $recset->data->[$i]->{$fieldname}; 
 					} else {
-						$row->{"VALUE.".$fieldname} = $recset->data->[$i]->{$fieldname}; 
+						$value= $recset->data->[$i]->{$fieldname}; 
+					}
+
+					if ($recset->webcontrol($fieldname)) {
+						my $webcontrol = $recset->webcontrol($fieldname);
+						my $type = $webcontrol->{type};
+
+						if ($type eq 'select') { #build variables for web dropdowns
+							$row->{"LOOP.".$fieldname} = $self->buildSelect($fieldname, $webcontrol, $value);
+						} elsif ($type eq 'checkbox') {
+							($row->{"VALUE.".$fieldname}, $row->{"CHECKED.".$fieldname}) = $self->buildCheckbox($fieldname, $webcontrol, $value);
+						} elsif ($type eq 'radio') {
+							$row->{"LOOP.".$fieldname} = $self->buildRadio($fieldname, $webcontrol, $webname, $webID, $value );
+						} else {
+							$row->{"VALUE.".$fieldname} = $value;
+						}
+
+					} else {
+						$row->{"VALUE.".$fieldname} = $value;
+
 					}
 
 					if ($recset->validator($fieldname)) {
@@ -167,13 +290,37 @@ sub contents {
 		my $defaultstring = join ",", sort keys %$defaults;
 		my $blankrow = {};
 		$newrecordindex++;
-		$blankrow->{$bodyRowName} = "row$newrecordindex";
+		$blankrow->{$bodyRowName} = $widgetID."Row".$newrecordindex;
 		$blankrow->{$deleteID} = "$widgetID-$newrecordindex" unless $nodelete;
 		$blankrow->{$deleteFlag} = 1 unless $nodelete;
 		foreach my $field ( @{$recset->visibleFields}) {
-			$blankrow->{"NAME.".$field} = "$widgetID-".$field."--".$newrecordindex;
-			$blankrow->{"ID.".$field} = "$widgetID-".$field."--".$newrecordindex;
-			$blankrow->{"VALUE.".$field} = '';
+			my $webname = "$widgetID-".$field."--".$newrecordindex;
+			my $webID = "$widgetID-".$field."--".$newrecordindex;
+
+			$blankrow->{"NAME.".$field} = $webname;
+			$blankrow->{"ID.".$field} = $webID;
+
+			if ($recset->webcontrol($field)) {
+				my $webcontrol = $recset->webcontrol($field);
+				my $type = $webcontrol->{type};
+
+				if ($type eq 'select') { #build variables for web dropdowns
+					$blankrow->{"LOOP.".$field} = $self->buildSelect($field, $webcontrol);
+
+				} elsif ($type eq 'checkbox') {
+					($blankrow->{"VALUE.".$field}, $blankrow->{"CHECKED.".$field}) = $self->buildCheckbox($field, $webcontrol);
+
+				} elsif ($type eq 'radio') {
+					$blankrow->{"LOOP.".$field} = $self->buildRadio($field, $webcontrol, $webname, $webID);
+
+				} else {
+					$blankrow->{"VALUE.".$field} = '';
+
+				}
+
+			} else {
+				$blankrow->{"VALUE.".$field} = '';
+			}
 
 			if ($recset->validator($field)) {
 				my $rule = $recset->validator($field);
@@ -216,26 +363,68 @@ sub contents {
 		if ($args{mode} eq 'blank') {
 			foreach my $fieldname (keys %{$recset->fieldlist}) {
 				unless ($recset->hidden($fieldname)) {
+					my $webname = "$widgetID-:INSERT:".$fieldname."--";
+					my $webID = "$widgetID-".$fieldname;
+
 					$tmplvars->{'LABEL.'.$fieldname} = $recset->label($fieldname) unless $recset->noLabel($fieldname);
-					$tmplvars->{'NAME.'.$fieldname} = "$widgetID-:INSERT:".$fieldname."--";
-					$tmplvars->{"ID.".$fieldname} = "$widgetID-".$fieldname;
+					$tmplvars->{'NAME.'.$fieldname} = $webname;
+					$tmplvars->{"ID.".$fieldname} = $webID;
+
+					if ($recset->webcontrol($fieldname)) {
+						my $webcontrol = $recset->webcontrol($fieldname);
+						my $type = $webcontrol->{type};
+
+						if ($type eq 'select') { #build variables for web dropdowns
+							$tmplvars->{"LOOP.".$fieldname} = $self->buildSelect($fieldname, $webcontrol);
+						} elsif ($type eq 'checkbox') {
+							($tmplvars->{"VALUE.".$fieldname}, $tmplvars->{"CHECKED.".$fieldname}) = $self->buildCheckbox($fieldname, $webcontrol);
+						} elsif ($type eq 'radio') {
+							$tmplvars->{"LOOP.".$fieldname} = $self->buildRadio($fieldname, $webcontrol, $webname, $webID);
+						} else {
+
+						}
+					}
 				}
 			}
 		} else {
 			foreach my $fieldname (keys %{$recset->fieldlist}) {
+				my $value;
+
+				if ($recset->outputMask($fieldname)) {
+					$value = sprintf $recset->outputMask($fieldname), $recset->data->[$recordnum]->{$fieldname}; 
+				} else {
+					$value = $recset->data->[$recordnum]->{$fieldname};
+				}
+
 				if ($recset->handle($fieldname)) { #if we've been given a handle for this field, set it
 					${$recset->handle($fieldname)} = $recset->data->[$recordnum]->{$fieldname};			
 				}
+
 				unless ($recset->hidden($fieldname)) {
+					my $webname = "$widgetID-:UPDATE:".$fieldname."-:-".$ID;
+					my $webID = "$widgetID-".$fieldname;
+
 					$tmplvars->{'LABEL.'.$fieldname} = $recset->label($fieldname) unless $recset->noLabel($fieldname);
-					$tmplvars->{'NAME.'.$fieldname} = "$widgetID-:UPDATE:".$fieldname."-:-".$ID;
-					$tmplvars->{"ID.".$fieldname} = "$widgetID-".$fieldname;
+					$tmplvars->{'NAME.'.$fieldname} = $webname;
+					$tmplvars->{"ID.".$fieldname} = $webID;
 					$tmplvars->{PRIMARYKEY} = $ID;
 
-					if ($recset->outputMask($fieldname)) {
-						$tmplvars->{"VALUE.".$fieldname} = sprintf $recset->outputMask($fieldname), $recset->data->[$recordnum]->{$fieldname}; 
+					if ($recset->webcontrol($fieldname)) {
+						my $webcontrol = $recset->webcontrol($fieldname);
+						my $type = $webcontrol->{type};
+
+						if ($type eq 'select') { #build variables for web dropdowns
+							$tmplvars->{"LOOP.".$fieldname} = $self->buildSelect($fieldname, $webcontrol, $value);
+						} elsif ($type eq 'checkbox') {
+							($tmplvars->{"VALUE.".$fieldname}, $tmplvars->{"CHECKED.".$fieldname}) = $self->buildCheckbox($fieldname, $webcontrol, $value);
+						} elsif ($type eq 'radio') {
+							$tmplvars->{"LOOP.".$fieldname} = $self->buildRadio($fieldname, $webcontrol, $webname, $webID, $value );
+						} else {
+							$tmplvars->{"VALUE.".$fieldname} = $value; 
+
+						}
 					} else {
-						$tmplvars->{"VALUE.".$fieldname} = $recset->data->[$recordnum]->{$fieldname};
+						$tmplvars->{"VALUE.".$fieldname} = $value; 
 					}
 				}
 			}
@@ -260,13 +449,18 @@ sub contents {
 	$validator = $self->q->jswrap("var ".$self->widgetID ."Validator = ".to_json($self->validator).";");
 	my $primarykey = $self->recordset->primarykey;
 
+	my $searchObjectName = $self->widgetID.'SearchObject';
+
+#	my $searchscript = $self->q->jswrap("var ".$self->widgetID ."SearchObject = ".to_json([@{$recset->visibleFields}]).";");
+
+	my $searchObject = to_json([map {$widgetID."-".$_} @{$recset->visibleFields}]);
+
 	my $jsvalidatorname = $widgetID."Validator";
 	my $jscontrollername = $widgetID."Controller";
 	my $jsmultisearchname = $widgetID."MultiSearchPrimaryKey";
 
 	my $javascript = <<END;
-		var $jsvalidatorname;
-		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$containerID', '$flagcolor');
+		var $jscontrollername = new datasetController('$widgetID', $jsvalidatorname, '$containerID', $searchObject, '$flagcolor');
 		var $jsmultisearchname = '$primarykey';
 END
 
@@ -276,6 +470,7 @@ END
 	return $headingsdiv.
 		$divopen.
 		$validator.
+#		$searchscript.
 		$js.
 		$formOpenTag.
 		$self->q->template($template)->process($tmplvars).
@@ -672,39 +867,41 @@ CGI::Lazy object.
 
 Hashref of object configs.
 
-id			=> widget id 			(manditory)
+	id			=> widget id 			(manditory)
+	
+	type			=> widget type			(manditory)  'single' or 'multi'
 
-template		=> standard template		(manditory)
+	template		=> standard template		(manditory)
 
-multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
+	multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
 
-headings		=> 'none'			No headings displayed on a multi dataset.  If it's anyting other than 'none' its assumed to be the name of a template
+	headings		=> 'none'			No headings displayed on a multi dataset.  If it's anyting other than 'none' its assumed to be the name of a template
 
-headings		=> 'template name'		template to use for headings.  Integral div tags assumed.  
+	headings		=> 'template name'		template to use for headings.  Integral div tags assumed.  
 
-recordset	=> CGI::Lazy::RecordSet			(manditory)
+	recordset		=> CGI::Lazy::RecordSet			(manditory)
 
-flagColor	=> color to flag fields that fail validation (defaults to red)   (optional)
+	flagColor		=> color to flag fields that fail validation (defaults to red)   (optional)
 
-lookups			=> 				(optional)
+	lookups			=> 				(optional)
 
-	countryLookup =>	name of lookup 
+		countryLookup =>	name of lookup 
 
-		sql 		=> sql
+			sql 		=> sql
 
-		preload 	=> 1 (0 means no preload, will have to be run via ajax)
+			preload 	=> 1 (0 means no preload, will have to be run via ajax)
 
-		orderby		=> order by clause
+			orderby		=> order by clause
 
-		output		=> type of output (see CGI::Lazy::DB)
+			output		=> type of output (see CGI::Lazy::DB)
 
-		primarykey	=> primary key
+			primarykey	=> primary key
 
-extravars		=>  Extra variables to be output to template	(optional)  		
+	extravars		=>  Extra variables to be output to template	(optional)  		
 
-			name	=> name of variable
+				name	=> name of variable
 
-				value => variable, string, or reference
+					value => variable, string, or reference
 
 =cut
 

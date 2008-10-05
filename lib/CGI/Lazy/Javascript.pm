@@ -77,12 +77,13 @@ function sjaxSend(request, outgoing, returnHandler) {
 
 #javascript for Ajax::Dataset
 our $DatasetJS = <<END;
-function datasetController(ID, validator, ParentID, flagcolor) {
+function datasetController(ID, validator, ParentID, searchObject, flagcolor) {
 	this.widgetID = ID;
 	this.validator = validator;
 	this.parentID = ParentID;
 	this.flagcolor = flagcolor;
 	this.fieldcolor = null;
+	this.searchObject = searchObject;
 }
 
 datasetController.prototype.constructor = datasetController;
@@ -167,57 +168,36 @@ datasetController.prototype.pushRow = function(caller) {
 		for (var i = 0; i< oldRow.cells.length; i++) {
 			var oldCell;
 			var oldWidget;
+			var newCell;
+			var position = newRow.cells.length;
+			newCell 		= newRow.insertCell(position);
 
 			for (var j=0; j< oldRow.cells[i].childNodes.length; j++) {
-				if (oldRow.cells[i].childNodes[j].id) { //grab the first thing with an id
-					oldCell = oldRow.cells[i];
-					oldWidget = oldCell.childNodes[j];
+				oldCell = oldRow.cells[i];
+				oldWidget = oldCell.childNodes[j];
+				newCell.align 		= oldCell.align;
+
+				var fieldName;
+
+				if (oldWidget.name && oldWidget.id) {
+					oldWidget.name 		= oldWidget.name.replace(/(.+)-(.+)--(\\d+\$)/, "\$1-:INSERT:\$2--\$3");
+					fieldName 		= oldWidget.id.replace(/\\d+\$/, ''); 
 				}
+
+				var newWidget		= oldWidget.cloneNode(true);
+				newWidget.name		= fieldName + newRownum;
+				newWidget.id 		= fieldName + newRownum;
+				newWidget.value		= '';
+
+				if (oldWidget.name && oldWidget.id) {
+					try {	
+						this.validator[newWidget.id] = this.validator[oldWidget.id];
+					} catch (e) {
+					}
+				}
+
+				newCell.appendChild(newWidget);
 			}
-	//		var oldWidget 		= oldRow.cells[i].childNodes[0]; //firefox
-	//		var oldWidget 		= oldRow.cells[i].childNodes[1]; //ie
-
-			oldWidget.name 		= oldWidget.name.replace(/(.+)-(.+)--(\\d+\$)/, "\$1-:INSERT:\$2--\$3");
-			var fieldName 		= oldWidget.id.replace(/\\d+\$/, ''); 
-			var newCell 		= newRow.insertCell(newRow.cells.length);
-			newCell.align 		= oldCell.align;
-
-			var newWidget 		= document.createElement('input');
-			newWidget.value 	= '';
-			newWidget.name		= fieldName + newRownum;
-			newWidget.id 		= fieldName + newRownum;
-		
-			try {	
-				this.validator[newWidget.id] = this.validator[oldWidget.id];
-			} catch (e) {
-			}
-
-			newWidget.type 		= oldWidget.type;
-			newWidget.size 		= oldWidget.size;
-			newWidget.onabort	= oldWidget.onabort;
-			newWidget.onblur	= oldWidget.onblur;
-			newWidget.onchange	= oldWidget.onchange;
-			newWidget.onclick	= oldWidget.onclick;
-			newWidget.ondblclick	= oldWidget.ondblclick;
-			newWidget.onerror	= oldWidget.onerror;
-			newWidget.onfocus	= oldWidget.onfocus;
-			newWidget.onkeydown	= oldWidget.onkeydown;
-			newWidget.onkeypress	= oldWidget.onkeypress;
-			newWidget.onkeyup 	= oldWidget.onkeyup;
-			newWidget.onload	= oldWidget.onload;
-			newWidget.onmousedown	= oldWidget.onmousedown;
-			newWidget.onmouseup	= oldWidget.onmouseup;
-			newWidget.onmouseover	= oldWidget.onmouseover;
-			newWidget.onmouseout	= oldWidget.onmouseout;
-			newWidget.onmousemove	= oldWidget.onmousemove;
-			newWidget.onreset	= oldWidget.onreset;
-			newWidget.onresize	= oldWidget.onresize;
-			newWidget.onselect	= oldWidget.onselect;
-			newWidget.onsubmit	= oldWidget.onsubmit;
-			newWidget.onunload	= oldWidget.onunload;
-			newWidget.className	= oldWidget.className;
-
-			newCell.appendChild(newWidget);
 		}
 	}
 }
@@ -280,19 +260,7 @@ datasetController.prototype.unflag = function(field) {
 	field.style.backgroundColor = this.fieldcolor;
 };
 
-datasetController.prototype.searchResults = function(text){
-	var incoming = JSON.parse(text);
-	for (widgetname in incoming.validator) {
-		var controller = eval(widgetname + 'Controller');
-		delete controller.validator;
-		controller.validator = incoming.validator[widgetname];
-	}
-	var html = incoming.html;
-
-	document.getElementById(this.widgetID).innerHTML = html;
-}; 
-
-datasetController.prototype.multiSearchResults = function(text, target) {
+datasetController.prototype.searchResults = function(text, target) {
 	var incoming = JSON.parse(text);
 	for (widgetname in incoming.validator) {
 		var controller = eval(widgetname + 'Controller');
@@ -301,7 +269,6 @@ datasetController.prototype.multiSearchResults = function(text, target) {
 	}
 
 	var html = incoming.html;
-	var widgetID = this.widgetID
 
 	document.getElementById(target).innerHTML = html;
 
@@ -312,11 +279,26 @@ datasetController.prototype.multiSearch = function(id) {
 	var outgoing = {CGILazyID : this.widgetID};
 	outgoing[primaryKey] = id;
 
-	var ADBMultiSearchRequest;
-	ajaxSend(ADBMultiSearchRequest, outgoing, this.multiSearchResults, this.parentID);
+	var multiSearchRequest;
+	ajaxSend(multiSearchRequest, outgoing, this.searchResults, this.parentID);
 
 };
 
+datasetController.prototype.search = function() {
+	var outgoing = {CGILazyID : this.widgetID};
+	for (i in this.searchObject) {
+		try {
+			outgoing[this.searchObject[i]] = document.getElementById(this.searchObject[i]).value;
+		}
+		catch (e) { 
+			//silently let it go if theres no input for this name built in the template
+		}
+	}
+
+	var sendRequest;
+	ajaxSend(sendRequest, outgoing, this.searchResults, this.widgetID);
+
+};
 
 END
 

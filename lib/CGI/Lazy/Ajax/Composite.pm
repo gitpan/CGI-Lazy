@@ -32,14 +32,13 @@ sub ajaxSelect {
 	$type = ucfirst $type;
 	my $method = 'ajaxSelect'.$type;
 
-	return $self->$method;
+	return $self->$method(%args);
 }
 
 #----------------------------------------------------------------------------------------
 sub ajaxSelectManual {
 	my $self = shift;
 	my %args = shift;
-
 
 	return;
 }
@@ -69,7 +68,7 @@ sub ajaxSelectParentChild {
 
 	$parentParams{like} = $self->relationship->{parent}->{searchLike} if $self->relationship->{parent}->{searchLike};
 
-        my $parentOutput = $parent->ajaxSelect(%parentParams); 
+        my $parentOutput = $parent->select(%parentParams); 
 
 #	$self->q->util->debug->edump(\%parentParams);
 
@@ -88,7 +87,7 @@ sub ajaxSelectParentChild {
 			if ($parent->empty) {
 				push @$output, $self->members->{$child}->ajaxBlank(div=>1);
 			} else {
-				push @$output, $self->members->{$child}->ajaxSelect(incoming => {%childParams}, div=>1);
+				push @$output, $self->members->{$child}->select(incoming => {%childParams}, div=>1);
 			}
 		}
 
@@ -630,7 +629,7 @@ Perl:
 
 		}
 
-		print $q->header, $composite->ajaxSelect($incoming);
+		print $q->header, $composite->select($incoming);
 
 		return;
 	}

@@ -5,6 +5,15 @@ use warnings;
 
 use HTML::Template;
 use CGI::Lazy::Globals;
+use CGI::Lazy::Template::Boilerplate;
+
+#----------------------------------------------------------------------------------------
+sub boilerplate {
+	my $self 	= shift;
+	my $widget 	= shift;
+
+	return CGI::Lazy::Template::Boilerplate->new($self, $widget);
+}
 
 #----------------------------------------------------------------------------------------
 sub config {
@@ -125,6 +134,14 @@ CGI::Lazy::Template
 CGI::Lazy::Template is pretty much just a wrapper to HTML::Template.  It takes a template name as it's single argument, and has a single useful method: process, which takes a hashref of variables to shuffle together with the template for subsequent printing to the browser.
 
 =head1 METHODS
+
+=head2 boilerplate (widget)
+
+Returns a boilerplate object for generating boilerplate templates for widget.  See CGI::Lazy::Template::Boilerplate for details.
+
+=head3 widget
+
+A CGI::Lazy widget of some kind.
 
 =head2 config
 

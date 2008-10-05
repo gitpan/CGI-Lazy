@@ -1,5 +1,14 @@
 Revision history for Perl extension CGI::Lazy.
 
+0.11	-added ajax search to dataset
+	-renamed Ajax method ajaxSelect to select.  ajaxSelect method now calls select and returns JSON to web
+	-changed Composite to reflect those changes
+	-added js object of visible field names in dataset for built in ajax search.
+	-renamed multiSearchReturn in Javascript for dataset to searchReturn.  now used by both search and multiSearch.
+	-reworked Boilerplate and renamed to CGI::Lazy::Template::Boilerplate.  Now takes widgets as it's argument and builds template stubs for the widgets.
+	-added support for selects, checkboxes, and radio buttons to Dataset and Recordset
+	-fixed problem in Ajax where edited records deliberately set blank were not updateing database as such.  Insert won't insert blanks, but Update will now.
+
 0.10	-added Image and CSS modules
 	-moved jsload into Javascript module from Ajax, renamed it to just 'load'.
 	-removed redundant jswrap method from Ajax

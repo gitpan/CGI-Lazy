@@ -3,6 +3,7 @@ package CGI::Lazy::Utility::Debug;
 use strict;
 use warnings;
 use Data::Dumper;
+use File::Basename;
 
 #-------------------------------------------------------------------------------------------------------------------------------
 sub cookie {
@@ -25,6 +26,13 @@ sub config {
 	my $self = shift;
 	
 	return $self->q->config;
+}
+
+#-------------------------------------------------------------------------------------------------------------------------------
+sub defaultFile {
+	my $self = shift;
+
+	return $self->{_defaultFile};
 }
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +65,7 @@ sub edump {
 	my $self = shift;
 
 	my $filename = $self->config->debugfile;
-	$filename = 'CGILazy.log' unless $filename;
+	$filename = $self->defaultFile unless $filename;
 
 	open OF, ">> /tmp/$filename" or $self->q->errorHandler->couldntOpenDebugFile($filename, $!);
 	local $\=$/;
@@ -83,7 +91,7 @@ sub edumpreplace {
 	my $self = shift;
 
 	my $filename = $self->config->debugfile;
-	$filename = 'CGILazy.log' unless $filename;
+	$filename = $self->defaultFile unless $filename;
 
 	open OF, ">> /tmp/$filename" or $self->q->errorHandler->couldntOpenDebugFile($filename, $!);
 	local $\=$/;
@@ -119,7 +127,7 @@ sub eparam {
 	}
 
 	my $filename = $self->config->debugfile;
-	$filename = 'CGILazy.log' unless $filename;
+	$filename = $self->defaultFile unless $filename;
 
 	open OF, ">> /tmp/$filename" or $self->q->errorHandler->couldntOpenDebugFile($filename, $!);
 
@@ -255,7 +263,10 @@ sub new {
 	my $class = shift;
 	my $q = shift;
 
-	my $self = {_q => $q};
+	my ($file, $path, $suffix) = fileparse($0);
+	$file .= ".log";
+
+	my $self = {_q => $q, _defaultFile => $file};
 
 	return bless $self, $class;
 }

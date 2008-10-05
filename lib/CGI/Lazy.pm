@@ -22,7 +22,7 @@ use CGI::Lazy::Image;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -439,6 +439,24 @@ If args is a hashref, it will assume that the hash is the config.
 
 If it's just a string, it's assumed to be the absolute path to the config file for the Lazy object.  That file will be parsed as JSON.
 
+
+	tmplDir 	=> Directory where Lazy will look for html templates
+
+	jsDir		=> Directory where Lazy will look for javascript
+
+	cssDir		=> Directory where Lazy will look for css
+
+	buildDir	=> Directory where Lazy will build template stubs.  
+
+	plugins 	=> Optional components
+
+		mod_perl => mod_perl goodness
+
+		dbh 	=> Lazy handles database connection
+
+		dbhVar	=> name of variable that holds database handle created elsewhere
+
+		session	=> stateful sessions (requires database)
 
 =head2 lazyversion ()
 

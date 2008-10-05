@@ -729,6 +729,18 @@ sub visibleFields {
 	return wantarray ? @visibleFieldList : \@visibleFieldList;
 }
 
+#------------------------------------------------------------------------------
+sub webcontrol {
+	my $self = shift;
+	my $field = shift;
+
+	if (exists $self->fieldlist->{$field}) {
+		return $self->fieldlist->{$field}->{webcontrol};
+	} else {
+		return;
+	}
+}
+
 #-----------------------------------------------------------------------------
 sub where {
 	my $self = shift;
@@ -1226,6 +1238,12 @@ array ref. list of fields with their attributes
 
 		handle	=> reference whose referrent will contain whatever value is set into db.  Useful for later use in cgi.
 
+	webcontrol	=> type of input displayed to browser.  Defaults to text input field.
+		
+		type	=> select, checkbox, text.  Text is the default.
+
+		values	=> arrayref, or hashref.  If arrayref, both displayed value and value will be the same.  If hashref, key will be label, value will be value.  
+
 
 =head3 updatedefaults 
 
@@ -1365,6 +1383,14 @@ Returns array or arrayref of labels for non-hidden fields.
 =head2 visibleFields
 
 Returns array or arrayref of field names that are not hidden
+
+=head2 webcontrol (field)
+
+Returns webcontrol hashref for field.
+
+=head3 field
+
+Name of field.
 
 =head2 where($sql, binds)
 	

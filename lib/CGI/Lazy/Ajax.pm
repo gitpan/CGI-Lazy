@@ -47,75 +47,9 @@ sub ajaxSelect {
 	my $self = shift;
 	my %args = @_;
 
-	my $incoming = $args{incoming} || from_json(($self->q->param('POSTDATA') || $self->q->param('keywords') || $self->q->param('XForms:Model')));
-	my $div = $args{div};
-	my $vars = $args{vars};
-	my $like = $args{like};
-	my $likevars = $args{likevars};
+        my $output = $self->select(%args); 
 
-
-	my $widgetID = $self->widgetID;
-	my @fields;
-	my $bind;
-	my $binds = [];
-
-#	$self->q->util->debug->edump($incoming);
-
-	delete $incoming->{CGILazyID}; #key/value pair only used at cgi level, will cause problems here (set automatically by Dataset with name of widget)
-
-	if ($like) {
-		$bind = " like ? ";
-
-	} else {
-		$bind = " = ? ";
-	}
-
-	my %likemap = (
-			'%?%'	=> sub {return '%'.$_[0].'%';},
-			'?%'	=> sub {return $_[0].'%';},
-			'%?'	=> sub {return '%'.$_[0];},
-
-		      );
-
-	foreach my $field (keys %$incoming) {
-		unless ($field =~ /['"&;]\(\)/) {
-			if ($incoming->{$field}) {
-				(my $fieldname = $field) =~ s/^$widgetID-//;
-				push @fields, $fieldname.$bind;
-				if (ref $incoming->{$field}) {
-					if ($likevars) {
-						my $value = $likemap{$likevars}->(${$incoming->{$field}});
-						push @$binds, $value;
-					} else {
-						push @$binds, ${$incoming->{$field}};
-					}
-				} else {
-					if ($like) {
-						my $value = $likemap{$like}->($incoming->{$field});
-						push @$binds, $value;
-					} else {
-						push @$binds, $incoming->{$field};
-					}
-				}
-			}
-		}
-	}
-	
-	my $bindstring = join ' and ', @fields;	
-	
-	$self->recordset->where($bindstring);
-
-#	$self->q->util->debug->edump("bindstring: $bindstring binds: @$binds");
-
-	my %parameters = (
-			mode => 'select', 
-			binds => $binds, 
-			vars => $vars, 
-			);
-
-	$parameters{nodiv} = 1 unless $div; #pass the div tag if we prefer
-
-	return $self->rawContents(%parameters);
+	return $self->ajaxReturn($self, $output);
 }
 
 #----------------------------------------------------------------------------------------
@@ -481,6 +415,84 @@ sub rundelete {
 }
 
 #----------------------------------------------------------------------------------------
+sub select {
+	my $self = shift;
+	my %args = @_;
+
+	$args{like} = $self->vars->{searchLike} if $self->vars->{searchLike};
+
+	my $incoming = $args{incoming} || from_json(($self->q->param('POSTDATA') || $self->q->param('keywords') || $self->q->param('XForms:Model')));
+	my $div = $args{div};
+	my $vars = $args{vars};
+	my $like = $args{like};
+	my $likevars = $args{likevars};
+
+
+	my $widgetID = $self->widgetID;
+	my @fields;
+	my $bind;
+	my $binds = [];
+
+#	$self->q->util->debug->edump($incoming);
+
+	delete $incoming->{CGILazyID}; #key/value pair only used at cgi level, will cause problems here (set automatically by Dataset with name of widget)
+
+	if ($like) {
+		$bind = " like ? ";
+
+	} else {
+		$bind = " = ? ";
+	}
+
+	my %likemap = (
+			'%?%'	=> sub {return '%'.$_[0].'%';},
+			'?%'	=> sub {return $_[0].'%';},
+			'%?'	=> sub {return '%'.$_[0];},
+
+		      );
+
+	foreach my $field (keys %$incoming) {
+		unless ($field =~ /['"&;]\(\)/) {
+			if ($incoming->{$field}) {
+				(my $fieldname = $field) =~ s/^$widgetID-//;
+				push @fields, $fieldname.$bind;
+				if (ref $incoming->{$field}) {
+					if ($likevars) {
+						my $value = $likemap{$likevars}->(${$incoming->{$field}});
+						push @$binds, $value;
+					} else {
+						push @$binds, ${$incoming->{$field}};
+					}
+				} else {
+					if ($like) {
+						my $value = $likemap{$like}->($incoming->{$field});
+						push @$binds, $value;
+					} else {
+						push @$binds, $incoming->{$field};
+					}
+				}
+			}
+		}
+	}
+	
+	my $bindstring = join ' and ', @fields;	
+	
+	$self->recordset->where($bindstring);
+
+#	$self->q->util->debug->edump("bindstring: $bindstring binds: @$binds");
+
+	my %parameters = (
+			mode => 'select', 
+			binds => $binds, 
+			vars => $vars, 
+			);
+
+	$parameters{nodiv} = 1 unless $div; #pass the div tag if we prefer
+
+	return $self->rawContents(%parameters);
+}
+
+#----------------------------------------------------------------------------------------
 sub update {
 	my $self = shift;
 	my %vars = @_;
@@ -515,10 +527,10 @@ sub updates {
         foreach my $key (grep {/^$widgetID-:UPDATE:/} $self->q->param) {
                 if ($key =~ /^($widgetID-:UPDATE:)(.+)-:-(.+)::(\d+)$/) {
 			my ($pre, $fieldname, $ID, $row) = ($1, $2, $3, $4);
-			$data->{$ID}->{$fieldname} = $self->q->param($key) if $self->q->param($key);
+			$data->{$ID}->{$fieldname} = $self->q->param($key);# if $self->q->param($key); #if this is set, won't blank fields deliberately left blank
 		} elsif ($key =~ /^($widgetID-:UPDATE:)(.+)-:-(.+)$/) {
 			my ($pre, $fieldname, $ID) = ($1, $2, $3);
-			$data->{$ID}->{$fieldname} = $self->q->param($key) if $self->q->param($key);
+			$data->{$ID}->{$fieldname} = $self->q->param($key);# if $self->q->param($key);
 		}
         }
 #	$self->q->util->debug->edump($data);
@@ -600,6 +612,14 @@ Its methods are called internally by its child classes.  There are, at present, 
 
 Wraps data (presumably from widget) in json format with validator from widgets for returning to browser in response to an ajax reqeust
 
+=head2 ajaxSelect (args )
+
+Returns result of select method in a json format suitable for returning to the browser
+
+=head3 args
+
+see select( args) for details
+
 =head3 widgets
 
 List of widgets to be parsed for validators
@@ -607,42 +627,6 @@ List of widgets to be parsed for validators
 =head3 data
 
 Widget html output
-
-
-=head2 ajaxSelect (args)
-
-Runs select based on args and returns output.  
-
-
-=head3 args
-
-Hash of select parameters.  Expects to see a key called 'incoming' that contains the incoming parameters in widgetID-fieldname => value format.  
-
-Widgets such as Dataset will also have a parameter called CGILazyID which will contain the name of the widget (for doing different things at the cgi level based on which widget is talking to the app). This key/value will be stripped automatically.
-
-The rest of the hash supports the following options:
-
-	div 		=> 1  #By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for members of composite widgets.
-	
-	like		=> '%?%' # search will be like %value%, in other words anything containing 'value'. Like is applied only to searches coming in from web, not vars added in cgi
-
-	like	 	=> '?%'  # search will be on value%
-
-	like		=> '%?'  # search on %v
-
-	vars 		=> {fieldname => {optionname => optionvalue}}
-
-	vars 		=> {fieldname => {value => 'bar'}} #extra search parameter.
-
-	vars		=> {foo => {handle => $ref}}} # when retrieved $$ref will have the value of field foo. ('handle' is a 'handle' on that value for use in tying things together.)
-	
-	likevars	=> '%?%' # search will be like %value%, in other words anything containing 'value'.  like is applied to vars specified from cgi
-
-	likevars 	=> '?%'  # search will be on value%
-
-	likevars	=> '%?'  # search on %v
-
-
 
 =head2 jsonescape ( var )
 
@@ -661,9 +645,40 @@ Runs queries for lookup tables and parses then into JSON wrapped in javascript s
 
 Useful only for tables that are intended to be preloaded into a page at load. 
 
-
 =head2 ajaxBlank ()
 
 Convenience method.  Returns blank widget output
+
+=head2 select (args)
+
+Runs select based on args and returns output.  
+
+=head3 args
+
+Hash of select parameters.  Expects to see a key called 'incoming' that contains the incoming parameters in widgetID-fieldname => value format.  
+
+Widgets such as Dataset will also have a parameter called CGILazyID which will contain the name of the widget (for doing different things at the cgi level based on which widget is talking to the app). This key/value will be stripped automatically.
+
+The rest of the hash supports the following options:
+
+	div 		=> 1  #By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for members of composite widgets.
+	
+	like		=> '%?%' # search will be like %value%, in other words anything containing 'value'. Like is applied only to searches coming in from web, not vars added to the search in the cgi
+
+	like	 	=> '?%'  # search will be on value%
+
+	like		=> '%?'  # search on %v
+
+	vars 		=> {fieldname => {optionname => optionvalue}}
+
+	vars 		=> {fieldname => {value => 'bar'}} #extra search parameter.
+
+	vars		=> {foo => {handle => $ref}}} # when retrieved $$ref will have the value of field foo. ('handle' is a 'handle' on that value for use in tying things together.)
+	
+	likevars	=> '%?%' # search will be like %value%, in other words anything containing 'value'.  like is applied to vars specified from the cgi. Basically this means you can do a like on variables hardcoded in the cgi independantly from things coming in from the web.
+
+	likevars 	=> '?%'  # search will be on value%
+
+	likevars	=> '%?'  # search on %v
 
 
