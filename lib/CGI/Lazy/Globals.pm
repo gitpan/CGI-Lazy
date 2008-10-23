@@ -1,10 +1,12 @@
 package CGI::Lazy::Globals;
 
+use strict;
+use warnings;
+
 use Exporter;
 use base qw(Exporter);
 
-use strict;
-use warnings;
+no warnings qw(uninitialized redefine);
 
 ##CONFIGROOT value
 #if your config root is the server's document root, your apps will be more portable, however you will need to take steps to secure teh configs (with the db password et al.) from the outside world

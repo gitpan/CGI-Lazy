@@ -1,11 +1,13 @@
 package CGI::Lazy::ID;
 
+use strict;
+use warnings;
+
 use Digest::MD5;
 use Time::HiRes qw(gettimeofday);
 use CGI::Lazy::Globals;
 
-use strict;
-use warnings;
+no warnings qw(uninitialized redefine);
 
 #---------------------------------------------------------------------------------------
 sub generate {

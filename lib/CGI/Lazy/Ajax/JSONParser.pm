@@ -6,6 +6,8 @@ use warnings;
 use Exporter;
 use base qw(Exporter);
 
+no warnings qw(uninitialized redefine);
+
 our @EXPORT = qw($JSONPARSER);
 
 our $JSONPARSER = <<END;

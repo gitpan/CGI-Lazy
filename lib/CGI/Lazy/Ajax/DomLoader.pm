@@ -6,6 +6,8 @@ use warnings;
 use base qw(CGI::Lazy::Ajax);
 use JSON;
 
+no warnings qw(uninitialized redefine);
+
 #----------------------------------------------------------------------------------------
 sub new {
 	my $class = shift;

@@ -5,6 +5,8 @@ use warnings;
 
 use CGI::Lazy::Globals;
 
+no warnings qw(uninitialized redefine);
+
 our $datasetMultipleStart = <<END;
 <table id="__WIDGETID__Table">
 	<caption> <tmpl_var name="CAPTION"> </caption>

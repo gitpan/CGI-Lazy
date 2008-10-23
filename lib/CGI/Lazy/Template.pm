@@ -7,6 +7,8 @@ use HTML::Template;
 use CGI::Lazy::Globals;
 use CGI::Lazy::Template::Boilerplate;
 
+no warnings qw(uninitialized redefine);
+
 #----------------------------------------------------------------------------------------
 sub boilerplate {
 	my $self 	= shift;
@@ -42,10 +44,12 @@ sub new {
 
 	my $docroot = $ENV{DOCUMENT_ROOT};
 	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
+	my $tmpldir = $self->config->tmplDir;
+	$tmpldir =~ s/^\///; #strip a leading slash so we don't double it
 
 	eval {
 		$self->{_template} = HTML::Template->new( 
-							filename => $docroot.$self->config->tmplDir."/".$tmplname, 
+							filename => $docroot."/".$self->config->tmplDir."/".$tmplname, 
 							die_on_bad_params => 0,
 						);
 	};

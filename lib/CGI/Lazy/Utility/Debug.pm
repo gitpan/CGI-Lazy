@@ -5,6 +5,8 @@ use warnings;
 use Data::Dumper;
 use File::Basename;
 
+no warnings qw(uninitialized redefine);
+
 #-------------------------------------------------------------------------------------------------------------------------------
 sub cookie {
 	my $self = shift;

@@ -6,8 +6,11 @@ use warnings;
 use JavaScript::Minifier qw(minify);
 use JSON;
 use CGI::Lazy::Globals;
+use Tie::IxHash;
 
 use base qw(CGI::Lazy::Ajax);
+
+no warnings qw(uninitialized redefine);
 
 our $tableCaptionVar     = "CAPTION";
 our $headingLoopVar      = "HEADING.LOOP";
@@ -33,8 +36,16 @@ sub buildCheckbox {
 			return ($webcontrol->{value});
 		}
 
-	}
+	} elsif ($webcontrol->{sql}) {
+		my ($query, @binds) = @{$webcontrol->{sql}};
+		my $lookupvalue = $self->q->db->get($query, @binds);
 
+		if ($value eq $lookupvalue) {
+			return ($lookupvalue, ' checked ');
+		} else {
+			return ($lookupvalue);
+		}
+	}
 }
 
 #----------------------------------------------------------------------------------------
@@ -60,26 +71,35 @@ sub buildSelect {
 
 	my $list = [];
 
-	if ($webcontrol->{values} ) {
-		my $vals = {};
+	my $vals = {};
+	tie %$vals, 'Tie::IxHash';
 
+	if ($webcontrol->{values} ) {
 		if (ref $webcontrol->{values} eq 'HASH') {
+			$vals->{''} = '' unless $webcontrol->{notNull};
 			$vals = $webcontrol->{values};
 		} elsif (ref $webcontrol->{values} eq 'ARRAY') {
+			$vals->{''} = '' unless $webcontrol->{notNull};
 			$vals->{$_} = $_ for @{$webcontrol->{values}};
 		} else {
 			return;
 		}
 
-		foreach (sort keys %$vals) {
-			if ($vals->{$_} eq $value) {
-				push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}, 'ITEM.SELECTED' => ' selected '};
 
-			} else {
-				push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}};
-			}
+	} elsif ($webcontrol->{sql}) {
+		my ($query, @binds) = @{$webcontrol->{sql}};
+		$vals->{''} = '' unless $webcontrol->{notNull};
+		$vals->{$_->[0]} = $_->[1] for @{$self->q->db->getarray($query, @binds)};
+
+	}
+
+	foreach (keys %$vals) {
+		if ($vals->{$_} eq $value) {
+			push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}, 'ITEM.SELECTED' => ' selected '};
+
+		} else {
+			push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}};
 		}
-
 	}
 
 	return $list;
@@ -95,9 +115,10 @@ sub buildRadio {
 	my $value = shift;
 
 	my $list = [];
+	my $vals = {};
+	tie %$vals, 'Tie::IxHash';
 
 	if ($webcontrol->{values} ) {
-		my $vals = {};
 
 		if (ref $webcontrol->{values} eq 'HASH') {
 			$vals = $webcontrol->{values};
@@ -107,27 +128,33 @@ sub buildRadio {
 			return;
 		}
 
-		foreach (sort keys %$vals) {
-			if ($vals->{$_} eq $value) {
-				push @$list, {
-					"ID.".$fieldname 		=> $webID."-$_", 
-					'NAME.'.$fieldname 		=> $webname, 
-					'VALUELABEL.'.$fieldname 	=> $vals->{$_}, 
-					'VALUE.'.$fieldname 		=> $vals->{$_}, 
-					'CHECKED.'.$fieldname 		=> ' checked ',
-				};
 
-			} else {
-				push @$list, {
-					"ID.".$fieldname 		=> $webID."-$_", 
-					'NAME.'.$fieldname 		=> $webname, 
-					'VALUELABEL.'.$fieldname 	=> $vals->{$_},
-					'VALUE.'.$fieldname 		=> $vals->{$_},
-				};
+	} elsif ($webcontrol->{sql} ) {
+		my ($query, @binds) = @{$webcontrol->{sql}};
 
-			}
+		$vals->{$_->[0]} = $_->[1] for @{$self->q->db->getarray($query, @binds)};
+
+	}
+
+	foreach (sort keys %$vals) {
+		if ($vals->{$_} eq $value) {
+			push @$list, {
+				"ID.".$fieldname 		=> $webID."-$_", 
+				'NAME.'.$fieldname 		=> $webname, 
+				'VALUELABEL.'.$fieldname 	=> $vals->{$_}, 
+				'VALUE.'.$fieldname 		=> $vals->{$_}, 
+				'CHECKED.'.$fieldname 		=> ' checked ',
+			};
+
+		} else {
+			push @$list, {
+				"ID.".$fieldname 		=> $webID."-$_", 
+				'NAME.'.$fieldname 		=> $webname, 
+				'VALUELABEL.'.$fieldname 	=> $vals->{$_},
+				'VALUE.'.$fieldname 		=> $vals->{$_},
+			};
+
 		}
-
 	}
 
 	return $list;
@@ -464,8 +491,11 @@ sub contents {
 		var $jsmultisearchname = '$primarykey';
 END
 
-	my $js = $self->q->jswrap(minify(input => $javascript));
-#	my $js = $self->q->jswrap($javascript);
+	if ($javascript) {
+		$javascript = minify(input => $javascript)
+	}
+
+	my $js = $self->q->jswrap($javascript);
 
 	return $headingsdiv.
 		$divopen.

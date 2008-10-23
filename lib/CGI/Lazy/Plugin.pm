@@ -5,6 +5,7 @@ use warnings;
 
 use CGI::Lazy::Globals;
 
+no warnings qw(uninitialized redefine);
 #-------------------------------------------------------------------------------
 sub AUTOLOAD {
 	my $self = shift;

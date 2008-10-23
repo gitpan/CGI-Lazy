@@ -5,6 +5,8 @@ use warnings;
 
 use CGI::Lazy::Globals;
 
+no warnings qw(uninitialized redefine);
+
 #-------------------------------------------------------------------------------------------------
 sub dir {
 	my $self = shift;
@@ -13,15 +15,26 @@ sub dir {
 }
 
 #----------------------------------------------------------------------------------------
+sub file {
+	my $self = shift;
+	my $file = shift;
+
+	my $dir = $self->dir;
+
+	return "$dir/$file";
+}
+
+#----------------------------------------------------------------------------------------
 sub load {
 	my $self = shift;
 	my $file = shift;
 	
 	my $dir = $self->dir;
+	$dir =~s/^\///; #strip a leading slash
 	my $docroot = $ENV{DOCUMENT_ROOT};
 	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
 
-	return "$docroot$dir/$file";
+	return "$docroot/$dir/$file";
 
 }
 
@@ -83,6 +96,14 @@ CGI::Lazy::Image is, at present, just a convience module for accessing images.
 =head2 dir ()
 
 Returns directory containing css specified at lazy object creation
+
+=head2 file (image)
+
+Returns absolute path to file image parsed with document root and image directory
+
+=head3 image
+
+Image file name
 
 =head2 q ( ) 
 

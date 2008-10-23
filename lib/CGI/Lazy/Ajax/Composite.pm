@@ -3,10 +3,11 @@ package CGI::Lazy::Ajax::Composite;
 use strict;
 use warnings;
 
-use JavaScript::Minifier qw(minify);
 use JSON;
 use CGI::Lazy::Globals;
 use base qw(CGI::Lazy::Ajax);
+
+no warnings qw(uninitialized redefine);
 
 #----------------------------------------------------------------------------------------
 sub ajaxBlank {

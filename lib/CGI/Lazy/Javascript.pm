@@ -7,6 +7,8 @@ use CGI::Lazy::Globals;
 use CGI::Lazy::Ajax::JSONParser;
 use JavaScript::Minifier qw(minify);
 
+no warnings qw(uninitialized redefine);
+
 #javascript for ajax requests
 our $AJAXJS = q[
 function ajaxSend(request, outgoing, returnHandler, returnTarget) {
@@ -314,10 +316,46 @@ our %component = (
 );
 
 #-------------------------------------------------------------------------------------------------
+sub dir {
+	my $self = shift;
+
+	return $self->{_dir};
+}
+
+#-------------------------------------------------------------------------------------------------
+sub file {
+	my $self = shift;
+	my $file = shift;
+
+	my $dir = $self->dir;
+
+	return "$dir/$file";
+}
+
+#-------------------------------------------------------------------------------------------------
 sub q {
 	my $self = shift;
 
 	return $self->{_q};
+}
+
+#----------------------------------------------------------------------------------------
+sub load {
+	my $self = shift;
+	my $file = shift;
+	
+	my $jsdir = $self->dir;
+	$jsdir =~ s/^\///; #strip a leading slash so we don't double it
+	my $docroot = $ENV{DOCUMENT_ROOT};
+	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
+
+	open IF, "< $docroot/$jsdir/$file" or $self->q->errorHandler->couldntOpenJsFile($docroot, $jsdir, $file, $!);
+	my $script = minify(input => *IF);
+
+	close IF;
+
+	return $self->q->jswrap($script);
+
 }
 
 #-------------------------------------------------------------------------------------------------
@@ -346,24 +384,6 @@ sub modules {
 	return $self->q->jswrap($output);
 }
 
-#----------------------------------------------------------------------------------------
-sub load {
-	my $self = shift;
-	my $file = shift;
-	
-	my $jsdir = $self->dir;
-	my $docroot = $ENV{DOCUMENT_ROOT};
-	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
-
-	open IF, "< $docroot$jsdir/$file" or $self->q->errorHandler->couldntOpenJsFile($docroot, $jsdir, $file, $!);
-	my $script = minify(input => *IF);
-
-	close IF;
-
-	return $self->q->jswrap($script);
-
-}
-
 #-------------------------------------------------------------------------------------------------
 sub new {
 	my $class = shift;
@@ -374,13 +394,6 @@ sub new {
 		_dir		=> $q->config->jsDir,
 	
 	}, $class;
-}
-
-#-------------------------------------------------------------------------------------------------
-sub dir {
-	my $self = shift;
-
-	return $self->{_dir};
 }
 
 1
@@ -449,11 +462,19 @@ For composite widgets, it loads each constituent widget in turn.
 
 =head2 load (file)
 
-Wraps, minifies, and loads file from javascript directory for output to browser
+Reads file from jss directory , wraps in script tags for output to browser
 
 =head3 file
 
-filename of javascript file
+filename of js file
+
+=head2 file (js)
+
+Returns absolute path to file css parsed with document root and css directory
+
+=head3 jss
+
+Javascript file name
 
 =head2 new ( q )
 
@@ -462,6 +483,7 @@ constructor.
 =head3 q
 
 CGI::Lazy object
+
 
 =cut
 

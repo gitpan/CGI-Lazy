@@ -22,7 +22,9 @@ use CGI::Lazy::Image;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '0.11';
+no warnings qw(uninitialized redefine);
+
+our $VERSION = '0.12';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -177,9 +179,9 @@ sub new {
 		$self->{_mod_perl} = CGI::Lazy::ModPerl->new($self);
 	}
 
-	if ($self->plugin->auth) {
-		require CGI::Lazy::Auth;
-		$self->{_auth}	= CGI::Lazy::Auth->new($self);
+	if ($self->plugin->authn) {
+		require CGI::Lazy::Authn;
+		$self->{_auth}	= CGI::Lazy::Authn->new($self);
 	}
 
 	if ($self->plugin->authz) {
@@ -440,11 +442,11 @@ If args is a hashref, it will assume that the hash is the config.
 If it's just a string, it's assumed to be the absolute path to the config file for the Lazy object.  That file will be parsed as JSON.
 
 
-	tmplDir 	=> Directory where Lazy will look for html templates
+	tmplDir 	=> Directory where Lazy will look for html templates.  Always relative to document root.
 
-	jsDir		=> Directory where Lazy will look for javascript
+	jsDir		=> Directory where Lazy will look for javascript.  Always relative to document root.
 
-	cssDir		=> Directory where Lazy will look for css
+	cssDir		=> Directory where Lazy will look for css.  Always relative to document root.
 
 	buildDir	=> Directory where Lazy will build template stubs.  
 

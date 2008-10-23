@@ -5,6 +5,8 @@ use warnings;
 
 use CGI::Lazy::Globals;
 
+no warnings qw(uninitialized redefine);
+
 #----------------------------------------------------------------------------------------
 sub badConfig {
 	my $self = shift;
@@ -46,6 +48,18 @@ sub couldntOpenDebugFile {
 	my $error = shift;
 
 	print $self->q->header, "Couldn't open Debugging Log file /tmp/$filename: $error";
+	exit;
+}
+
+#----------------------------------------------------------------------------------------
+sub couldntOpenCssFile {
+	my $self = shift;
+	my $docroot = shift;
+	my $cssdir = shift;
+	my $file = shift;
+	my $error = shift;
+
+	print $self->q->header, "Couldn't open CSS file $docroot$cssdir/$file: $error";
 	exit;
 }
 

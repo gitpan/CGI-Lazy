@@ -1,4 +1,12 @@
 Revision history for Perl extension CGI::Lazy.
+0.12	-fixed Dataset to respect order of arrays or hashes sent to it for select webcontrols
+	-added sql support for select widgets in dataset
+	-added missing method to ErrorHandler to handle CSS object errors
+	-fixed bugs in CSS and Javascript modules where paths to files weren't being created correctly.
+	-fixed bug in Template where explicit slash in tmplDir property could end up doubling.
+	-updated Lazy POD
+	-fixed all modules to throw no uninitialized or redefinition warnings.
+	-renamed Auth.pm to Authn.pm
 
 0.11	-added ajax search to dataset
 	-renamed Ajax method ajaxSelect to select.  ajaxSelect method now calls select and returns JSON to web
@@ -6,7 +14,7 @@ Revision history for Perl extension CGI::Lazy.
 	-added js object of visible field names in dataset for built in ajax search.
 	-renamed multiSearchReturn in Javascript for dataset to searchReturn.  now used by both search and multiSearch.
 	-reworked Boilerplate and renamed to CGI::Lazy::Template::Boilerplate.  Now takes widgets as it's argument and builds template stubs for the widgets.
-	-added support for selects, checkboxes, and radio buttons to Dataset and Recordset
+	-added support for selects, checkboxes, and radio buttons to Dataset and Recordset, also Boilerplate
 	-fixed problem in Ajax where edited records deliberately set blank were not updateing database as such.  Insert won't insert blanks, but Update will now.
 
 0.10	-added Image and CSS modules

@@ -21,6 +21,6 @@ lib/CGI/Lazy/Plugin.pm
 lib/CGI/Lazy/Session.pm
 lib/CGI/Lazy/Session/Data.pm
 lib/CGI/Lazy/Template.pm
+lib/CGI/Lazy/Template/Boilerplate.pm
 lib/CGI/Lazy/Utility.pm
 lib/CGI/Lazy/Utility/Debug.pm
-lib/CGI/Lazy/Boilerplate.pm

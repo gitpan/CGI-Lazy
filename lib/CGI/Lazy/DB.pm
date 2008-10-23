@@ -7,6 +7,8 @@ use DBI;
 use CGI::Lazy::Globals;
 use Carp;
 
+no warnings qw(uninitialized redefine);
+
 #---------------------------------------------------------------------------------------
 sub config {
 	my $self = shift;

@@ -4,11 +4,12 @@ use strict;
 use warnings;
 
 use JSON;
-use JavaScript::Minifier qw(minify);
 use CGI::Lazy::Globals;
 use CGI::Lazy::Ajax::Dataset;
 use CGI::Lazy::Ajax::DomLoader;
 use CGI::Lazy::Ajax::Composite;
+
+no warnings qw(uninitialized redefine);
 
 #----------------------------------------------------------------------------------------
 sub ajaxBlank {

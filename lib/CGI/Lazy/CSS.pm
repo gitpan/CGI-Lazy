@@ -5,6 +5,8 @@ use warnings;
 
 use CGI::Lazy::Globals;
 
+no warnings qw(uninitialized redefine);
+
 #-------------------------------------------------------------------------------------------------
 sub dir {
 	my $self = shift;
@@ -13,15 +15,26 @@ sub dir {
 }
 
 #----------------------------------------------------------------------------------------
+sub file {
+	my $self = shift;
+	my $file = shift;
+
+	my $dir = $self->dir;
+
+	return "$dir/$file";
+}
+
+#----------------------------------------------------------------------------------------
 sub load {
 	my $self = shift;
 	my $file = shift;
 	
 	my $dir = $self->dir;
+	$dir =~ s/^\///; #strip a leading slash so we don't double it
 	my $docroot = $ENV{DOCUMENT_ROOT};
 	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
 
-	open IF, "< $docroot$dir/$file" or $self->q->errorHandler->couldntOpenCssFile($docroot, $dir, $file, $!);
+	open IF, "< $docroot/$dir/$file" or $self->q->errorHandler->couldntOpenCssFile($docroot, $dir, $file, $!);
 
 	my $script;
 
@@ -94,13 +107,17 @@ CGI::Lazy::CSS is just a convience module for accessing css files.
 
 Returns directory containing css specified at lazy object creation
 
-=head2 q ( ) 
+=head2 file (css)
 
-Returns CGI::Lazy object.
+Returns absolute path to file css parsed with document root and css directory
+
+=head3 css
+
+Css file name
 
 =head2 load (file)
 
-Wraps, loads file from css directory for output to browser
+Reads file from css directory , wraps in script tags for output to browser
 
 =head3 file
 

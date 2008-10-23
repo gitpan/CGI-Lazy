@@ -9,6 +9,8 @@ use CGI::Lazy::CookieMonster;
 use CGI::Lazy::Session::Data;
 use CGI::Lazy::Globals;
 
+no warnings qw(uninitialized redefine);
+
 #--------------------------------------------------------------------------------------
 sub cookiemonster {
 	my $self = shift;

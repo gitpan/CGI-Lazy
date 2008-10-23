@@ -6,6 +6,8 @@ use warnings;
 use Tie::IxHash;
 use Data::Dumper;
 
+no warnings qw(uninitialized redefine);
+
 #------------------------------------------------------------------
 sub basewhere {
 	my $self = shift;
@@ -1242,7 +1244,13 @@ array ref. list of fields with their attributes
 		
 		type	=> select, checkbox, text.  Text is the default.
 
+		value	=> for a checkbox, only a single value can be specified
+
 		values	=> arrayref, or hashref.  If arrayref, both displayed value and value will be the same.  If hashref, key will be label, value will be value.  
+
+		sql	=> [$query, @binds]	You can specify a query that will build the values, but it expected to return 2 values per row, the first being the label, the second being the value.
+
+		notNull	=> 1   Set this for selects if you don't want the first item of the select to be blank
 
 
 =head3 updatedefaults 
