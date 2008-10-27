@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use CGI::Lazy::Globals;
-use CGI::Lazy::Ajax::JSONParser;
+use CGI::Lazy::Javascript::JSONParser;
 use JavaScript::Minifier qw(minify);
 
 no warnings qw(uninitialized redefine);
@@ -77,7 +77,7 @@ function sjaxSend(request, outgoing, returnHandler) {
 }
 ];
 
-#javascript for Ajax::Dataset
+#javascript for Widget::Dataset
 our $DatasetJS = <<END;
 function datasetController(ID, validator, ParentID, searchObject, flagcolor) {
 	this.widgetID = ID;
@@ -280,6 +280,7 @@ datasetController.prototype.multiSearch = function(id) {
 	var primaryKey = eval(this.widgetID + 'MultiSearchPrimaryKey');
 	var outgoing = {CGILazyID : this.widgetID};
 	outgoing[primaryKey] = id;
+	outgoing['noSearchLike'] = 1;
 
 	var multiSearchRequest;
 	ajaxSend(multiSearchRequest, outgoing, this.searchResults, this.parentID);
@@ -289,8 +290,15 @@ datasetController.prototype.multiSearch = function(id) {
 datasetController.prototype.search = function() {
 	var outgoing = {CGILazyID : this.widgetID};
 	for (i in this.searchObject) {
+		var element = document.getElementById(this.searchObject[i]);
 		try {
-			outgoing[this.searchObject[i]] = document.getElementById(this.searchObject[i]).value;
+			if (element.type == 'checkbox') {
+				if (element.checked == true) {
+					outgoing[this.searchObject[i]] = element.value;
+				}
+			} else {
+				outgoing[this.searchObject[i]] = element.value;
+			}
 		}
 		catch (e) { 
 			//silently let it go if theres no input for this name built in the template
@@ -310,9 +318,9 @@ our $DOMLOADJS;
 our $COMPJS;
 
 our %component = (
-		'CGI::Lazy::Ajax::Dataset'		=> $DatasetJS,
-		'CGI::Lazy::Ajax::DomLoader'		=> $DOMLOADJS,
-		'CGI::Lazy::Ajax::Composite'		=> $COMPJS,
+		'CGI::Lazy::Widget::Dataset'		=> $DatasetJS,
+		'CGI::Lazy::Widget::DomLoader'		=> $DOMLOADJS,
+		'CGI::Lazy::Widget::Composite'		=> $COMPJS,
 );
 
 #-------------------------------------------------------------------------------------------------
@@ -368,7 +376,7 @@ sub modules {
 	
 	if (@args) {
 		foreach my $widget (@args) {
-			if (ref $widget eq 'CGI::Lazy::Ajax::Composite') {
+			if (ref $widget eq 'CGI::Lazy::Widget::Composite') {
 				$inc{ref $widget} = 1;
 				foreach my $subwidget (@{$widget->memberarray}) {
 					$inc{ref $subwidget} = 1;
@@ -448,9 +456,9 @@ Returns CGI::Lazy object.
 
 =head2 modules ( components )
 
-Returns javascript for parsing JSON and making ajax calls, as well as the clientside goodness for the ajax widgets.  This method needs to be printed on any page that is going to use JSON or the Ajax objects.
+Returns javascript for parsing JSON and making ajax calls, as well as the clientside goodness for the ajax widgets.  This method needs to be printed on any page that is going to use JSON or the Widget objects..
 
-It's included as a separate method as it should be sent only once per page, and would be included in the header except this would be an irritation for cases where CGI::Lazy is not using Ajax objects.  If called without components, it will send out only the defaults listed below.
+It's included as a separate method as it should be sent only once per page, and would be included in the header except this would be an irritation for cases where CGI::Lazy is not using Widget objects.  If called without components, it will send out only the defaults listed below.
 
 =head3 components
 

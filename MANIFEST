@@ -4,11 +4,6 @@ MANIFEST
 README
 t/CGI-Lazy.t
 lib/CGI/Lazy.pm
-lib/CGI/Lazy/Ajax.pm
-lib/CGI/Lazy/Ajax/Composite.pm
-lib/CGI/Lazy/Ajax/Dataset.pm
-lib/CGI/Lazy/Ajax/DomLoader.pm
-lib/CGI/Lazy/Ajax/JSONParser.pm
 lib/CGI/Lazy/Config.pm
 lib/CGI/Lazy/CookieMonster.pm
 lib/CGI/Lazy/DB.pm
@@ -17,6 +12,7 @@ lib/CGI/Lazy/ErrorHandler.pm
 lib/CGI/Lazy/Globals.pm
 lib/CGI/Lazy/ID.pm
 lib/CGI/Lazy/Javascript.pm
+lib/CGI/Lazy/Javascript/JSONParser.pm
 lib/CGI/Lazy/Plugin.pm
 lib/CGI/Lazy/Session.pm
 lib/CGI/Lazy/Session/Data.pm
@@ -24,3 +20,7 @@ lib/CGI/Lazy/Template.pm
 lib/CGI/Lazy/Template/Boilerplate.pm
 lib/CGI/Lazy/Utility.pm
 lib/CGI/Lazy/Utility/Debug.pm
+lib/CGI/Lazy/Widget.pm
+lib/CGI/Lazy/Widget/Composite.pm
+lib/CGI/Lazy/Widget/Dataset.pm
+lib/CGI/Lazy/Widget/DomLoader.pm

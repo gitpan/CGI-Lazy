@@ -1,4 +1,4 @@
-package CGI::Lazy::Ajax::JSONParser;
+package CGI::Lazy::Javascript::JSONParser;
 
 use strict;
 use warnings;

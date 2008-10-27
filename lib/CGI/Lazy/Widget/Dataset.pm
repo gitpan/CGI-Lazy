@@ -1,4 +1,4 @@
-package CGI::Lazy::Ajax::Dataset;
+package CGI::Lazy::Widget::Dataset;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use JSON;
 use CGI::Lazy::Globals;
 use Tie::IxHash;
 
-use base qw(CGI::Lazy::Ajax);
+use base qw(CGI::Lazy::Widget);
 
 no warnings qw(uninitialized redefine);
 
@@ -199,7 +199,7 @@ sub contents {
 
 	my $type 		= $vars->{type};
 	my $multiType	 	= $vars->{multiType};
-	my $containerID 	= $vars->{containerId} || '';
+	my $containerID 	= $vars->{containerId} || $widgetID;
         my $tableCaptionValue   = $vars->{tableCaption}; 	#can be blank
         my $recset              = $vars->{recordset}; 		#required
         my $lookups             = $vars->{lookups}; 		#if this isn't set, then new records will only contain what's on the screen
@@ -368,7 +368,7 @@ sub contents {
 		if (scalar @{$recset->data} > 1) {
 			unless ($vars->{multiType} eq 'sequential') { #there are configurations where we don't want to display multi
 				$self->{_multi} = 1;
-				return $self->displaySingleList;
+				return $self->displaySingleList(%args);
 			}
 		} elsif (scalar @{$recset->data} == 0) {
 			$self->{_empty} = 1;
@@ -478,8 +478,6 @@ sub contents {
 
 	my $searchObjectName = $self->widgetID.'SearchObject';
 
-#	my $searchscript = $self->q->jswrap("var ".$self->widgetID ."SearchObject = ".to_json([@{$recset->visibleFields}]).";");
-
 	my $searchObject = to_json([map {$widgetID."-".$_} @{$recset->visibleFields}]);
 
 	my $jsvalidatorname = $widgetID."Validator";
@@ -500,7 +498,6 @@ END
 	return $headingsdiv.
 		$divopen.
 		$validator.
-#		$searchscript.
 		$js.
 		$formOpenTag.
 		$self->q->template($template)->process($tmplvars).
@@ -607,16 +604,22 @@ sub new {
 	my $q = shift;
 	my $vars = shift;
 	
+	unless (ref $vars->{recordset} eq 'CGI::Lazy::DB::RecordSet') {
+		$vars->{recordset} = $q->db->recordset($vars->{recordset});
+	}
+
 	my $self = {
 			_q 		=> $q,
 			_vars 		=> $vars, 
+			_recordset	=> $vars->{recordset},
 			_type 		=> $vars->{type}, 
 			_multiType 	=> $vars->{multiType}, 
-			_recordset 	=> $vars->{recordset}, 
 			_widgetID 	=> $vars->{id},
 	};
 
 	bless $self, $class;
+
+#	$q->util->debug->edump($self->recordset);
 
 	$self->{_headings} = $self->buildHeadings;
 
@@ -671,7 +674,7 @@ Bug reports and comments to nik.ogura@gmail.com.
 
 =head1 NAME
 
-CGI::Lazy::Ajax::Dataset
+CGI::Lazy::Widget::Dataset
 
 =head1 SYNOPSIS
 
@@ -692,8 +695,6 @@ CGI::Lazy::Ajax::Dataset
 							saveOnCleanup	=> 1,
 
 						},
-
-						ajax	=>  1,
 
 						dbh 	=> {
 
@@ -725,7 +726,7 @@ CGI::Lazy::Ajax::Dataset
 
 
 
-	my $widget = $q->ajax->dataset({
+	my $widget = $q->widget->dataset({
 
 				id		=> 'detailBlock',
 
@@ -832,7 +833,7 @@ CGI::Lazy::Ajax::Dataset
 
 =head1 DESCRIPTION
 
-CGI::Lazy::Ajax::Dataset is, at present, the crown jewel of the CGI::Lazy framework, and the chief reason why the framework was written.  Lazy was written because the author has been asked to write front ends to simple databases so often that he started to realize he was writing the same damn code over and over again, and finally got sick of it.
+CGI::Lazy::Widget::Dataset is, at present, the crown jewel of the CGI::Lazy framework, and the chief reason why the framework was written.  Lazy was written because the author has been asked to write front ends to simple databases so often that he started to realize he was writing the same damn code over and over again, and finally got sick of it.
 
 When we're talking about web-based access to a database, there really aren't many operations that we are talking about performing.  It all comes down to Select, Insert, Update, and Delete (and Ignore- but more on that later).  From the standpoint of the database, it doesn't matter what the data is pertaining to, it could be cardiac patients, or tootsie rolls- the data is still stored in tables, rows and fields, and no matter what you need to read it, modify it, extend it, or destroy it.
 
@@ -843,7 +844,7 @@ Furthermore, as much of the work as possible is done clientside to cut down on i
 To do it's magic, the Dataset relies heavily on javascript that *should* work for Firefox and IE6.  At the time of publication, all funcitons and methods work flawlessly with FF2, FF3, and IE6.  The author has tried to write for W3C standards, and provide as much IE support as his corporate sponsors required.  YMMV.  Bug reports are always welcome, however we will not support IE to the detrement of W3C standards.  Get on board M$.
 
 
-The API for Lazy, Recordset, and Dataset allows for hooking simple widgets together to generate not-so-simple results, such as pages with Parent/Child 1 to Many relationships between the Datasets.  CGI::Lazy::Composite is a wrapper designed to connect Dataset objects together.
+The API for Lazy, Recordset, and Dataset allows for hooking simple widgets together to generate not-so-simple results, such as pages with Parent/Child 1 to Many relationships between the Datasets.  CGI::Lazy::Composite is a wrapper designed to connect Widgets, especially Datasets, together.
 
 
 =head1 METHODS
@@ -897,19 +898,21 @@ CGI::Lazy object.
 
 Hashref of object configs.
 
+	class			=> widget class name (lowercase, just as if you were calling $q->widget->$classname)  (only necessary if creating widgets automatically, such as members of a Composite widget)
+
 	id			=> widget id 			(manditory)
 	
 	type			=> widget type			(manditory)  'single' or 'multi'
 
 	template		=> standard template		(manditory)
 
-	multipleTemplate 	=> 				(manditory if your searches could ever return multiple results)
+	multipleTemplate 	=> multiple template		(manditory if your searches could ever return multiple results)
 
 	headings		=> 'none'			No headings displayed on a multi dataset.  If it's anyting other than 'none' its assumed to be the name of a template
 
 	headings		=> 'template name'		template to use for headings.  Integral div tags assumed.  
 
-	recordset		=> CGI::Lazy::RecordSet			(manditory)
+	recordset		=> CGI::Lazy::RecordSet		(manditory)  Can pre-make recordset and pass object reference, or just pass hashref with recordset's particulars, and it'll get created on the fly.
 
 	flagColor		=> color to flag fields that fail validation (defaults to red)   (optional)
 

@@ -15,6 +15,13 @@ sub basewhere {
 	return $self->{_basewhere};
 }
 
+#------------------------------------------------------------------------------
+sub checkboxes {
+	my $self = shift;
+
+	return $self->{_checkboxes};
+}
+
 #--------------------------------------------------------------------
 sub createSelect {
 	my $self = shift;
@@ -331,6 +338,7 @@ sub new {
 		_where			=> '',
 		_mysqlAuto		=> $args->{mysqlAuto},
 		_primarykeyhandle	=> \$var,
+		_checkboxes		=> [],
 
 	};
 	
@@ -339,7 +347,9 @@ sub new {
 
 	foreach (@{$args->{fieldlist}}) {
 		$self->{_fieldlist}{$_->{name}} = $_;
-
+		if ($_->{webcontrol} && ($_->{webcontrol}->{type} eq 'checkbox')) {
+			push @{$self->{_checkboxes}}, $_->{name};
+		}
 	}
 
 	return bless $self, $class;
@@ -619,11 +629,25 @@ sub update {
 			}
 		}
 
+		if (@{$self->checkboxes}) {
+			foreach (@{$self->checkboxes}) {
+				next if exists $data->{$ID}->{$_};
+
+				if ($vars->{$_}->{handle}) {
+					${$vars->{$_}->{handle}} = '';
+				}
+
+				push @updates,  "$_ = ?";
+				push @binds, '';
+
+			}
+		}
+
 		my $updateclause = join ',', @updates;
 
 		my $query = "update $table set $updateclause where $primarykey = ?";
 
-#		$self->q->util->debug->edump($query."\n".join ',', @binds. " key: $ID");
+#		$self->q->util->debug->edump($query, join ',', @binds. " key: $ID");
 	       
 		$self->db->do($query, @binds, $ID);
 

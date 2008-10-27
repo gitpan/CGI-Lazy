@@ -1,11 +1,11 @@
-package CGI::Lazy::Ajax::Composite;
+package CGI::Lazy::Widget::Composite;
 
 use strict;
 use warnings;
 
 use JSON;
 use CGI::Lazy::Globals;
-use base qw(CGI::Lazy::Ajax);
+use base qw(CGI::Lazy::Widget);
 
 no warnings qw(uninitialized redefine);
 
@@ -67,7 +67,7 @@ sub ajaxSelectParentChild {
 			vars => {%parentKeys},
 	);
 
-	$parentParams{like} = $self->relationship->{parent}->{searchLike} if $self->relationship->{parent}->{searchLike};
+	$parentParams{searchLike} = $self->relationship->{parent}->{searchLike} if $self->relationship->{parent}->{searchLike};
 
         my $parentOutput = $parent->select(%parentParams); 
 
@@ -86,9 +86,9 @@ sub ajaxSelectParentChild {
 			push @$widgets, $self->members->{$child};
 			
 			if ($parent->empty) {
-				push @$output, $self->members->{$child}->ajaxBlank(div=>1);
+				push @$output, $self->members->{$child}->ajaxBlank(div => 1);
 			} else {
-				push @$output, $self->members->{$child}->select(incoming => {%childParams}, div=>1);
+				push @$output, $self->members->{$child}->select(incoming => {%childParams}, div => 1);
 			}
 		}
 
@@ -211,8 +211,23 @@ sub new {
 	my $vars = shift;
 
         my $widgetID = $vars->{id};
-
 	my $members = {};
+
+	my $parsedMembers = [];
+
+	foreach my $member (@{$vars->{members}}) {
+		if (ref $member =~ /^CGI::Lazy::Widget/) {
+			push @$parsedMembers, $member;
+		} else {
+			my $class = $member->{class};
+
+			my $widget = $q->widget->$class($member);
+			push @$parsedMembers, $widget;
+		}
+	}
+
+	$vars->{members} = $parsedMembers;
+
 	foreach (@{$vars->{members}}) {
 		$members->{$_->widgetID} = $_;
 	}
@@ -262,14 +277,14 @@ Bug reports and comments to nik.ogura@gmail.com.
 
 =head1 NAME
 
-CGI::Lazy::Ajax::Composite
+CGI::Lazy::Widget::Composite
 
 =head1 SYNOPSIS
 
 	use CGI::Lazy;
 
 	our $q = CGI::Lazy->new('/path/to/config/file');
-	our $composite = $q->ajax->composite({
+	our $composite = $q->widget->composite({
 			id		=> 'stuff',
 
 			type		=> 'parentChild',
@@ -369,48 +384,6 @@ members 		=> arrayref of member widgets	(manditory)
 
 =head1 EXAMPLES
 
-Javascript:
-
-	#these functions are built into a dataset, but at present have to be written manually for a composite
-
-	# javascript functions for recieving search results for a composite widget
-	
-	function compositeReturn(text) {
-		var incoming = JSON.parse(text);
-		var html = incoming.html;
-
-		parentController.validator = incoming.validator.parent;
-		childController.validator = incoming.validator.child;
-
-		document.getElementById('stuff').innerHTML = html;
-	}
-
-	#validation of both parent and child on submit
-	function pageValidate() {		
-		var parentstate = parentController.validate();
-		var childstate = childController.validate();
-
-		if (parentstate && childstate) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	# javascript functions for searching a parent/child widget composite
-	function compositesearch () {
-			list = ['parent-field1', 'parent-field2', 'parent-field3'];
-			var outgoing = {};
-
-			for (i in list) {
-				outgoing[list[i]] = document.getElementById(list[i]).value;
-			}
-
-			var compositeSend;
-			ajaxSend(compositeSend, outgoing, compositeReturn);
-	}
-
-Perl: 
 #!/usr/bin/perl
 
 	use strict;
@@ -421,7 +394,7 @@ Perl:
 	our $ref = \$var; #ref to tie parts together.
 
 	our $q = CGI::Lazy->new('/path/to/config/file');
-	our $composite = $q->ajax->composite({
+	our $composite = $q->widget->composite({
 			id		=> 'stuff',
 
 			type		=> 'parentChild',
@@ -454,145 +427,146 @@ Perl:
 
 			members 	=> [
 
-				$q->ajax->dataset({
-						
-						id		=> 'advertiser',
+				{
+					class		=> 'dataset',
+					
+					id		=> 'advertiser',
 
-						type		=> 'single',
+					type		=> 'single',
 
-						multiType	=> 'list',
+					multiType	=> 'list',
 
-						containerId	=> 'stuff',
+					containerId	=> 'stuff',
 
-						template	=> 'cscAdvertiser.tmpl',
+					template	=> 'cscAdvertiser.tmpl',
 
-						multipleTemplate => 'cscAdvertiserMulti.tmpl',
+					multipleTemplate => 'cscAdvertiserMulti.tmpl',
 
-						extravars	=> {
+					extravars	=> {
 
-								advertiserID	=> {
+							advertiserID	=> {
 
-										value => $id,
+									value => $id,
 
-									},
-						},
+								},
+					},
 
-						recordset	=> $q->db->recordset({
+					recordset	=> {
 
-									table		=> 'advertiser', 
+								table		=> 'advertiser', 
 
-									fieldlist	=> [
+								fieldlist	=> [
 
-												{name => 'advertiser.ID',	label	=> 'Adv#', handle => $id},
+											{name => 'advertiser.ID',	label	=> 'Adv#', handle => $id},
 
-												{name => 'advertiser.companyname',		label	=> 'Company:', 		multi	=> 1},
+											{name => 'advertiser.companyname',		label	=> 'Company:', 		multi	=> 1},
 
-												{name => 'advertiser.repid',		label	=> 'Account Rep:',	multi	=> 1},
+											{name => 'advertiser.repid',		label	=> 'Account Rep:',	multi	=> 1},
 
-												{name => 'advertiser.address', 		label	=> 'Address:',	 	multi	=> 1},
+											{name => 'advertiser.address', 		label	=> 'Address:',	 	multi	=> 1},
 
-												{name => 'advertiser.city', 		label	=> 'City:', 		multi	=> 1},
+											{name => 'advertiser.city', 		label	=> 'City:', 		multi	=> 1},
 
-												{name => 'advertiser.state', 		label	=> 'State:'},
+											{name => 'advertiser.state', 		label	=> 'State:'},
 
-												{name => 'advertiser.postalcode', 		label	=> 'Zip:'},
+											{name => 'advertiser.postalcode', 		label	=> 'Zip:'},
 
-												{name => 'advertiser.country', 		label	=> 'Country'},
+											{name => 'advertiser.country', 		label	=> 'Country'},
 
-												{name => 'advertiser.contactphone',	label	=> 'Phone:'},
+											{name => 'advertiser.contactphone',	label	=> 'Phone:'},
 
-												{name => 'advertiser.contactfax', 		label	=> 'Fax:'},
+											{name => 'advertiser.contactfax', 		label	=> 'Fax:'},
 
-												{name => 'advertiser.contactnamefirst',	label	=> 'Contact:' },
+											{name => 'advertiser.contactnamefirst',	label	=> 'Contact:' },
 
-												{name => 'advertiser.contactnamelast',	label	=> '', 			noLabel => 1},
+											{name => 'advertiser.contactnamelast',	label	=> '', 			noLabel => 1},
 
-												{name => 'advertiser.contactemail',	label 	=> 'Email:'},
+											{name => 'advertiser.contactemail',	label 	=> 'Email:'},
 
-												{name => 'advertiser.website',		label	=> 'Website:'},
+											{name => 'advertiser.website',		label	=> 'Website:'},
 
-												{name => 'advertiser.notes',	label 	=> 'Notes:'},
+											{name => 'advertiser.notes',	label 	=> 'Notes:'},
 
-												{name => 'salesrep.namefirst',	noLabel => 1},
+											{name => 'salesrep.namefirst',	noLabel => 1},
 
-												{name => 'salesrep.namelast', 	noLabel	=> 1}
+											{name => 'salesrep.namelast', 	noLabel	=> 1}
 
-												], 
+											], 
 
-									basewhere 	=> '', 
+								basewhere 	=> '', 
 
-									orderby		=> 'advertiser.ID', 
+								orderby		=> 'advertiser.ID', 
 
-									primarykey	=> 'advertiser.ID',
+								primarykey	=> 'advertiser.ID',
 
-									joins		=> [
+								joins		=> [
 
-												{type => 'inner', table	=> 'salesrep', field1 => 'salesrep.ID', field2 => 'advertiser.repid',},
+											{type => 'inner', table	=> 'salesrep', field1 => 'salesrep.ID', field2 => 'advertiser.repid',},
 
-									],
+								],
 
-									insertadditional => {
+								insertadditional => {
 
-										advertiserID	=> {
+									advertiserID	=> {
 
-												sql => 'select LAST_INSERT_ID()',
+											sql => 'select LAST_INSERT_ID()',
 
-												handle => $id,
-
-										},
-
-
+											handle => $id,
 
 									},
 
-								}),
 
 
-				}),
+								},
 
-				$q->ajax->dataset({
+							},
 
-						id		=> 'activity',
+				},
 
-						type		=> 'multi',
+				{
+					class		=> 'dataset',
 
-						template	=> "cscActivity.tmpl",
+					id		=> 'activity',
 
-						recordset	=> $q->db->recordset({
+					type		=> 'multi',
 
-									table		=> 'activity', 
+					template	=> "cscActivity.tmpl",
 
-									fieldlist	=> [
+					recordset	=> {
 
-												{name => 'advertiserID', 	hidden => 1},
+								table		=> 'activity', 
 
-												{name => 'activity.ID',		label => 'Item#'},
+								fieldlist	=> [
 
-												{name => 'sortdate', 		label => 'RunDate'},
+											{name => 'advertiserID', 	hidden => 1},
 
-												{name => 'issue', 		label => 'Location'},
+											{name => 'activity.ID',		label => 'Item#'},
 
-												{name => 'page', 		label => 'Page'},
+											{name => 'sortdate', 		label => 'RunDate'},
 
-												{name => 'description', 	label => 'Description', nolabel => 1},
+											{name => 'issue', 		label => 'Location'},
 
-												{name => 'type', 		label => 'Type', nolabel => 1},
+											{name => 'page', 		label => 'Page'},
 
-												{name => 'activity.notes', 	label => 'Notes', nolabel => 1},
+											{name => 'description', 	label => 'Description', nolabel => 1},
+
+											{name => 'type', 		label => 'Type', nolabel => 1},
+
+											{name => 'activity.notes', 	label => 'Notes', nolabel => 1},
 
 
 
-												], 
+											], 
 
-									basewhere 	=> '', 
+								basewhere 	=> '', 
 
-									orderby		=> 'activity.ID', 
+								orderby		=> 'activity.ID', 
 
-									primarykey	=> 'activity.ID',
+								primarykey	=> 'activity.ID',
 
-						}),
+					},
 
-				}),
+				},
 				
 				],
 		);

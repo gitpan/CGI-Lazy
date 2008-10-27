@@ -1,9 +1,9 @@
-package CGI::Lazy::Ajax::DomLoader;
+package CGI::Lazy::Widget::DomLoader;
 
 use strict;
 use warnings;
 
-use base qw(CGI::Lazy::Ajax);
+use base qw(CGI::Lazy::Widget);
 use JSON;
 
 no warnings qw(uninitialized redefine);
@@ -47,7 +47,7 @@ Bug reports and comments to nik.ogura@gmail.com.
 
 =head1 NAME
 
-CGI::Lazy::Ajax::DomLoader
+CGI::Lazy::Widget::DomLoader
 
 =head1 SYNOPSIS
 
@@ -79,7 +79,7 @@ CGI::Lazy::Ajax::DomLoader
 
 =head1 DESCRIPTION
 
-CGI::Lazy::Ajax::DomLoader is an object for preloading useful stuff into a page's DOM, such as lookup queries, or any javascript object that might be desired.  This is functionality that is duplicated from the internals of CGI::Lazy::Ajax::Dataset, but it's included as a separate object for preloading arbitrary values for other purposes.
+CGI::Lazy::Widget::DomLoader is an object for preloading useful stuff into a page's DOM, such as lookup queries, or any javascript object that might be desired.  This is functionality that is duplicated from the internals of CGI::Lazy::Widget::Dataset, but it's included as a separate object for preloading arbitrary values for other purposes.
 
 
 =head1 METHODS

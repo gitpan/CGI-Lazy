@@ -1,4 +1,13 @@
 Revision history for Perl extension CGI::Lazy.
+1.00	-changed Ajax class to Widget.
+	-modified Dataset so it can take an existing recordset, or just a hashref for a recordset, which will be created on the fly.
+	-likewise modded Composite so it can take data structures as well as widgets.
+	-fixed bug in Dataset where multiple search results wouldn't display properly, and wouldn't take one to a particular record.
+	-changed like and likevars to searchLike and searchLikeVars respectively to remove ambiguity.
+	-fixed bug in Dataset where multiple returns on a single dataset would, when searching for a particular primary key value, would use 'like' if searchLike was set
+	-fixed bug in checkbox handling where searches took unchecked checkboxes to be checked (updeate in Javascript.pm)
+	-added code to Recordset so unchecked checkboxes would write to db as ''
+
 0.12	-fixed Dataset to respect order of arrays or hashes sent to it for select webcontrols
 	-added sql support for select widgets in dataset
 	-added missing method to ErrorHandler to handle CSS object errors
@@ -67,7 +76,7 @@ Revision history for Perl extension CGI::Lazy.
 	-added readonly mode to Dataset
 	-set Template.pm to die_on_bad_params => 0  It won't care now if you output a parameter to a template that doesn't contain that tag- will just ignore it
 
-0.03	-split Auth.pm and Authz.pm ito separate distros
+0.03	-split Authn.pm and Authz.pm ito separate distros
 	-lowered requirements in Makefile.PL  they were unnecessarily high
 
 0.02-r3 -fixed pod formatting again.  no changes to code
@@ -81,5 +90,5 @@ Revision history for Perl extension CGI::Lazy.
 0.01  Tue Jul 29 15:37:23 2008
 	- original version; created by h2xs 1.23 with options
 		-X CGI::Lazy
-	then added teh real code... here goes...
+	then added the real code... here goes...
 

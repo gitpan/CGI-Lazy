@@ -1,13 +1,13 @@
-package CGI::Lazy::Ajax;
+package CGI::Lazy::Widget;
 
 use strict;
 use warnings;
 
 use JSON;
 use CGI::Lazy::Globals;
-use CGI::Lazy::Ajax::Dataset;
-use CGI::Lazy::Ajax::DomLoader;
-use CGI::Lazy::Ajax::Composite;
+use CGI::Lazy::Widget::Dataset;
+use CGI::Lazy::Widget::DomLoader;
+use CGI::Lazy::Widget::Composite;
 
 no warnings qw(uninitialized redefine);
 
@@ -58,7 +58,7 @@ sub composite {
 	my $self = shift;
 	my $vars = shift;
 	
-	return CGI::Lazy::Ajax::Composite->new($self->q, $vars);
+	return CGI::Lazy::Widget::Composite->new($self->q, $vars);
 }
 
 #----------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ sub dataset {
 	my $self = shift;
 	my $vars = shift;
 
-	return CGI::Lazy::Ajax::Dataset->new($self->q, $vars);
+	return CGI::Lazy::Widget::Dataset->new($self->q, $vars);
 }
 
 #----------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ sub dbwrite {
 	my $self = shift;
 	my %args = @_;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->dbwrite;
 		}
@@ -152,7 +152,7 @@ sub displaySelect {
 sub deletes {
 	my $self = shift;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->deletes;
 		}
@@ -214,7 +214,7 @@ sub domloader {
 	my $self = shift;
 	my $vars = shift;
 
-	return CGI::Lazy::Ajax::DomLoader->new($self->q, $vars);
+	return CGI::Lazy::Widget::DomLoader->new($self->q, $vars);
 }
 
 #----------------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ sub insert {
 	my $self = shift;
 	my %vars = @_;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->insert(%vars);
 		}
@@ -237,7 +237,7 @@ sub insert {
 sub inserts {
 	my $self = shift;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->inserts;
 		}
@@ -317,7 +317,7 @@ sub new {
 sub postdata {
         my $self = shift;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->postdata;
 		}
@@ -403,7 +403,7 @@ sub rundelete {
 	my $self = shift;
 	my %vars = @_;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->rundelete(%vars);
 		}
@@ -420,13 +420,14 @@ sub select {
 	my $self = shift;
 	my %args = @_;
 
-	$args{like} = $self->vars->{searchLike} if $self->vars->{searchLike};
+        $args{searchLike} = $self->vars->{searchLike} if $self->vars->{searchLike};
+        $args{searchLikeVars} = $self->vars->{searchLikeVars} if $self->vars->{searchLikeVars};
 
 	my $incoming = $args{incoming} || from_json(($self->q->param('POSTDATA') || $self->q->param('keywords') || $self->q->param('XForms:Model')));
 	my $div = $args{div};
 	my $vars = $args{vars};
-	my $like = $args{like};
-	my $likevars = $args{likevars};
+	my $like = $args{searchLike};
+	my $likevars = $args{searchLikeVars};
 
 
 	my $widgetID = $self->widgetID;
@@ -435,6 +436,11 @@ sub select {
 	my $binds = [];
 
 #	$self->q->util->debug->edump($incoming);
+
+	if ($incoming->{noSearchLike}) {
+		$like = undef;
+		delete $incoming->{noSearchLike};
+	}
 
 	delete $incoming->{CGILazyID}; #key/value pair only used at cgi level, will cause problems here (set automatically by Dataset with name of widget)
 
@@ -450,7 +456,7 @@ sub select {
 			'?%'	=> sub {return $_[0].'%';},
 			'%?'	=> sub {return '%'.$_[0];},
 
-		      );
+	);
 
 	foreach my $field (keys %$incoming) {
 		unless ($field =~ /['"&;]\(\)/) {
@@ -498,7 +504,7 @@ sub update {
 	my $self = shift;
 	my %vars = @_;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->update(%vars);
 		}
@@ -515,7 +521,7 @@ sub update {
 sub updates {
 	my $self = shift;
 
-	if (ref $self eq 'CGI::Lazy::Ajax::Composite') {
+	if (ref $self eq 'CGI::Lazy::Widget::Composite') {
 		foreach (@{$self->memberarray}) {
 			$_->updates;
 		}
@@ -591,7 +597,7 @@ Bug reports and comments to nik.ogura@gmail.com.
 
 =head1 NAME
 
-CGI::Lazy::Ajax
+CGI::Lazy::Widget
 
 =head1 SYNOPSIS
 
@@ -599,11 +605,11 @@ CGI::Lazy::Ajax
 
 	my $q = CGI::Lazy->new('/path/to/config');
 
-	my $widget = $q->ajax->dataset({...});
+	my $widget = $q->widget->dataset({...});
 
 =head1 DESCRIPTION
 
-CGI::Lazy::Ajax is an abstract class for the Lazy Ajax widgets such as Dataset, Composite, and Domloader.
+CGI::Lazy::Widget is an abstract class for widgets such as Dataset, Composite, and Domloader.
 
 Its methods are called internally by its child classes.  There are, at present, no real uses for the class by itself.
 
@@ -664,11 +670,11 @@ The rest of the hash supports the following options:
 
 	div 		=> 1  #By default will be sans enclosing div tags, but div can be included if you pass div => 1.  This is useful for members of composite widgets.
 	
-	like		=> '%?%' # search will be like %value%, in other words anything containing 'value'. Like is applied only to searches coming in from web, not vars added to the search in the cgi
+	searchLike		=> '%?%' # search will be like %value%, in other words anything containing 'value'. Like is applied only to searches coming in from web, not vars added to the search in the cgi
 
-	like	 	=> '?%'  # search will be on value%
+	searchLike	 	=> '?%'  # search will be on value%
 
-	like		=> '%?'  # search on %v
+	searchLike		=> '%?'  # search on %v
 
 	vars 		=> {fieldname => {optionname => optionvalue}}
 
@@ -676,10 +682,10 @@ The rest of the hash supports the following options:
 
 	vars		=> {foo => {handle => $ref}}} # when retrieved $$ref will have the value of field foo. ('handle' is a 'handle' on that value for use in tying things together.)
 	
-	likevars	=> '%?%' # search will be like %value%, in other words anything containing 'value'.  like is applied to vars specified from the cgi. Basically this means you can do a like on variables hardcoded in the cgi independantly from things coming in from the web.
+	searchLikeVars	=> '%?%' # search will be like %value%, in other words anything containing 'value'.  like is applied to vars specified from the cgi. Basically this means you can do a like on variables hardcoded in the cgi independantly from things coming in from the web.
 
-	likevars 	=> '?%'  # search will be on value%
+	searchLikeVars 	=> '?%'  # search will be on value%
 
-	likevars	=> '%?'  # search on %v
+	searchikeVars	=> '%?'  # search on %v
 
 

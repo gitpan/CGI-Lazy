@@ -12,7 +12,7 @@ use CGI::Lazy::DB;
 use CGI::Lazy::DB::RecordSet;
 use CGI::Lazy::Session;
 use CGI::Lazy::Template;
-use CGI::Lazy::Ajax;
+use CGI::Lazy::Widget;
 use CGI::Lazy::Globals;
 use CGI::Lazy::ErrorHandler;
 use CGI::Lazy::Utility;
@@ -24,7 +24,7 @@ use base qw(CGI::Pretty);
 
 no warnings qw(uninitialized redefine);
 
-our $VERSION = '0.12';
+our $VERSION = '1.00';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -40,10 +40,10 @@ sub DESTROY {
 }
 
 #------------------------------------------------------------
-sub ajax {
+sub widget {
 	my $self = shift;
 
-	return CGI::Lazy::Ajax->new($self);
+	return CGI::Lazy::Widget->new($self);
 }
 
 #------------------------------------------------------------
@@ -368,15 +368,11 @@ Probably 80% of the apps the author has been asked to write have been front ends
 
 Output to the web is intended to be through templates via HTML::Template.  However, if you want to write your content into the code manually, we won't stop you.  Again, the whole point was to be flexible and reusable, and to spend our time writing new stuff, not the same old crap over and over again.
 
-The CGI::Lazy::Ajax::Dataset module especially was written to bring spreadsheet-like access to a database table to the web in a fairly transparent manner- after all, most of the time you're doing one of 4 operations on a database: select, insert, update, delete.  The Dataset is, at least at the time of the original writing, the crown jewel of the Lazy framework.
+The CGI::Lazy::Widget::Dataset module especially was written to bring spreadsheet-like access to a database table to the web in a fairly transparent manner- after all, most of the time you're doing one of 4 operations on a database: select, insert, update, delete.  The Dataset is, at least at the time of the original writing, the crown jewel of the Lazy framework.
 
 In any event, it is my hope that this is useful to you.  It has saved me quite alot of work.  I hope that it can do the same for you.  Bug reports and comments are always welcome.
 
 =head1 METHODS
-
-=head2 ajax ()
-
-returns the CGI::Lazy::Ajax object
 
 =head2 javascript (  )
 
@@ -495,6 +491,10 @@ See CGI::Lazy::Utility for details.
 =head2 vars ()
 
 Returns hashref to the variables used in creating the object.
+
+=head2 widget ()
+
+returns the CGI::Lazy::Widget object
 
 =head1 Subversion
 
