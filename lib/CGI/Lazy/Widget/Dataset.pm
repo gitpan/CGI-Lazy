@@ -285,7 +285,7 @@ sub contents {
 						my $webcontrol = $recset->webcontrol($fieldname);
 						my $type = $webcontrol->{type};
 
-						if ($type eq 'select') { #build variables for web dropdowns
+						if ($type eq 'select') { #build variables for web controls
 							$row->{"LOOP.".$fieldname} = $self->buildSelect($fieldname, $webcontrol, $value);
 						} elsif ($type eq 'checkbox') {
 							($row->{"VALUE.".$fieldname}, $row->{"CHECKED.".$fieldname}) = $self->buildCheckbox($fieldname, $webcontrol, $value);
@@ -525,16 +525,16 @@ sub displaySingleList {
 	my $formOpenTag 	= '';
 	my $formCloseTag 	= '';
         my $widgetID		= $self->vars->{id};
-	my $recset = $self->recordset;
-	my @fieldlist = $recset->multipleFieldList;
-	my @labels = $recset->multipleFieldLabels;
+	my $recset 		= $self->recordset;
+	my @fieldlist 		= $recset->multipleFieldList;
+	my @labels 		= $recset->multipleFieldLabels;
 
-        my $surroundingDivName	=         "DIV.MAIN";
-        my $tableCaptionVar   	=         "CAPTION";
-        my $headingLoopVar  	=         "HEADING.LOOP";
-        my $headingItemVar   	=         "HEADING.ITEM";
-        my $bodyRowLoopVar    	=         "ROW.LOOP";
-        my $bodyRowName       	=         "ROW";
+        my $surroundingDivName	= "DIV.MAIN";
+        my $tableCaptionVar   	= "CAPTION";
+        my $headingLoopVar  	= "HEADING.LOOP";
+        my $headingItemVar   	= "HEADING.ITEM";
+        my $bodyRowLoopVar    	= "ROW.LOOP";
+        my $bodyRowName       	= "ROW";
 	
 	if ($standalone) {
 		$formOpenTag = $self->vars->{formOpenTag} || $self->q->start_form({-method => 'post', -action => $self->q->url});
@@ -553,8 +553,33 @@ sub displaySingleList {
 
 		foreach my $field (keys %{$record}) {
 			if ($recset->multipleField($field)) {
-				$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".$record->{$field}."</a>";
 				$row->{PRIMARYKEY} = $ID;
+
+				if ($recset->webcontrol($field)) {
+					my $webcontrol = $recset->webcontrol($field);
+					my $type = $webcontrol->{type};
+
+					if ($type eq 'select') { #build variables for web dropdowns
+						$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".
+							$self->singleListSelect($field, $webcontrol, $record->{$field}).
+							"</a>";
+						
+					} elsif ($type eq 'checkbox') {
+						$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".
+							$self->singleListCheckbox($field, $webcontrol, $record->{$field}).
+							"</a>";
+					} elsif ($type eq 'radio') {
+						$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".
+						$self->singleListRadio($field, $webcontrol, $record->{$field}).
+							"</a>";
+					} else {
+						$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".$record->{$field}."</a>";
+					}
+
+				} else {
+					$row->{"VALUE.".$field} = "<a href= \"javascript:$widgetID"."Controller.multiSearch('$ID');\">".$record->{$field}."</a>";
+
+				}
 			}
 		}
 
@@ -567,7 +592,7 @@ sub displaySingleList {
 
 	};
 
-	my $divopen = $args{nodiv} ? '' : "<div id='$widgetID'>";
+	my $divopen = $args{nodiv} ? '' : "<div id='$widgetID"."Multi'>";
 	my $divclose = $args{nodiv} ? '' : "</div>";
 
 	return $divopen.
@@ -638,6 +663,108 @@ sub searchResults {
 	my $outgoing = '{"validator" : '.$self->validator.', "html" : "'.$html.'"}';    
 
 	return $outgoing;
+}
+
+#----------------------------------------------------------------------------------------
+sub singleListCheckbox {
+	my $self = shift;
+	my $fieldname = shift;
+	my $webcontrol = shift;
+	my $value = shift;
+
+	if ($webcontrol->{value}) {
+		if ($value eq $webcontrol->{value}) {
+			return 'yes';
+		} else {
+			return 'no';
+		}
+
+	} elsif ($webcontrol->{sql}) {
+		my ($query, @binds) = @{$webcontrol->{sql}};
+		my $lookupvalue = $self->q->db->get($query, @binds);
+
+		if ($value eq $lookupvalue) {
+			return 'yes';
+		} else {
+			return 'no';
+		}
+	}
+}
+
+#----------------------------------------------------------------------------------------
+sub singleListRadio {
+	my $self = shift;
+	my $fieldname = shift;
+	my $webcontrol = shift;
+	my $value = shift;
+
+	my $list = [];
+	my $vals = {};
+	tie %$vals, 'Tie::IxHash';
+
+	if ($webcontrol->{values} ) {
+
+		if (ref $webcontrol->{values} eq 'HASH') {
+			$vals = $webcontrol->{values};
+		} elsif (ref $webcontrol->{values} eq 'ARRAY') {
+			$vals->{$_} = $_ for @{$webcontrol->{values}};
+		} else {
+			return;
+		}
+
+
+	} elsif ($webcontrol->{sql} ) {
+		my ($query, @binds) = @{$webcontrol->{sql}};
+
+		$vals->{$_->[0]} = $_->[1] for @{$self->q->db->getarray($query, @binds)};
+
+	}
+
+	foreach (sort keys %$vals) {
+		if ($vals->{$_} eq $value) {
+			return  $vals->{$_};
+
+		}
+	}
+
+}
+
+#----------------------------------------------------------------------------------------
+sub singleListSelect {
+	my $self = shift;
+	my $fieldname = shift;
+	my $webcontrol = shift;
+	my $value = shift;
+
+	my $list = [];
+
+	my $vals = {};
+	tie %$vals, 'Tie::IxHash';
+
+	if ($webcontrol->{values} ) {
+		if (ref $webcontrol->{values} eq 'HASH') {
+			$vals->{''} = '' unless $webcontrol->{notNull};
+			$vals = $webcontrol->{values};
+		} elsif (ref $webcontrol->{values} eq 'ARRAY') {
+			$vals->{''} = '' unless $webcontrol->{notNull};
+			$vals->{$_} = $_ for @{$webcontrol->{values}};
+		} else {
+			return;
+		}
+
+
+	} elsif ($webcontrol->{sql}) {
+		my ($query, @binds) = @{$webcontrol->{sql}};
+		$vals->{''} = '' unless $webcontrol->{notNull};
+		$vals->{$_->[0]} = $_->[1] for @{$self->q->db->getarray($query, @binds)};
+
+	}
+
+	foreach (keys %$vals) {
+		if ($vals->{$_} eq $value) {
+			return $vals->{$_};
+		} 
+	}
 }
 
 #----------------------------------------------------------------------------------------

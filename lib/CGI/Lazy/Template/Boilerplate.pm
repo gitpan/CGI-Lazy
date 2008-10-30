@@ -9,164 +9,164 @@ no warnings qw(uninitialized redefine);
 
 our $datasetMultipleStart = <<END;
 <table id="__WIDGETID__Table">
-	<caption> <tmpl_var name="CAPTION"> </caption>
-	<tr>
-		<tmpl_loop name='HEADING.LOOP'>
-			<th> <tmpl_var name='HEADING.ITEM'> </th>
-		</tmpl_loop>
-	</tr>
-	<tmpl_loop name='ROW.LOOP'>
-		<tr id="<tmpl_var name="ROW">">
+	<caption> <tmpl_var name="CAPTION"> </caption> 
+	<tr> 
+		<tmpl_loop name='HEADING.LOOP'> 
+			<th> <tmpl_var name='HEADING.ITEM'> </th> 
+		</tmpl_loop> 
+	</tr> 
+	<tmpl_loop name='ROW.LOOP'> 
+		<tr id="<tmpl_var name="ROW">"> 
 END
 
 our $tdPrototypeMultiText = <<END;
-				<td>
+				<td> 
 					<input 
-						type="text" 
+						type="text"  
 						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
 						value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
-						id="<tmpl_var name='ID.__FIELDNAME__'>"
+						id="<tmpl_var name='ID.__FIELDNAME__'>" 
 						onchange="__WIDGETID__Controller.unflag(this);__WIDGETID__Controller.pushRow(this);" 
-					/>
-				</td>
+					/> 
+				</td> 
 END
 
 our $tdPrototypeMultiSelect = <<END;
-				<td>
-					<select
+				<td> 
+					<select 
 						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
-						id="<tmpl_var name='ID.__FIELDNAME__'>"
+						id="<tmpl_var name='ID.__FIELDNAME__'>" 
 						onchange="__WIDGETID__Controller.unflag(this);__WIDGETID__Controller.pushRow(this);" 
-					/>
-						<tmpl_loop name="LOOP.__FIELDNAME__">
-							 <option value="<tmpl_var name="ITEM.VALUE">" <tmpl_var name="ITEM.SELECTED">> <tmpl_var name="ITEM.LABEL"> </option>
-						</tmpl_loop>
-					</select>
-				</td>
+					/> 
+						<tmpl_loop name="LOOP.__FIELDNAME__"> 
+							 <option value="<tmpl_var name="ITEM.VALUE">" <tmpl_var name="ITEM.SELECTED">> <tmpl_var name="ITEM.LABEL"> </option> 
+						</tmpl_loop> 
+					</select> 
+				</td> 
 END
 
 our $tdPrototypeMultiCheckbox = <<END;
-				<td>
+				<td> 
 					<input 
 						type="checkbox" 
-						<tmpl_var name='CHECKED.fax'>
+						<tmpl_var name='CHECKED.fax'> 
 						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
 						value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
-						id="<tmpl_var name='ID.__FIELDNAME__'>"
+						id="<tmpl_var name='ID.__FIELDNAME__'>" 
 						onchange="__WIDGETID__Controller.unflag(this); __WIDGETID__Controller.pushRow(this);" 
-					/>
-				</td>
+					/> 
+				</td> 
 END
 
 our $tdPrototypeMultiRadio = <<END;
-				<td>
-					<tmpl_loop name="LOOP.__FIELDNAME__">
-						<tmpl_var name='VALUELABEL.__FIELDNAME__'>
+				<td> 
+					<tmpl_loop name="LOOP.__FIELDNAME__"> 
+						<tmpl_var name='VALUELABEL.__FIELDNAME__'> 
 						<input 
 							type="radio" 
-							<tmpl_var name='CHECKED.__FIELDNAME__'>
-							name="<tmpl_var name='NAME.__FIELDNAME__'>"
-							value="<tmpl_var name='VALUE.__FIELDNAME__'>"
-							id="<tmpl_var name='ID.__FIELDNAME__'>"
-							onchange="__WIDGETID__Controller.unflag(this);__WIDGETID__Controller.pushRow(this);"
-						/>
-					</tmpl_loop>
+							<tmpl_var name='CHECKED.__FIELDNAME__'> 
+							name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+							value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
+							id="<tmpl_var name='ID.__FIELDNAME__'>" 
+							onchange="__WIDGETID__Controller.unflag(this);__WIDGETID__Controller.pushRow(this);" 
+						/> 
+					</tmpl_loop> 
 				</td>
 
 END
 
 our $tdPrototypeMultiRO = <<END;
-				<td>
-					<tmpl_var name='VALUE.__FIELDNAME__'>
-				</td>
+				<td> 
+					<tmpl_var name='VALUE.__FIELDNAME__'> 
+				</td> 
 END
 
 our $tdPrototypeSingleMulti = <<END;
-				<td>
-					<tmpl_var name='VALUE.__FIELDNAME__'>
-				</td>
+				<td> 
+					<tmpl_var name='VALUE.__FIELDNAME__'> 
+				</td> 
 END
 
 our $tdPrototypeSingleText = <<END;
-		<td>
-			<input 
+		<td> 
+			<input  
 				type="text" 
 				name="<tmpl_var name='NAME.__FIELDNAME__'>" 
 				value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
-				id="<tmpl_var name='ID.__FIELDNAME__'>"
-				onchange="__WIDGETID__Controller.unflag(this);" 
-			/>
-		</td>
+				id="<tmpl_var name='ID.__FIELDNAME__'>" 
+				onchange="__WIDGETID__Controller.unflag(this);"  
+			/> 
+		</td> 
 END
 
 our $tdPrototypeSingleRadio = <<END;
- 		<td>
-                        <tmpl_loop name="LOOP.__FIELDNAME__">
-                                <tmpl_var name='VALUELABEL.__FIELDNAME__'>
+ 		<td> 
+                        <tmpl_loop name="LOOP.__FIELDNAME__"> 
+                                <tmpl_var name='VALUELABEL.__FIELDNAME__'> 
                                 <input 
                                         type="radio" 
-                                        <tmpl_var name='CHECKED.__FIELDNAME__'>
-                                        name="<tmpl_var name='NAME.__FIELDNAME__'>"
-                                        value="<tmpl_var name='VALUE.__FIELDNAME__'>"
-                                        id="<tmpl_var name='ID.__FIELDNAME__'>"
-                                        onchange="__WIDGETID__Controller.unflag(this);"
-                                />
-                        </tmpl_loop>
-                </td>
+                                        <tmpl_var name='CHECKED.__FIELDNAME__'> 
+                                        name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+                                        value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
+                                        id="<tmpl_var name='ID.__FIELDNAME__'>" 
+                                        onchange="__WIDGETID__Controller.unflag(this);" 
+                                /> 
+                        </tmpl_loop> 
+                </td> 
 
 END
 
 our $tdPrototypeSingleCheckbox = <<END;
-		<td>
+		<td> 
 			<input 
 				type="checkbox" 
-				<tmpl_var name="CHECKED.__FIELDNAME__">
-				name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+				<tmpl_var name="CHECKED.__FIELDNAME__"> 
+				name="<tmpl_var name='NAME.__FIELDNAME__'>"  
 				value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
-				id="<tmpl_var name='ID.__FIELDNAME__'>"
+				id="<tmpl_var name='ID.__FIELDNAME__'>" 
 				onchange="__WIDGETID__Controller.unflag(this);" 
-			/>
-		</td>
+			/> 
+		</td> 
 END
 
 our $tdPrototypeSingleSelect = <<END;
-		<td>
+		<td> 
 			<select 
 				name="<tmpl_var name='NAME.__FIELDNAME__'>" 
-				id="<tmpl_var name='ID.__FIELDNAME__'>"
+				id="<tmpl_var name='ID.__FIELDNAME__'>" 
 				onchange="__WIDGETID__Controller.unflag(this);" 
-			>
-				<tmpl_loop name="LOOP.__FIELDNAME__">
-					<option value="<tmpl_var name="ITEM.VALUE">" <tmpl_var name="ITEM.SELECTED"> > <tmpl_var name="ITEM.LABEL"> </option>
-				</tmpl_loop>
+			> 
+				<tmpl_loop name="LOOP.__FIELDNAME__"> 
+					<option value="<tmpl_var name="ITEM.VALUE">" <tmpl_var name="ITEM.SELECTED"> > <tmpl_var name="ITEM.LABEL"> </option> 
+				</tmpl_loop> 
 
-			</select>
-		</td>
+			</select> 
+		</td> 
 END
 
 our $tdPrototypeSingleRO = <<END;
-		<td>
-			<tmpl_var name='VALUE.__FIELDNAME__'>
-		</td>
+		<td> 
+			<tmpl_var name='VALUE.__FIELDNAME__'> 
+		</td> 
 END
 
 our $datasetDeleteTd = <<END;
-				<tmpl_if name="DELETE.FLAG">
-				<td>
-					<input 
-						type = 'checkbox' 
-						tabindex=-1 
-						id = "<tmpl_var name = 'DELETE.ID'>" 
-						onclick="__WIDGETID__Controller.deleteRow(this);"
-					>
-				</td>
-				</tmpl_if>
+				<tmpl_if name="DELETE.FLAG"> 
+				<td> 
+					<input  
+						type = 'checkbox'  
+						tabindex=-1  
+						id = "<tmpl_var name = 'DELETE.ID'>"  
+						onclick="__WIDGETID__Controller.deleteRow(this);" 
+					> 
+				</td> 
+				</tmpl_if> 
 END
 
 our $datasetMultipleEnd = <<END;
-		</tr>
-	</tmpl_loop>
-</table>
+		</tr> 
+	</tmpl_loop> 
+</table> 
 END
 
 our $cssClean = <<END;
@@ -181,55 +181,55 @@ our $datasetSingleStart = <<END;
 END
 
 our $datasetSingleRowStart = <<END;
-	<tr>
+	<tr> 
 END
 
 our $datasetSingleLableTd = <<END;
 		<td 
-			id="__FIELDNAME__Label">
-			<tmpl_var name="LABEL.__FIELDNAME__">
-		</td>
+			id="__FIELDNAME__Label"> 
+			<tmpl_var name="LABEL.__FIELDNAME__"> 
+		</td> 
 END
 
 our $datasetSingleRowEnd = <<END;
-	</tr>
+	</tr> 
 
 END
 
 our $datasetSingleEnd = <<END;
 		
-</table>
+</table> 
 
 END
 
 our $datasetMultipleHeaderStart = <<END;
-<div id="__WIDGETID__HDR">
-	<table>
-		<caption> <tmpl_var name="CAPTION"> </caption>
-		<tr>
+<div id="__WIDGETID__HDR"> 
+	<table> 
+		<caption> <tmpl_var name="CAPTION"> </caption> 
+		<tr> 
 
 END
 
 our $datasetMultipleHeaderTd = <<END;
-			<th> 
-				<tmpl_var name="HEADING.ITEM.__FIELDNAME__"> 
-			</th>
+			<th>  
+				<tmpl_var name="HEADING.ITEM.__FIELDNAME__">  
+			</th> 
 
 END
 
 our $datasetMultipleHeaderDeleteTd = <<END;
-			<th> 
-				<tmpl_var name="HEADING.ITEM.DELETE"> 
-			</th>
+			<th>  
+				<tmpl_var name="HEADING.ITEM.DELETE">  
+			</th> 
 
 END
 
 our $datasetMultipleHeaderEnd = <<END;
-		</tr>
+		</tr> 
 
 
-	</table>
-</div>
+	</table> 
+</div> 
 
 
 END
@@ -426,13 +426,13 @@ sub new {
 		_widget			=> $widget,
 	};
 
-	if (ref $widget eq 'CGI::Lazy::Ajax::Dataset') {
+	if (ref $widget eq 'CGI::Lazy::Widget::Dataset') {
 		$self->{_widgetID}	= $widget->widgetID;
 		$self->{_fieldlist}	= $widget->recordset->visibleFields;
 		$self->{_type}		= $widget->type;
 		$self->{_style}		= $widget->vars->{style};
 
-	} elsif (ref $widget eq 'CGI::Lazy::Ajax::Composite') {
+	} elsif (ref $widget eq 'CGI::Lazy::Widget::Composite') {
 		$self->{_widgetID}	= $widget->widgetID;
 		$self->{_composite} 	= 1;
 

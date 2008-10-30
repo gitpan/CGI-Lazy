@@ -1,4 +1,10 @@
 Revision history for Perl extension CGI::Lazy.
+1.01	- Fixed Boilerplate for changes from 1.00.  It was forgotten, and boilerplate objects did nothing
+	- Removed last (hopefully) references to Ajax object from pod
+	- Added to Dataset so that single datasets with webcontrols have the display values, not the values themselves show up on multiple return templates
+	- Fixed native search issues for Composite.
+	- Added more encapsulation to Javascript for dataset pushrow to deal with IE issues.  
+
 1.00	-changed Ajax class to Widget.
 	-modified Dataset so it can take an existing recordset, or just a hashref for a recordset, which will be created on the fly.
 	-likewise modded Composite so it can take data structures as well as widgets.

@@ -24,7 +24,7 @@ use base qw(CGI::Pretty);
 
 no warnings qw(uninitialized redefine);
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 

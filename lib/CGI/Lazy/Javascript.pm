@@ -79,10 +79,10 @@ function sjaxSend(request, outgoing, returnHandler) {
 
 #javascript for Widget::Dataset
 our $DatasetJS = <<END;
-function datasetController(ID, validator, ParentID, searchObject, flagcolor) {
+function datasetController(ID, validator, containerID, searchObject, flagcolor) {
 	this.widgetID = ID;
 	this.validator = validator;
-	this.parentID = ParentID;
+	this.containerID = containerID;
 	this.flagcolor = flagcolor;
 	this.fieldcolor = null;
 	this.searchObject = searchObject;
@@ -185,11 +185,14 @@ datasetController.prototype.pushRow = function(caller) {
 					oldWidget.name 		= oldWidget.name.replace(/(.+)-(.+)--(\\d+\$)/, "\$1-:INSERT:\$2--\$3");
 					fieldName 		= oldWidget.id.replace(/\\d+\$/, ''); 
 				}
-
 				var newWidget		= oldWidget.cloneNode(true);
-				newWidget.name		= fieldName + newRownum;
-				newWidget.id 		= fieldName + newRownum;
-				newWidget.value		= '';
+
+				try {
+					newWidget.name		= fieldName + newRownum;
+					newWidget.id 		= fieldName + newRownum;
+					newWidget.value		= '';
+				} catch (e) {
+				}
 
 				if (oldWidget.name && oldWidget.id) {
 					try {	
@@ -283,7 +286,7 @@ datasetController.prototype.multiSearch = function(id) {
 	outgoing['noSearchLike'] = 1;
 
 	var multiSearchRequest;
-	ajaxSend(multiSearchRequest, outgoing, this.searchResults, this.parentID);
+	ajaxSend(multiSearchRequest, outgoing, this.searchResults, this.containerID);
 
 };
 
@@ -307,6 +310,29 @@ datasetController.prototype.search = function() {
 
 	var sendRequest;
 	ajaxSend(sendRequest, outgoing, this.searchResults, this.widgetID);
+
+};
+
+datasetController.prototype.compositeSearch = function() {
+	var outgoing = {CGILazyID : this.widgetID};
+	for (i in this.searchObject) {
+		var element = document.getElementById(this.searchObject[i]);
+		try {
+			if (element.type == 'checkbox') {
+				if (element.checked == true) {
+					outgoing[this.searchObject[i]] = element.value;
+				}
+			} else {
+				outgoing[this.searchObject[i]] = element.value;
+			}
+		}
+		catch (e) { 
+			//silently let it go if theres no input for this name built in the template
+		}
+	}
+
+	var sendRequest;
+	ajaxSend(sendRequest, outgoing, this.searchResults, this.containerID);
 
 };
 

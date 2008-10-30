@@ -993,7 +993,7 @@ CGI::Lazy::RecordSet
 
 =head1 DESCRIPTION
 
-CGI::Lazy::DB::Recordset is a container object for handling a set of records pulled out of a database.  The big difference between using the Recordset object and just using a standard query is the Recordset, with it's defined internal structure allows for automated transformations to the data.  The object builds the queries on the fly, and remembers where it got all the data in question, so it can edit it and put it back.  Much of this functionality is seen in the Ajax::Dataset object, for which the Recordset object was originally written.
+CGI::Lazy::DB::Recordset is a container object for handling a set of records pulled out of a database.  The big difference between using the Recordset object and just using a standard query is the Recordset, with it's defined internal structure allows for automated transformations to the data.  The object builds the queries on the fly, and remembers where it got all the data in question, so it can edit it and put it back.  Much of this functionality is seen in the CGI::Lazy::Widget::Dataset object, for which the Recordset object was originally written.
 
 =head1 METHODS
 
@@ -1406,7 +1406,7 @@ Name of field to be tested.
 
 Untaints and returns true only if the given string is a field included in the database
 
-Due to the dynamic nature of the Ajax objects, it's not possible to bind all variables coming in from the web.  This is not ideal.  However, we can guard from sql injection attacks by refusing to include strings that contain characters beyond A-Za-z0-9_-, and verify that the field in question is part of your recordset.  If your database structure has special characters in it's table names, go out back and hit yourself with a brick.  Shame on you.
+Due to the dynamic nature of the Widget objects, it's not possible to bind all variables coming in from the web.  This is not ideal.  However, we can guard from sql injection attacks by refusing to include strings that contain characters beyond A-Za-z0-9_-, and verify that the field in question is part of your recordset.  If your database structure has special characters in it's table names, go out back and hit yourself with a brick.  Shame on you.
 
 =head2 visibleFieldLabels ()
 

@@ -59,7 +59,7 @@ Bug reports and comments to nik.ogura@gmail.com.
 
 =head1 NAME
 
-CGI::Lazy::Ajax::JSONParser
+CGI::Lazy::Javascript::JSONParser
 
 =head1 DESCRIPTION
 

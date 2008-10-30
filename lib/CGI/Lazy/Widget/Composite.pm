@@ -51,7 +51,7 @@ sub ajaxSelectParentChild {
 
 	my $incoming = $args{incoming} || from_json(($self->q->param('POSTDATA') || $self->q->param('keywords') || $self->q->param('XForms:Model')));
 
-        my $parent = $self->members->{$self->relationship->{parent}->{name}};
+        my $parent = $self->members->{$self->relationship->{parent}->{id}};
 
 	my %parentKeys;
 
@@ -62,9 +62,9 @@ sub ajaxSelectParentChild {
 	}
 
 	my %parentParams = (
-			incoming => $incoming, 
-			div => $self->relationship->{parent}->{searchDiv}, 
-			vars => {%parentKeys},
+			incoming 	=> $incoming, 
+			div		=> 1,
+			vars 		=> {%parentKeys},
 	);
 
 	$parentParams{searchLike} = $self->relationship->{parent}->{searchLike} if $self->relationship->{parent}->{searchLike};
@@ -86,7 +86,7 @@ sub ajaxSelectParentChild {
 			push @$widgets, $self->members->{$child};
 			
 			if ($parent->empty) {
-				push @$output, $self->members->{$child}->ajaxBlank(div => 1);
+				push @$output, $self->members->{$child}->ajaxBlank();
 			} else {
 				push @$output, $self->members->{$child}->select(incoming => {%childParams}, div => 1);
 			}
@@ -154,7 +154,7 @@ sub dbwriteParentChild {
        	my $self = shift;
 	my %args = @_;
 
-        my $parent = $self->members->{$self->relationship->{parent}->{name}};
+        my $parent = $self->members->{$self->relationship->{parent}->{id}};
 
 	my %parentKeys;
 
@@ -292,11 +292,9 @@ CGI::Lazy::Widget::Composite
 			relationship	=> {
 
                              parent          => {
-                                                name            => 'parentWidget',
+                                                id            => 'parentWidget',
 
                                                 searchLike      => '%?%',
-
-                                                searchDiv       => 1,
 
                                 },
 
@@ -402,11 +400,9 @@ members 		=> arrayref of member widgets	(manditory)
 			relationship	=> {
 
                              parent          => {
-                                                name            => 'parentWidget',
+                                                id            => 'parentWidget',
 
                                                 searchLike      => '%?%',
-
-                                                searchDiv       => 1,
 
                                 },
 
