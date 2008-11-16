@@ -4,13 +4,17 @@ MANIFEST
 README
 t/CGI-Lazy.t
 lib/CGI/Lazy.pm
+lib/CGI/Lazy/Authn.pm
+lib/CGI/Lazy/Authz.pm
 lib/CGI/Lazy/Config.pm
 lib/CGI/Lazy/CookieMonster.pm
+lib/CGI/Lazy/CSS.pm
 lib/CGI/Lazy/DB.pm
 lib/CGI/Lazy/DB/RecordSet.pm
 lib/CGI/Lazy/ErrorHandler.pm
 lib/CGI/Lazy/Globals.pm
 lib/CGI/Lazy/ID.pm
+lib/CGI/Lazy/Image.pm
 lib/CGI/Lazy/Javascript.pm
 lib/CGI/Lazy/Javascript/JSONParser.pm
 lib/CGI/Lazy/Plugin.pm

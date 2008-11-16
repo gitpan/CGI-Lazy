@@ -325,9 +325,9 @@ Session data is stored in the db as JSON formatted text at present.  Fancier sto
 
 The session table must have the following fields at a bare minimum:
 
-	sessionID	not null, primary key
+	sessionID	not null, primary key, varchar(25)
 
-	data		text (mysql) large storage (blob in oracle)
+	data		text (mysql) large storage (clob in oracle)
 
 	expired		bool (mysql) 1 digit number basically
 

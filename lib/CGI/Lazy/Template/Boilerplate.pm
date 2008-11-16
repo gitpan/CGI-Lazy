@@ -10,7 +10,7 @@ no warnings qw(uninitialized redefine);
 our $datasetMultipleStart = <<END;
 <table id="__WIDGETID__Table">
 	<caption> <tmpl_var name="CAPTION"> </caption> 
-	<tr> 
+	<tr> <!-- even if you don't use this row, leave it here, or pushRow will break -->
 		<tmpl_loop name='HEADING.LOOP'> 
 			<th> <tmpl_var name='HEADING.ITEM'> </th> 
 		</tmpl_loop> 

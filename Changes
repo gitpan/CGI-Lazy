@@ -1,4 +1,10 @@
 Revision history for Perl extension CGI::Lazy.
+1.02	- Completed Authz and Authn
+	- extended RecordSet to handle password fields for Authn
+	- Cleaned up Javascript to fix multiple issues for pushrow.
+	- Added support for Password fields in recordset.  Their values will be automatically hashed in accordance with Authn, and their values will never be selected.
+	- Fixed multiple bugs relating to webcontrols in Datasets
+
 1.01	- Fixed Boilerplate for changes from 1.00.  It was forgotten, and boilerplate objects did nothing
 	- Removed last (hopefully) references to Ajax object from pod
 	- Added to Dataset so that single datasets with webcontrols have the display values, not the values themselves show up on multiple return templates

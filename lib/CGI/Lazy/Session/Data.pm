@@ -76,7 +76,7 @@ Bug reports and comments to nik.ogura@gmail.com.
 
 CGI::Lazy::Session::Data
 
-=SYNOPSIS
+=head1 SYNOPSIS
 
 	use CGI::Lazy;
 
@@ -134,7 +134,7 @@ CGI::Lazy::Session::Data
 
 	      $q->session->data->name;
 
-=DESCRIPTION
+=head1 DESCRIPTION
 
 CGI::Lazy::Session::Data is simply a data container for CGI::Lazy::Session.  Its a separate object just so we can cleanly use an autoloader without running into namespace problems with the Session object.  This way, you have the widest possible range of names to use for session data.
 

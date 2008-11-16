@@ -19,12 +19,14 @@ use CGI::Lazy::Utility;
 use CGI::Lazy::Javascript;
 use CGI::Lazy::CSS;
 use CGI::Lazy::Image;
+use CGI::Lazy::Authn;
+use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
 no warnings qw(uninitialized redefine);
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -40,10 +42,18 @@ sub DESTROY {
 }
 
 #------------------------------------------------------------
-sub widget {
+sub authn {
 	my $self = shift;
 
-	return CGI::Lazy::Widget->new($self);
+	return $self->{_authn};
+}
+
+#------------------------------------------------------------
+sub authz {
+	my $self = shift;
+
+	return $self->{_authz};
+
 }
 
 #------------------------------------------------------------
@@ -172,22 +182,23 @@ sub new {
 	$self->{_plugin}	= CGI::Lazy::Plugin->new($self);
 	$self->{_db} 		= CGI::Lazy::DB->new($self);
 
-	$self->{_session} 	= CGI::Lazy::Session->open($self, $sessionID) if $self->plugin->session;
+	if ($self->plugin->session) {
+		$self->{_session} = CGI::Lazy::Session->open($self, $sessionID);
+	}
+
+	if ($self->plugin->authn) {
+		$self->{_authn}	= CGI::Lazy::Authn->new($self);
+	}
+
+	if ($self->plugin->authz) {
+		$self->{_authz}	= CGI::Lazy::Authz->new($self);
+	}
 
 	if ($self->plugin->mod_perl) {
 		require CGI::Lazy::ModPerl;
 		$self->{_mod_perl} = CGI::Lazy::ModPerl->new($self);
 	}
 
-	if ($self->plugin->authn) {
-		require CGI::Lazy::Authn;
-		$self->{_auth}	= CGI::Lazy::Authn->new($self);
-	}
-
-	if ($self->plugin->authz) {
-		require CGI::Lazy::Authz;
-		$self->{_authz}	= CGI::Lazy::Authz->new($self);
-	}
 
 	return $self; 
 }
@@ -238,6 +249,13 @@ sub vars {
 	my $self = shift;
 
 	return $self->{_vars};
+}
+
+#------------------------------------------------------------
+sub widget {
+	my $self = shift;
+
+	return CGI::Lazy::Widget->new($self);
 }
 
 1
@@ -374,12 +392,13 @@ In any event, it is my hope that this is useful to you.  It has saved me quite a
 
 =head1 METHODS
 
-=head2 javascript (  )
+=head2 authn ()
 
-returns CGI::Lazy::Javascript object.
+Returns authentication object
 
-see CGI::Lazy::Javascript for details.
+=head2 authz ()
 
+Returns authorization object
 
 =head2 config ()
 
@@ -410,6 +429,11 @@ Creates standard http header.  Passes all arguments to CGI::Pretty::header, simp
 
 normal header args
 
+=head2 javascript (  )
+
+returns CGI::Lazy::Javascript object.
+
+see CGI::Lazy::Javascript for details.
 
 =head2 jswrap ( script )
 

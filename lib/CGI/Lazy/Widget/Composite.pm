@@ -157,21 +157,23 @@ sub dbwriteParentChild {
         my $parent = $self->members->{$self->relationship->{parent}->{id}};
 
 	my %parentKeys;
+	my $parentHandle;
 
 	foreach my $child (keys %{$self->relationship->{children}}){
-		if (($self->relationship->{children}->{$child}->{parentKey} eq $parent->recordset->primarykey) && $parent->recordset->mysqlAuto) {
-			$parentKeys{$self->relationship->{children}->{$child}->{parentKey}} = {handle => $parent->recordset->primarykeyhandle};
-		} else {
-			my $handle;
-			$parentKeys{$self->relationship->{children}->{$child}->{parentKey}} = {handle => \$handle};
-		}
-
+		$parentKeys{$self->relationship->{children}->{$child}->{parentKey}} = {handle => $parent->recordset->primarykeyhandle};
 	}
 
 	$parent->dbwrite(insert => {%parentKeys}, update => {%parentKeys});
 
+#	$self->q->util->debug->edump(\%parentKeys);
+
 	foreach my $child (keys %{$self->relationship->{children}}) {
-		my %childParams = ($self->relationship->{children}->{$child}->{childKey} => {value => ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}}});
+		my %childParams = ($self->relationship->{children}->{$child}->{childKey} => {
+					value => ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}},
+				},
+		);
+
+#		$self->q->util->debug->edump($child, ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}});
 
 		$self->members->{$child}->dbwrite(
 					insert	=> {%childParams},

@@ -162,9 +162,9 @@ datasetController.prototype.pushRow = function(caller) {
 	var oldRownum = oldRow.rowIndex;
 	var newRownum = oldRownum +1;
 
-	if (! document.getElementById("row" + newRownum)) {
+	if (! document.getElementById(this.widgetID + "Row" + newRownum)) {
 		var newRow = table.insertRow(table.rows.length);
-		newRow.id = 'row'+newRownum;
+		newRow.id = this.widgetID + 'Row' + newRownum;
 		var newRownum = newRow.rowIndex;
 
 		for (var i = 0; i< oldRow.cells.length; i++) {

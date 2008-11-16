@@ -57,6 +57,8 @@ sub createSelect {
 		unless ($self->displayOnly($field)) {
 			if ($self->readfunc($field)) {
 				push @fieldlist, $self->readfunc($field);
+			} elsif ($self->passwd($field)) {
+				next;
 			} else {
 				push @fieldlist, $field;
 			}
@@ -104,6 +106,7 @@ sub delete {
 	foreach my $ID (keys %$data) {
 		my $query = "delete from $table where $primarykey = ?";
 	       
+		${$self->primarykeyhandle} = $ID;
 #		$self->q->util->debug->edump($query.", $ID");
 		$self->db->do($query, $ID);
 
@@ -232,21 +235,36 @@ sub insert {
 				unless ($self->displayOnly($field) || $self->readOnly($field)) {
 					push @fieldlist, $field;
 
-					if ($vars->{$field}->{handle}) {
-						${$vars->{$field}->{handle}} = $data->{$row}->{$field};
-					}
+					my $value;
+
 
 					if ($self->inputMask($field)) {
-						push @bindvalues, sprintf $self->inputMask($field), $data->{$row}->{$field};
+						$value = sprintf $self->inputMask($field), $data->{$row}->{$field};
+					} elsif ($self->passwd($field)){
+						if ($self->q->authn) {
+							$value = $self->q->authn->passwdhash($data->{$row}->{$self->passwd($field)->{userField}}, $data->{$row}->{$field});
+						}
 					} else {
-						push @bindvalues, $data->{$row}->{$field};
+						$value = $data->{$row}->{$field};
 					}
+
+					if ($vars->{$field}->{handle}) {
+						${$vars->{$field}->{handle}} = $value;
+					}
+
+					if ($field eq $self->primarykey) {
+						${$self->primarykeyhandle} = $value;
+
+					}
+
+					push @bindvalues, $value;
 
 					if ($self->writefunc($field) ) {
 						push @binds,  $self->fieldlist->{$field}->{writefunc};
 					} else {
 						push @binds, "?";
 					}
+
 				}
 			}
 		}
@@ -262,6 +280,7 @@ sub insert {
 			my $query = 'select LAST_INSERT_ID()';
 			${$self->primarykeyhandle} = $self->db->get($query);
 		}
+
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
@@ -337,7 +356,7 @@ sub new {
 		_updateadditional	=> $args->{updateadditional},
 		_where			=> '',
 		_mysqlAuto		=> $args->{mysqlAuto},
-		_primarykeyhandle	=> \$var,
+		_primarykeyhandle		=> \$var,
 		_checkboxes		=> [],
 
 	};
@@ -446,6 +465,22 @@ sub mysqlAuto {
 }
 
 #------------------------------------------------------------------------------
+sub passwd {
+	my $self = shift;
+	my $field = shift;
+	
+	if (exists $self->fieldlist->{$field}) {
+		if ($self->fieldlist->{$field}->{passwd}) {
+			return $self->fieldlist->{$field}->{passwd};
+		} else {
+			return;
+		}
+	} else {
+		return;
+	}
+}
+
+#------------------------------------------------------------------------------
 sub primarykey {
 	my $self = shift;
 	my $value = shift;
@@ -518,7 +553,7 @@ sub select {
 	eval {
 		$sth = $self->db->dbh->prepare($query);
 		$sth->execute(@bindvars);
-#		$self->q->util->debug->edump($query, @bindvars);
+		#$self->q->util->debug->edump($query, @bindvars);
 	};
 
 	if ($@) {
@@ -532,6 +567,7 @@ sub select {
 			tie (%$record, 'Tie::IxHash');
 
 			for (0..$#fieldlist) {
+				next if	$self->passwd($fieldlist[$_]);
 				$record->{$fieldlist[$_]} = $record[$_];
 			}
 
@@ -541,6 +577,7 @@ sub select {
 
 	$self->{_data} = \@data; 
 
+	#$self->q->util->debug->edump(\@data);
 	return $self->{_data};
 }
 
@@ -612,16 +649,35 @@ sub update {
 				unless ($self->displayOnly($field) || $self->readOnly($field)) {
 					if ($vars->{$field}->{handle}) {
 						${$vars->{$field}->{handle}} = $data->{$ID}->{$field};
+
+					}
+
+					if ($field eq $self->primarykey) {
+						${$self->primarykeyhandle} = $data->{$ID}->{$field};
+
 					}
 
 					if ($self->inputMask($field)) {
 						push @binds, sprintf $self->inputMask($field), $data->{$ID}->{$field};
+					} elsif ($self->passwd($field)){
+						if ($data->{$ID}->{$field}) {
+							if ($self->q->authn) {
+								push @binds, $self->q->authn->passwdhash($data->{$ID}->{$self->passwd($field)->{userField}}, $data->{$ID}->{$field});
+							}
+						}
 					} else {
 						push @binds, $data->{$ID}->{$field};
 					}
+
 					if ($self->writefunc($field) ) {
 						push @updates,  "$field = ".$self->fieldlist->{$field}->{writefunc};
 
+					} elsif ($self->passwd($field)) {
+						if ($self->q->authn) {
+							if ($data->{$ID}->{$field}) {
+								push @updates,  "$field = ?";
+							}
+						}
 					} else {
 						push @updates,  "$field = ?";
 					}
@@ -650,6 +706,8 @@ sub update {
 #		$self->q->util->debug->edump($query, join ',', @binds. " key: $ID");
 	       
 		$self->db->do($query, @binds, $ID);
+
+		${$self->primarykeyhandle} = $ID;
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
@@ -1152,6 +1210,29 @@ Options:
 
 			},
 
+			{
+
+				name		=> 'username',
+
+				label		=> 'Username',
+
+			},
+
+			{	
+
+				name		=> 'passwd',
+				
+				label		=> 'Password',
+
+				passwd		=> {
+
+							userField	=> 'username',
+
+				},
+
+			},
+				
+
 		],
 
 		insertdefaults	=> {
@@ -1276,6 +1357,10 @@ array ref. list of fields with their attributes
 
 		notNull	=> 1   Set this for selects if you don't want the first item of the select to be blank
 
+	passwd		=> This field is password field used with the authn plugin
+
+		userField	=> name of field in recordset that will contain the username
+
 
 =head3 updatedefaults 
 
@@ -1324,6 +1409,18 @@ Returns arrayref or array of fields flagged to show up on multiple records page
 
 Returns arrayref or array of labels for fields chosen to appear on multiple record pages.
 
+=head2 mysqlAuto ()
+
+Returns true if recordset was created with mysqlAuto => 1 .
+
+=head2 passwd ( field ) 
+
+Returns passwd hashref from fieldlist config.  
+
+=head3 fieldname
+
+name of the field in question
+
 =head2 primarykey ( fieldname )
 
 returns or sets the primary key for the object
@@ -1334,11 +1431,7 @@ The name of the field in the database
 
 =head2 primarykeyhandle ()
 
-Returns scalar ref to primary key if set via default or mysqlAuto.
-
-=head2 mysqlAuto ()
-
-Returns true if recordset was created with mysqlAuto => 1 .
+Returns scalar ref to primary key of record being processed.  Used by Composite widget to get primary key of parent.  Only really useful for datasets in single mode.  Use with multiple row datasets at your own risk.
 
 =head2 q ()
 

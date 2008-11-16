@@ -355,9 +355,10 @@ sub preloadLookup {
                         my $output = $lookups->{$queryname}->{output};
 
                         my $orderby = $lookups->{$queryname}->{orderby};
-                        my $orderbystring = join ',', @$orderby;
-                        $query .= " order by " if $orderby;
-                        $query .=$orderbystring;
+
+			if ($orderby) {
+				$query .= " order by ".  join ',', @$orderby;
+			}
 
                         my $results;
 

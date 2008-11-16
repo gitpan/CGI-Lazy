@@ -722,7 +722,7 @@ sub singleListRadio {
 
 	foreach (sort keys %$vals) {
 		if ($vals->{$_} eq $value) {
-			return  $vals->{$_};
+			return  $_;
 
 		}
 	}
@@ -762,7 +762,8 @@ sub singleListSelect {
 
 	foreach (keys %$vals) {
 		if ($vals->{$_} eq $value) {
-			return $vals->{$_};
+#			return $vals->{$_};
+			return $_;
 		} 
 	}
 }
