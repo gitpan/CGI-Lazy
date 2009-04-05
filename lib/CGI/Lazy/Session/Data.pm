@@ -1,11 +1,8 @@
 package CGI::Lazy::Session::Data;
 
 use strict;
-use warnings;
 
 use CGI::Lazy::Globals;
-
-no warnings qw(uninitialized redefine);
 
 #----------------------------------------------------------------------------------------------	
 sub AUTOLOAD {

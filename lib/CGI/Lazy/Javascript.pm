@@ -1,13 +1,10 @@
 package CGI::Lazy::Javascript;
 
 use strict;
-use warnings;
 
 use CGI::Lazy::Globals;
 use CGI::Lazy::Javascript::JSONParser;
 use JavaScript::Minifier qw(minify);
-
-no warnings qw(uninitialized redefine);
 
 #javascript for ajax requests
 our $AJAXJS = q[
@@ -338,6 +335,56 @@ datasetController.prototype.compositeSearch = function() {
 
 END
 
+our $CONTROLLERJS = <<END;
+
+function controllerController(ID, containerID, selectObject) {
+	this.widgetID = ID;
+	this.containerID = containerID;
+	this.selectObject = selectObject;
+}
+
+controllerController.prototype.constructor = controllerController;
+
+controllerController.prototype.select = function() {
+	var outgoing = {};
+	var selectRequest;
+
+	for (i in this.selectObject) {
+		var re = /^select/;
+		if (re.test(document.getElementById(this.selectObject[i].name).type)) {
+			if (this.selectObject[i].required && !document.getElementById(this.selectObject[i].name).options[document.getElementById(this.selectObject[i].name).selectedIndex].value) {
+				return;
+			}
+			outgoing[this.selectObject[i].name] = document.getElementById(this.selectObject[i].name).options[document.getElementById(this.selectObject[i].name).selectedIndex].value;
+			if (document.getElementById(this.selectObject[i].name).options[document.getElementById(this.selectObject[i].name).selectedIndex].value) {
+			}
+		} else {
+			if (this.selectObject[i].required && !document.getElementById(this.selectObject[i].name).value) {
+				return;
+			}
+			outgoing[this.selectObject[i].name] = document.getElementById(this.selectObject[i].name).value;
+		}
+	}
+
+	ajaxSend(selectRequest, outgoing, this.selectResults, this.containerID);
+}
+
+controllerController.prototype.selectResults = function (text, target) {
+	var incoming = JSON.parse(text);
+	for (widgetname in incoming.validator) {
+		var controller = eval(widgetname + 'Controller');
+		delete controller.validator;
+		controller.validator = incoming.validator[widgetname];
+	}
+
+	var html = incoming.html;
+
+	document.getElementById(target).innerHTML = html;
+}
+
+
+END
+
 #javascript for domloader
 our $DOMLOADJS;
 #javascript for composite
@@ -347,6 +394,7 @@ our %component = (
 		'CGI::Lazy::Widget::Dataset'		=> $DatasetJS,
 		'CGI::Lazy::Widget::DomLoader'		=> $DOMLOADJS,
 		'CGI::Lazy::Widget::Composite'		=> $COMPJS,
+		'CGI::Lazy::Widget::Controller'		=> $CONTROLLERJS,
 );
 
 #-------------------------------------------------------------------------------------------------

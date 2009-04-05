@@ -1,12 +1,9 @@
 package CGI::Lazy::Widget::DomLoader;
 
 use strict;
-use warnings;
 
 use base qw(CGI::Lazy::Widget);
 use JSON;
-
-no warnings qw(uninitialized redefine);
 
 #----------------------------------------------------------------------------------------
 sub new {

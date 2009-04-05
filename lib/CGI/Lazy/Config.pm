@@ -1,12 +1,9 @@
 package CGI::Lazy::Config;
 
 use strict;
-use warnings;
 
 use JSON;
 use CGI::Lazy::Globals;
-
-no warnings qw(uninitialized redefine);
 
 #-------------------------------------------------------------------------------
 sub AUTOLOAD {

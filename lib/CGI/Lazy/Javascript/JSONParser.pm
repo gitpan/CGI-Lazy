@@ -1,12 +1,9 @@
 package CGI::Lazy::Javascript::JSONParser;
 
 use strict;
-use warnings;
 
 use Exporter;
 use base qw(Exporter);
-
-no warnings qw(uninitialized redefine);
 
 our @EXPORT = qw($JSONPARSER);
 

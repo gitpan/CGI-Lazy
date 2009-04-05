@@ -1,12 +1,9 @@
 package CGI::Lazy::DB::RecordSet;
 
 use strict;
-use warnings;
 
 use Tie::IxHash;
 use Data::Dumper;
-
-no warnings qw(uninitialized redefine);
 
 #------------------------------------------------------------------
 sub basewhere {

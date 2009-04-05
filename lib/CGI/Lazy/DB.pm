@@ -1,13 +1,10 @@
 package CGI::Lazy::DB;
 
 use strict;
-use warnings;
 
 use DBI;
 use CGI::Lazy::Globals;
 use Carp;
-
-no warnings qw(uninitialized redefine);
 
 #---------------------------------------------------------------------------------------
 sub config {

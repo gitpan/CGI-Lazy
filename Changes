@@ -1,4 +1,9 @@
 Revision history for Perl extension CGI::Lazy.
+1.03	- Fixed bug in Boilerplate where checkbox 'checked' tmplvar wasn't populating fieldname
+	- Added Controller widget for use in Composites with Datasets.  Dataset will query based on valuse in Controller
+	- Added Support for Controller to Boilerplate
+	- Removed use warnings from all modules.
+
 1.02	- Completed Authz and Authn
 	- extended RecordSet to handle password fields for Authn
 	- Cleaned up Javascript to fix multiple issues for pushrow.

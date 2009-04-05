@@ -1,22 +1,27 @@
 package CGI::Lazy::Template::Boilerplate;
 
 use strict;
-use warnings;
 
 use CGI::Lazy::Globals;
 
-no warnings qw(uninitialized redefine);
-
-our $datasetMultipleStart = <<END;
+our $datasetMultipleStartBegin = <<END;
 <table id="__WIDGETID__Table">
 	<caption> <tmpl_var name="CAPTION"> </caption> 
 	<tr> <!-- even if you don't use this row, leave it here, or pushRow will break -->
-		<tmpl_loop name='HEADING.LOOP'> 
-			<th> <tmpl_var name='HEADING.ITEM'> </th> 
-		</tmpl_loop> 
+END
+
+our $datasetMultipleHDR = <<END;
+		<th> 
+			<tmpl_var name='HEADING.ITEM.__FIELDNAME__'> 
+		</th> 
+
+END
+
+our $datasetMultipleStartEnd = <<END;
 	</tr> 
 	<tmpl_loop name='ROW.LOOP'> 
 		<tr id="<tmpl_var name="ROW">"> 
+
 END
 
 our $tdPrototypeMultiText = <<END;
@@ -49,7 +54,7 @@ our $tdPrototypeMultiCheckbox = <<END;
 				<td> 
 					<input 
 						type="checkbox" 
-						<tmpl_var name='CHECKED.fax'> 
+						<tmpl_var name='CHECKED.__FIELDNAME__'> 
 						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
 						value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
 						id="<tmpl_var name='ID.__FIELDNAME__'>" 
@@ -210,13 +215,6 @@ our $datasetMultipleHeaderStart = <<END;
 
 END
 
-our $datasetMultipleHeaderTd = <<END;
-			<th>  
-				<tmpl_var name="HEADING.ITEM.__FIELDNAME__">  
-			</th> 
-
-END
-
 our $datasetMultipleHeaderDeleteTd = <<END;
 			<th>  
 				<tmpl_var name="HEADING.ITEM.DELETE">  
@@ -234,11 +232,106 @@ our $datasetMultipleHeaderEnd = <<END;
 
 END
 
+our $controllerStart = <<END;
+<table>
+	<tr>
+
+END
+
+our $controllerEnd = <<END;
+	</tr>
+</table>
+
+END
+
+our $tdPrototypeControllerSelect = <<END;
+				<td> 
+					<select 
+						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+						id="<tmpl_var name='ID.__FIELDNAME__'>" 
+						onchange="__WIDGETID__Controller.select();" 
+					/> 
+						<tmpl_loop name="LOOP.__FIELDNAME__"> 
+							 <option value="<tmpl_var name="ITEM.VALUE">" <tmpl_var name="ITEM.SELECTED">> <tmpl_var name="ITEM.LABEL"> </option> 
+						</tmpl_loop> 
+					</select> 
+				</td> 
+END
+
+our $tdPrototypeControllerCheckbox = <<END;
+				<td> 
+					<input 
+						type="checkbox" 
+						<tmpl_var name='CHECKED.__FIELDNAME__'> 
+						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+						value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
+						id="<tmpl_var name='ID.__FIELDNAME__'>" 
+						onchange="__WIDGETID__Controller.select();" 
+					/> 
+				</td> 
+END
+
+our $tdPrototypeControllerRadio = <<END;
+				<td> 
+					<tmpl_loop name="LOOP.__FIELDNAME__"> 
+						<tmpl_var name='VALUELABEL.__FIELDNAME__'> 
+						<input 
+							type="radio" 
+							<tmpl_var name='CHECKED.__FIELDNAME__'> 
+							name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+							value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
+							id="<tmpl_var name='ID.__FIELDNAME__'>" 
+							onchange="__WIDGETID__Controller.select();" 
+						/> 
+					</tmpl_loop> 
+				</td>
+
+END
+
+our $tdPrototypeControllerText = <<END;
+				<td> 
+					<input 
+						type="text"  
+						name="<tmpl_var name='NAME.__FIELDNAME__'>" 
+						value="<tmpl_var name='VALUE.__FIELDNAME__'>" 
+						id="<tmpl_var name='ID.__FIELDNAME__'>" 
+						onchange="__WIDGETID__Controller.select();" 
+					/> 
+				</td> 
+END
+
+#--------------------------------------------------------------------------------------------
+sub buildTmplController {
+	my $self = shift;
+
+	my $tmpl = $controllerStart;
+
+	foreach my $control (@{$self->controls}) {
+		my $type = $control->{type};
+
+		if ($type eq 'select') { 
+			$tmpl .= $self->parse4FieldAndID($control->{name}, $tdPrototypeControllerSelect);
+		} elsif ($type eq 'checkbox') {
+			$tmpl .= $self->parse4FieldAndID($control->{name}, $tdPrototypeControllerCheckbox);
+		} elsif ($type eq 'radio') {
+			$tmpl .= $self->parse4FieldAndID($control->{name}, $tdPrototypeControllerRadio);
+		} else {
+			$tmpl .= $self->parse4FieldAndID($control->{name}, $tdPrototypeControllerText);
+		}
+	}
+	
+	$tmpl .= $controllerEnd;
+
+	return $self->outputTmpl($tmpl, 'Controller');
+}
+
 #--------------------------------------------------------------------------------------------
 sub buildTmplDatasetMultiple {
 	my $self = shift;
 
-	my $tmpl = $self->parse4ID($datasetMultipleStart);
+	my $tmpl = $self->parse4ID($datasetMultipleStartBegin);
+	$tmpl .= $self->parse4Field($_, $datasetMultipleHDR) for $self->widget->recordset->visibleFields;
+	$tmpl .= $datasetMultipleStartEnd;
 	
 	foreach my $fieldname (@{$self->fieldlist}) {
 		if ($self->widget->recordset->webcontrol($fieldname)) {
@@ -270,7 +363,7 @@ sub buildTmplDatasetMultipleHeadings {
 	my $self = shift;
 
 	my $tmpl = $self->parse4ID($datasetMultipleHeaderStart);
-	$tmpl .= $self->parse4Field($_, $datasetMultipleHeaderTd) for @{$self->fieldlist};
+	$tmpl .= $self->parse4Field($_, $datasetMultipleHDR) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetMultipleHeaderDeleteTd);
 	$tmpl .= $self->parse4ID($datasetMultipleHeaderEnd);
 
@@ -281,7 +374,9 @@ sub buildTmplDatasetMultipleHeadings {
 sub buildTmplDatasetMultipleRO {
 	my $self = shift;
 
-	my $tmpl = $self->parse4ID($datasetMultipleStart);
+	my $tmpl = $self->parse4ID($datasetMultipleStartBegin);
+	$tmpl .= $self->parse4Field($_, $datasetMultipleHDR) for $self->widget->recordset->visibleFields;
+	$tmpl .= $datasetMultipleStartEnd;
 	$tmpl .= $self->parse4FieldAndID($_, $tdPrototypeMultiRO) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetMultipleEnd);
 
@@ -374,7 +469,9 @@ sub buildTmplDatasetSingleRO {
 sub buildTmplDatasetSingleMulti {
 	my $self = shift;
 
-	my $tmpl = $self->parse4ID($datasetMultipleStart);
+	my $tmpl = $self->parse4ID($datasetMultipleStartBegin);
+	$tmpl .= $self->parse4Field($_, $datasetMultipleHDR) for $self->widget->recordset->multipleFieldList;
+	$tmpl .= $datasetMultipleStartEnd;
 	$tmpl .= $self->parse4Field($_, $tdPrototypeSingleMulti) for @{$self->fieldlist};
 	$tmpl .= $self->parse4ID($datasetMultipleEnd);
 
@@ -389,19 +486,29 @@ sub buildTemplates {
 		return;
 	}
 
-	if ($self->type eq 'single') {
+	if ($self->type eq 'Dataset-single') {
 		$self->buildTmplDatasetSingle;
 		$self->buildTmplDatasetSingleMulti;
 		$self->buildTmplDatasetSingleRO;
 
-	} elsif ($self->type eq 'multi') {
+	} elsif ($self->type eq 'Dataset-multi') {
 		$self->buildTmplDatasetMultiple;
 		$self->buildTmplDatasetMultipleRO;
 		$self->buildTmplDatasetMultipleHeadings;
 
+	} elsif ($self->type eq 'Controller') {
+		$self->buildTmplController;
+
 	}
 
 	return;
+}
+
+#--------------------------------------------------------------------------------------------
+sub controls {
+	my $self = shift;
+
+	return $self->{_controls};
 }
 
 #--------------------------------------------------------------------------------------------
@@ -429,9 +536,14 @@ sub new {
 	if (ref $widget eq 'CGI::Lazy::Widget::Dataset') {
 		$self->{_widgetID}	= $widget->widgetID;
 		$self->{_fieldlist}	= $widget->recordset->visibleFields;
-		$self->{_type}		= $widget->type;
+		$self->{_type}		= 'Dataset-'.$widget->type;
 		$self->{_style}		= $widget->vars->{style};
 
+	} elsif (ref $widget eq 'CGI::Lazy::Widget::Controller') {
+		$self->{_widgetID}	= $widget->widgetID;
+		$self->{_type}		= 'Controller';
+		$self->{_controls}	= $widget->controls;
+	
 	} elsif (ref $widget eq 'CGI::Lazy::Widget::Composite') {
 		$self->{_widgetID}	= $widget->widgetID;
 		$self->{_composite} 	= 1;

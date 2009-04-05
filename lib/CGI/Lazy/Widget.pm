@@ -1,15 +1,13 @@
 package CGI::Lazy::Widget;
 
 use strict;
-use warnings;
 
 use JSON;
 use CGI::Lazy::Globals;
 use CGI::Lazy::Widget::Dataset;
 use CGI::Lazy::Widget::DomLoader;
 use CGI::Lazy::Widget::Composite;
-
-no warnings qw(uninitialized redefine);
+use CGI::Lazy::Widget::Controller;
 
 #----------------------------------------------------------------------------------------
 sub ajaxBlank {
@@ -66,6 +64,14 @@ sub config {
 	my $self = shift;
 
 	return $self->q->config;
+}
+
+#----------------------------------------------------------------------------------------
+sub controller {
+	my $self = shift;
+	my $vars = shift;
+
+	return CGI::Lazy::Widget::Controller->new($self->q, $vars);
 }
 
 #----------------------------------------------------------------------------------------

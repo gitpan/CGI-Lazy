@@ -1,15 +1,12 @@
 package CGI::Lazy::Session;
 
 use strict;
-use warnings;
 
 use JSON;
 use CGI::Lazy::ID;
 use CGI::Lazy::CookieMonster;
 use CGI::Lazy::Session::Data;
 use CGI::Lazy::Globals;
-
-no warnings qw(uninitialized redefine);
 
 #--------------------------------------------------------------------------------------
 sub cookiemonster {

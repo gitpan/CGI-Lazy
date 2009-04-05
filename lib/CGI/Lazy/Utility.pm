@@ -1,12 +1,9 @@
 package CGI::Lazy::Utility;
 
 use strict;
-use warnings;
 
 use CGI::Lazy::Globals;
 use CGI::Lazy::Utility::Debug;
-
-no warnings qw(uninitialized redefine);
 
 #--------------------------------------------------------------
 sub debug {

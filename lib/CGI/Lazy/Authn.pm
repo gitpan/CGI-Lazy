@@ -1,9 +1,6 @@
 package CGI::Lazy::Authn;
 
 use strict;
-use warnings;
-
-no warnings qw(uninitialized redefine);
 
 use CGI::Lazy::Globals;
 use Digest::MD5;

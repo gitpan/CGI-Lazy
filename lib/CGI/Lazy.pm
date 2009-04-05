@@ -2,7 +2,6 @@
 package CGI::Lazy;
 
 use strict;
-use warnings;
 
 use JSON;
 use CGI::Pretty;
@@ -24,9 +23,7 @@ use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
-no warnings qw(uninitialized redefine);
-
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 

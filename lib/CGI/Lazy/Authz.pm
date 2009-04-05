@@ -3,9 +3,6 @@ package CGI::Lazy::Authz;
 use CGI::Lazy::Globals;
 
 use strict;
-use warnings;
-
-no warnings qw(uninitialized redefine);
 
 #-------------------------------------------------------------------------------
 sub AUTOLOAD {

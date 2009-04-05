@@ -1,13 +1,10 @@
 package CGI::Lazy::Template;
 
 use strict;
-use warnings;
 
 use HTML::Template;
 use CGI::Lazy::Globals;
 use CGI::Lazy::Template::Boilerplate;
-
-no warnings qw(uninitialized redefine);
 
 #----------------------------------------------------------------------------------------
 sub boilerplate {

@@ -1,7 +1,6 @@
 package CGI::Lazy::Widget::Dataset;
 
 use strict;
-use warnings;
 
 use JavaScript::Minifier qw(minify);
 use JSON;
@@ -10,11 +9,8 @@ use Tie::IxHash;
 
 use base qw(CGI::Lazy::Widget);
 
-no warnings qw(uninitialized redefine);
-
 our $tableCaptionVar     = "CAPTION";
-our $headingLoopVar      = "HEADING.LOOP";
-our $headingItemVar      = "HEADING.ITEM";
+our $headingItemVar      = "HEADING.ITEM.";
 our $bodyRowLoopVar      = "ROW.LOOP";
 our $bodyRowName         = "ROW";
 our $surroundingDivName  = "DIV.MAIN";
@@ -56,8 +52,8 @@ sub buildHeadings {
 	my $headings = {};
 	my $recset = $self->recordset;
 
-	$headings->{$headingItemVar.".".$_}  = $recset->label($_) for $recset->visibleFields;
-	$headings->{$headingItemVar."."."DELETE"} = $deletename unless $self->vars->{nodelete};
+	$headings->{$headingItemVar.$_}  = $recset->label($_) for $recset->visibleFields;
+	$headings->{$headingItemVar."DELETE"} = $deletename unless $self->vars->{nodelete};
 
 	return $headings;
 }
@@ -232,7 +228,6 @@ sub contents {
 	$self->{_multi} = 0;
 	$self->{_empty} = scalar @{$recset->data} ? 0 : 1;;
 
-	my @headings;
 	my $headingsdiv;
 
 	if ($type eq 'multi') {
@@ -242,9 +237,8 @@ sub contents {
 			$headingsdiv .= $self->q->template($headings)->process($self->headings);
 
 		} else {
-			@headings = map {{$headingItemVar => $_}} $recset->visibleFieldLabels;
-			push @headings, {$headingItemVar => $deletename} unless $nodelete;
-
+			$tmplvars->{$headingItemVar.$_} = $recset->label($_) for $recset->visibleFields;
+			$tmplvars->{$headingItemVar."DELETE"} = $deletename unless $nodelete;
 		}
 
 		my $bodyRowLoop = [];
@@ -361,7 +355,6 @@ sub contents {
 		$self->{_validator} = $validator;
 
 		$tmplvars->{$tableCaptionVar}	= $tableCaptionValue;
-		$tmplvars->{$headingLoopVar}	= \@headings;
 		$tmplvars->{$bodyRowLoopVar}	= $bodyRowLoop;
 			
 	} elsif ($type eq 'single')  {
@@ -531,8 +524,7 @@ sub displaySingleList {
 
         my $surroundingDivName	= "DIV.MAIN";
         my $tableCaptionVar   	= "CAPTION";
-        my $headingLoopVar  	= "HEADING.LOOP";
-        my $headingItemVar   	= "HEADING.ITEM";
+        my $headingItemVar   	= "HEADING.ITEM.";
         my $bodyRowLoopVar    	= "ROW.LOOP";
         my $bodyRowName       	= "ROW";
 	
@@ -540,8 +532,6 @@ sub displaySingleList {
 		$formOpenTag = $self->vars->{formOpenTag} || $self->q->start_form({-method => 'post', -action => $self->q->url});
 		$formCloseTag = $self->q->end_form;
 	}
-
-	my @headings = map {{$headingItemVar => $_}} $recset->multipleFieldLabels;
 
 	my $bodyRowLoop = [];
 
@@ -587,10 +577,11 @@ sub displaySingleList {
 	}
 
 	my $tmplvars = {
-		$headingLoopVar	=> \@headings,
 		$bodyRowLoopVar	=> $bodyRowLoop,
 
 	};
+
+	$tmplvars->{$headingItemVar.$_} = $recset->label($_) for $recset->multipleFieldList;
 
 	my $divopen = $args{nodiv} ? '' : "<div id='$widgetID"."Multi'>";
 	my $divclose = $args{nodiv} ? '' : "</div>";

@@ -1,13 +1,12 @@
 package CGI::Lazy::Widget::Composite;
 
 use strict;
-use warnings;
 
 use JSON;
 use CGI::Lazy::Globals;
 use base qw(CGI::Lazy::Widget);
 
-no warnings qw(uninitialized redefine);
+# for new composite types need the following:  ajaxSelect<type>  and dbwrite<type
 
 #----------------------------------------------------------------------------------------
 sub ajaxBlank {
@@ -94,8 +93,34 @@ sub ajaxSelectParentChild {
 
 		return $self->ajaxReturn($widgets, $output);
         }
+}
 
+#----------------------------------------------------------------------------------------
+sub ajaxSelectSelectableDataset {
+	my $self = shift;
+	my %args = @_;
 
+	my $incoming = $args{incoming} || from_json(($self->q->param('POSTDATA') || $self->q->param('keywords') || $self->q->param('XForms:Model')));
+        my $parent = $self->members->{$self->relationship->{parent}->{id}};
+
+	my $widgets 	= [$parent];
+	my $output 	= [$parent->rawContents(incoming => $incoming, div => 1)];
+
+	foreach my $child (keys %{$self->relationship->{children}}) {
+		my $params = {};
+		
+		foreach (@{$self->relationship->{children}->{$child}}) {	
+			my $value = $incoming->{$_->{parentParam}};
+			my $field = $_->{childField};
+
+			$params->{$field} = $value;
+		}
+
+        	push @$widgets, $self->members->{$child};
+		push @$output, $self->members->{$child}->select(incoming => $params, div => 1);
+	}
+
+	return $self->ajaxReturn($widgets, $output);
 }
 
 #----------------------------------------------------------------------------------------
@@ -174,6 +199,47 @@ sub dbwriteParentChild {
 		);
 
 #		$self->q->util->debug->edump($child, ${$parentKeys{$self->relationship->{children}->{$child}->{parentKey}}->{handle}});
+
+		$self->members->{$child}->dbwrite(
+					insert	=> {%childParams},
+					update 	=> {%childParams},
+				);
+	}
+
+	return;
+}
+
+#----------------------------------------------------------------------------------------
+sub dbwriteSelectableDataset {
+	my $self = shift;
+	my %args = @_;
+	
+        my $parent = $self->members->{$self->relationship->{parent}->{id}};
+
+	my $incoming = {};
+
+	foreach my $child (keys %{$self->relationship->{children}}) {
+		
+		foreach (@{$self->relationship->{children}->{$child}}) {	
+			my $param = $_->{parentParam};
+			my $value = $self->q->param($param);
+
+			$incoming->{$param} = $value;
+		}
+	}
+
+	my $widgets 	= [$parent];
+	my $output 	= [$parent->rawContents(incoming => $incoming, div => 1)];
+
+	foreach my $child (keys %{$self->relationship->{children}}) {
+		my %childParams = ();
+
+		foreach (@{$self->relationship->{children}->{$child}}) {	
+			my $value = $incoming->{$_->{parentParam}};
+			my $field = $_->{childField};
+
+			$childParams{$field} = {value => $value};
+		}
 
 		$self->members->{$child}->dbwrite(
 					insert	=> {%childParams},
