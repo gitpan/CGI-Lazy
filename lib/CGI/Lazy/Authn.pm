@@ -60,7 +60,7 @@ sub check {
 
 	my $session = $self->q->session;
 
-	if  ($session->data->authn && $session->data->authn->{username} && $session->data->authn->{authenticated}) {
+	if  (!$session->expired && $session->data->authn && $session->data->authn->{username} && $session->data->authn->{authenticated}) {
 		return 1;
 	} else {
 		if ($self->authenticate) {

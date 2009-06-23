@@ -3,6 +3,7 @@ package CGI::Lazy::Config;
 use strict;
 
 use JSON;
+use Carp;
 use CGI::Lazy::Globals;
 
 #-------------------------------------------------------------------------------
@@ -49,7 +50,7 @@ sub new {
 		$conf = $filename;
 	} else {	
 		eval {
-			open IF, "< $CONFIGROOT$filename" or croak $!; 
+			open IF, "< $CONFIGROOT/$filename" or croak $!; 
 
 			while (<IF>) {
 				$json .= $_ unless ($_ =~ /^\s*#/);

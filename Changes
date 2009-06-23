@@ -1,4 +1,10 @@
 Revision history for Perl extension CGI::Lazy.
+1.04	-Fixed bug in Javascript.pm where pushRow was clearing out the values of checkboxes in pushRow.  Dynamically generated checkboxes returned no value whether checked or not.
+	-Fixed bug in Config.pm where paths to config file weren't building correctly.
+	-fixed bug in Recordset where insertdefaults weren't handling sql queries consistent with the rest of the API
+	-Reworked ErrorHandler so that it doesn't print to the screen.  Now it pushes the errors onto an array for later retrieval.  Also it prints errors to STDERR.  New flag added to Lazy itself to prevent this printing behavor if desired.
+	-Fixed Session so that the expired method actually calculates if the session is expired based on timestamp rather than relying on db flag which isn't always set.
+
 1.03	- Fixed bug in Boilerplate where checkbox 'checked' tmplvar wasn't populating fieldname
 	- Added Controller widget for use in Composites with Datasets.  Dataset will query based on valuse in Controller
 	- Added Support for Controller to Boilerplate

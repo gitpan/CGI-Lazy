@@ -9,8 +9,13 @@ sub badConfig {
 	my $self = shift;
 	my $filename = shift;
 
-	print $self->q->header, "Couldn't parse config file $filename: $@";
-	exit;
+	my $msg = "Couldn't parse config file $filename: $@\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -18,16 +23,26 @@ sub badSession {
 	my $self = shift;
 	my $id = shift;
 
-	print $self->q->header, "Bad Session ID : $id";
-	exit;
+	my $msg = "Bad Session ID : $id\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
 sub badSessionExpiry {
 	my $self = shift;
 
-	print $self->q->header, "Bad Session Config.  Please check your config file or hash in the Session->{expires} key.";
-	exit;
+	my $msg = "Bad Session Config.  Please check your config file or hash in the Session->{expires} key.\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -43,9 +58,14 @@ sub couldntOpenDebugFile {
 	my $self = shift;
 	my $filename = shift;
 	my $error = shift;
+	
+	my $msg = "Couldn't open Debugging Log file /tmp/$filename: $error\n";
 
-	print $self->q->header, "Couldn't open Debugging Log file /tmp/$filename: $error";
-	exit;
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -56,8 +76,13 @@ sub couldntOpenCssFile {
 	my $file = shift;
 	my $error = shift;
 
-	print $self->q->header, "Couldn't open CSS file $docroot$cssdir/$file: $error";
-	exit;
+	my $msg = "Couldn't open CSS file $docroot$cssdir/$file: $error\n";
+	
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -68,16 +93,26 @@ sub couldntOpenJsFile {
 	my $file = shift;
 	my $error = shift;
 
-	print $self->q->header, "Couldn't open JS file $docroot$jsdir/$file: $error";
-	exit;
+	my $msg = "Couldn't open JS file $docroot$jsdir/$file: $error\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+	
+	return;
 }
 
 #----------------------------------------------------------------------------------------
 sub dbConnectFailed {
 	my $self = shift;
 
-	print $self->q->header, "Database connection failed: <br><br> $@";
-	exit;
+	my $msg = "Database connection failed: $@\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -88,7 +123,13 @@ sub dbError {
 	my $line = shift;
 	my $query = shift;
 
-	print $self->q->header, "Database operation failed in $file calling $pkg at line $line : <br><br> $@ <br> calling: <br> $query";
+	my $msg = "Database operation failed in $file calling $pkg at line $line :$@\ncalling: $query\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -96,7 +137,28 @@ sub dbReturnedMoreThanSingleValue {
 	my $self = shift;
 
 	my ($pkg, $file, $line) = caller;
-	print $self->q->header, "Database lookup return more thana single value in $pkg called by $file at line $line";
+
+	my $msg = "Database lookup return more than a single value in $pkg called by $file at line $line\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
+}
+
+#----------------------------------------------------------------------------------------
+sub errorref {
+	my $self = shift;
+
+	return $self->{_errors};
+}
+
+#----------------------------------------------------------------------------------------
+sub errors {
+	my $self = shift;
+
+	return @{$self->{_errors}};
 }
 
 #----------------------------------------------------------------------------------------
@@ -104,8 +166,14 @@ sub getWithOtherThanArray {
 	my $self = shift;
 
 	my ($pkg, $file, $line) = caller;
-	print $self->q->header, "DB get (get, getarray, gethashlist) called with something other than an array reference in $pkg called by $file at line $line.  That won't fly, exiting";
-	exit;
+
+	my $msg = "DB get (get, getarray, gethashlist) called with something other than an array reference in $pkg called by $file at line $line.  That won't fly.\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -113,15 +181,13 @@ sub noConfig {
 	my $self = shift;
 	my $filename = shift;
 
-	my $headervars = {
-		mainTitle 	=> "Config Error",
-		secondaryTitle	=> "A problem occured in creating the Config object",
-		versionTitle	=> "version ".$self->q->lazyversion,
-		messageTitle	=> "Couldn't open config file $filename : $@",
-	};
+	my $msg = "Couldn't open config file $filename : $@\n";
 
-	print $self->q->header, "Couldn't open config file $filename : $@";
-	exit;
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 #----------------------------------------------------------------------------------------
@@ -129,7 +195,15 @@ sub new {
 	my $class = shift;
 	my $q = shift;
 
-	return bless {_q => $q}, $class
+	my $self = {
+		_q 	=> $q,
+		_errors	=> [],
+		_silent	=> $q->vars->{silent},
+	};
+
+	bless $self, $class;
+
+	return $self;
 }
 
 #----------------------------------------------------------------------------------------
@@ -143,7 +217,20 @@ sub q {
 sub tmplCreateError {
 	my $self = shift;
 
-	print $self->q->header, "Template Creation Error: <br><br> $@";
+	my $msg = "Template Creation Error: $@\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, ;
+
+	return;
+}
+
+#----------------------------------------------------------------------------------------
+sub silent {
+	my $self = shift;
+
+	return $self->{_silent};
 }
 
 #----------------------------------------------------------------------------------------
@@ -151,7 +238,13 @@ sub tmplParamError {
 	my $self = shift;
 	my $template = shift;
 
-	print $self->q->header, "Template Parameter Error in $template: <br><br> $@";
+	my $msg = "Template Parameter Error in $template: $@\n";
+
+	print STDERR $msg unless $self->silent;
+
+	push @{$self->{_errors}}, $msg;
+
+	return;
 }
 
 1
@@ -181,20 +274,26 @@ CGI::Lazy::ErrorHandler
 
 	my $q = CGI::Lazy->new('/path/to/config/');
 
-	eval {
-		something();
-	};
+	...
 
-	if ($@) {
-		$q->errorHandler->funkyErrorMethod;
+	if ($q->errorHandler->errors) {
+		print STDERR "ARRGH! $_\n" for $q->errorHandler->errors;
 	}
 
 =head1 DESCRIPTION
+The error handler gathers up all error messages produced by the Lazy's internals.  It has, at present, one really useful method: errors, which returns the array of error messages encountered in the execution of the request.  It returns an array, so you can use it in an if or unless to check for errors.  If it returns false, then no errors were encountered.  No news is good news. For convenience sake, the errorref method is available to return a reference to the errors array.
 
-CGI::Lazy::ErrorHandler is simply a bunch of canned error messages for displaying errors to the user.
+By default, any errors triggered are printed to STDERR.  If you wish to disable this feature, set silent => 1 in the main lazy config.
 
-At some point in the future, it will display them in a neater and more unified way, but for now, it's just a convenience object.
+=head1 METHODS
 
+=head2 errors ()
+
+Returns array of error messages produced by the request.
+
+=head2 errorref ()
+
+Returns array ref to array of error messages produced by the request.
 
 =cut
 

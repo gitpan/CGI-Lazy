@@ -206,7 +206,7 @@ sub insert {
 						${$vars->{$field}->{handle}} = $defaults->{$field}->{value};
 					}
 				} else { #values pulled from queries and such
-					my $result = $self->db->getarray($defaults->{$field}->{sql});
+					my $result = $self->db->getarray(@{$defaults->{$field}->{sql}});
 
 					if (defined $result->[1] || defined $result->[0]->[1]) { #we got more than a single value, better warn
 						$self->q->errorHandler->dbReturnedMoreThanSingleValue;
@@ -281,12 +281,7 @@ sub insert {
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
-				my $result;
-				if (ref $additional->{$field}->{sql}) {
-					$result = $self->db->getarray(@{$additional->{$field}->{sql}});
-				} else {
-					$result = $self->db->getarray($additional->{$field}->{sql});
-				}
+				my $result = $self->db->getarray(@{$additional->{$field}->{sql}});
 
 				if (defined $result->[1] || defined $result->[0]->[1]) { #we got more than a single value, better warn
 					$self->q->errorHandler->dbReturnedMoreThanSingleValue;
@@ -622,7 +617,7 @@ sub update {
 						${$vars->{$field}->{handle}} = $defaults->{$field}->{value};
 					}
 				} else { #values pulled from queries and such
-					my $result = $self->db->getarray($defaults->{$field}->{sql});
+					my $result = $self->db->getarray(@{$defaults->{$field}->{sql}});
 
 					if (defined $result->[1] || defined $result->[0]->[1]) { #we got more than a single value, better warn
 						$self->q->errorHandler->dbReturnedMoreThanSingleValue;
@@ -708,12 +703,7 @@ sub update {
 
 		if ($additional) { #addional queries run on insert
 			foreach my $field (keys %$additional) {
-				my $result;
-				if (ref $additional->{$field}->{sql}) {
-					$result = $self->db->getarray(@{$additional->{$field}->{sql}});
-				} else {
-					$result = $self->db->getarray($additional->{$field}->{sql});
-				}
+				my $result = $self->db->getarray(@{$additional->{$field}->{sql}});
 
 				if (defined $result->[1] || defined $result->[0]->[1]) { #we got more than a single value, better warn
 					$self->q->errorHandler->dbReturnedMoreThanSingleValue;
@@ -1242,12 +1232,12 @@ Options:
 
 			field2 => {
 
-				sql	=> 'select foo from bar',
+				sql	=> ['select foo from bar where ?', $bind1],
 			},
 
 			field3	=> {
 
-				sql	=> 'select foo.nextvar from dual',
+				sql	=> ['select foo.nextvar from dual'],
 				handle	=> $ref,
 			}
 
@@ -1261,12 +1251,12 @@ Options:
 
 			field2 => {
 
-				sql	=> 'select foo from bar',
+				sql	=> ['select foo from bar where ?', $bind1],
 			},
 
 			field3	=> {
 
-				sql	=> 'select foo.nextvar from dual',
+				sql	=> ['select foo.nextvar from dual'],
 				handle	=> $ref,
 			}
 
@@ -1330,7 +1320,7 @@ array ref. list of fields with their attributes
 		
 		value	=> value to insert
 
-		sql	=> sql to generate value to insert
+		sql	=> array ref.  first value is sql to generate value to insert, rest is binds
 
 		handle	=> reference whose referrent will contain whatever value is set into db.  Useful for later use in cgi.
 
@@ -1338,7 +1328,7 @@ array ref. list of fields with their attributes
 		
 		value	=> value to insert
 
-		sql	=> sql to generate value to insert
+		sql	=> array ref. first value is sql to generate value to insert, rest is binds
 
 		handle	=> reference whose referrent will contain whatever value is set into db.  Useful for later use in cgi.
 

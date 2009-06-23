@@ -168,13 +168,13 @@ datasetController.prototype.pushRow = function(caller) {
 			var oldCell;
 			var oldWidget;
 			var newCell;
-			var position = newRow.cells.length;
-			newCell 		= newRow.insertCell(position);
+			var position 	= newRow.cells.length;
+			newCell 	= newRow.insertCell(position);
 
 			for (var j=0; j< oldRow.cells[i].childNodes.length; j++) {
-				oldCell = oldRow.cells[i];
-				oldWidget = oldCell.childNodes[j];
-				newCell.align 		= oldCell.align;
+				oldCell 	= oldRow.cells[i];
+				oldWidget 	= oldCell.childNodes[j];
+				newCell.align 	= oldCell.align;
 
 				var fieldName;
 
@@ -182,19 +182,29 @@ datasetController.prototype.pushRow = function(caller) {
 					oldWidget.name 		= oldWidget.name.replace(/(.+)-(.+)--(\\d+\$)/, "\$1-:INSERT:\$2--\$3");
 					fieldName 		= oldWidget.id.replace(/\\d+\$/, ''); 
 				}
-				var newWidget		= oldWidget.cloneNode(true);
+
+				var newWidget	= oldWidget.cloneNode(true);
 
 				try {
 					newWidget.name		= fieldName + newRownum;
 					newWidget.id 		= fieldName + newRownum;
-					newWidget.value		= '';
+
+					var re = /^checkbox/;
+					if (re.test(newWidget.type)) {
+						newWidget.value	= oldWidget.value;
+					} else {
+						newWidget.value	= '';
+					}
+
 				} catch (e) {
+
 				}
 
 				if (oldWidget.name && oldWidget.id) {
 					try {	
 						this.validator[newWidget.id] = this.validator[oldWidget.id];
 					} catch (e) {
+
 					}
 				}
 

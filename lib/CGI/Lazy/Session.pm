@@ -38,14 +38,19 @@ sub db {
 }
 
 #--------------------------------------------------------------------------------------
-sub expire {
+sub expired {
 	my $self = shift;
-
+	
 	my $table = $self->sessionTable;
 
-	$self->db->do("update $table set expired = 1 where sessionID = ?", $self->sessionID);
+	my $now = time();
+	my $expiry = $self->data->expires;
 
-	return;
+	if ($expiry > $now) { 
+		return;
+	} else {
+		return 1;
+	}
 }
 
 #----------------------------------------------------------------------------------------------	
@@ -128,13 +133,15 @@ sub open {
 		my $now = time();
 		my $expiry = $self->data->expires;
 
+		$sessionID = $self->new($self->id->generate) if $self->expired;
+
 		if ($expiry > $now) { #valid sesion, update expiration
 			#$q->util->debug->edump("not expired", "now: ".$now, "expires: ".$expiry, "difference: ".($expiry - $now));
 			$self->data->expires($self->parseExpiry($now)); #reset expiry time
 
 		} else {
 			#$q->util->debug->edump("expired");
-			$self->expire();
+			$self->terminate();
 
 			$sessionID = $self->new($self->id->generate); #session expired.  create a new one
 		}
@@ -230,6 +237,16 @@ sub save {
 	$self->db->do("update $sessionTable set data = ? where sessionID = ?", $datastring, $sessionID);
 }
 
+#--------------------------------------------------------------------------------------
+sub terminate {
+	my $self = shift;
+
+	my $table = $self->sessionTable;
+
+	$self->db->do("update $table set expired = 1 where sessionID = ?", $self->sessionID);
+
+	return;
+}
 1
 
 __END__
@@ -346,9 +363,9 @@ returns reference to the CGI::Lazy::Session::Data object
 
 returns reference to CGI::Lazy::DB object
 
-=head2 expire ()
+=head2 expired ()
 
-expires the session
+returns 1 if session has been expired, either explicitly or by timeout
 
 =head2 expires ()
 
@@ -411,6 +428,11 @@ returns session table name specified by session plugin
 =head2 save ()
 
 saves session variable to database
+
+=head2 terminate ()
+
+terminates the session
+
 
 =cut
 

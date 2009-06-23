@@ -23,7 +23,7 @@ use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -195,7 +195,6 @@ sub new {
 		require CGI::Lazy::ModPerl;
 		$self->{_mod_perl} = CGI::Lazy::ModPerl->new($self);
 	}
-
 
 	return $self; 
 }
@@ -466,6 +465,8 @@ If it's just a string, it's assumed to be the absolute path to the config file f
 	cssDir		=> Directory where Lazy will look for css.  Always relative to document root.
 
 	buildDir	=> Directory where Lazy will build template stubs.  
+
+	silent		=> Set to a true value, and internal errors will not be printed to STDERR.  Defaults to false.
 
 	plugins 	=> Optional components
 
