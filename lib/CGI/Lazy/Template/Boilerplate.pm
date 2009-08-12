@@ -568,10 +568,7 @@ sub output {
 	$filename .= $extra if $extra;
 	$filename .=".$type";
 
-	my $docroot = $ENV{DOCUMENT_ROOT};
-	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
-	
-	my $file = $docroot.$self->q->config->buildDir."/".$filename;
+	my $file = $self->q->config->buildDir."/".$filename;
 
 	open OF, "+> $file" or die "Couldn't open $file for writing: $!";
 	print OF $text;

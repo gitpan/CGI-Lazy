@@ -46,7 +46,9 @@ sub expired {
 	my $now = time();
 	my $expiry = $self->data->expires;
 
-	if ($expiry > $now) { 
+	if ($self->data->terminated) {
+		return 1;
+	} elsif ($expiry > $now) { 
 		return;
 	} else {
 		return 1;
@@ -241,10 +243,11 @@ sub save {
 sub terminate {
 	my $self = shift;
 
-	my $table = $self->sessionTable;
+#	my $table = $self->sessionTable;
 
-	$self->db->do("update $table set expired = 1 where sessionID = ?", $self->sessionID);
+#	$self->db->do("update $table set expired = 1 where sessionID = ?", $self->sessionID);
 
+	$self->data->terminated(1);
 	return;
 }
 1
@@ -343,8 +346,6 @@ The session table must have the following fields at a bare minimum:
 
 	data		text (mysql) large storage (clob in oracle)
 
-	expired		bool (mysql) 1 digit number basically
-
 =head1 METHODS
 
 =head2 cookiemonster
@@ -407,31 +408,31 @@ Currently only can parse seconds, minutes, hours and days.  Is more really neces
 
 =head3 time
 
-epoch returned from time() function
+Epoch returned from time() function
 
 =head2 q ()
 
-returns reference to CGI::Lazy object
+Returns reference to CGI::Lazy object
 
 =head2 sessionCookie ()
 
-returns name of session cookie specified by session plugin
+Returns name of session cookie specified by session plugin
 
 =head2 sessionID ()
 
-returns session id
+Returns session id
 
 =head2 sessionTable ()
 
-returns session table name specified by session plugin
+Returns session table name specified by session plugin
 
 =head2 save ()
 
-saves session variable to database
+Saves session variable to database
 
 =head2 terminate ()
 
-terminates the session
+Terminates the session.  Session data object will have the 'terminated' flag set.
 
 
 =cut

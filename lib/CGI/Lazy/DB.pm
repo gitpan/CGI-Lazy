@@ -155,7 +155,7 @@ sub gethashlist { #run query with return value
 		return;
 	}
 
-	my $results;
+	my $results = [];
 	while (my $row = $sth->fetchrow_hashref) {
 		push @$results, $row;
 	}

@@ -1,4 +1,3 @@
-
 package CGI::Lazy;
 
 use strict;
@@ -23,7 +22,7 @@ use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -36,6 +35,8 @@ sub DESTROY {
 			$self->session->save;
 		}
 	}
+
+	return;
 }
 
 #------------------------------------------------------------
@@ -254,7 +255,7 @@ sub widget {
 	return CGI::Lazy::Widget->new($self);
 }
 
-1
+1;
 
 __END__
 

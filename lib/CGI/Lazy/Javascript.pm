@@ -9,23 +9,23 @@ use JavaScript::Minifier qw(minify);
 #javascript for ajax requests
 our $AJAXJS = q[
 function ajaxSend(request, outgoing, returnHandler, returnTarget) {
-    try {
-        request = new XMLHttpRequest();
-	browser = "standards-compliant";
-    } catch (err) {
 	try {
-            	request = new ActiveXObject("Msxml12.XMLHTTP");
-		browser = "bogus";
+		request = new XMLHttpRequest();
+		browser = "standards-compliant";
 	} catch (err) {
 		try {
-			request = new ActiveXObject("Microsoft.XMLHTTP");
-            		browser = "bogus";
+			request = new ActiveXObject("Msxml12.XMLHTTP");
+			browser = "bogus";
 		} catch (err) {
-			alert("your browser doesn't support AJAX, try upgrading to Firefox");
-                	request = null;
-            	}
-        }
-    }
+			try {
+				request = new ActiveXObject("Microsoft.XMLHTTP");
+				browser = "bogus";
+			} catch (err) {
+				alert("your browser doesn't support AJAX, try upgrading to Firefox");
+				request = null;
+			}
+		}
+	}
 
 	try {
 		request.open('POST',parent.location,true);
@@ -33,10 +33,11 @@ function ajaxSend(request, outgoing, returnHandler, returnTarget) {
 		alert("AJAX call failed: "+ err);
 	}
 										
+	request.setRequestHeader('Content-Type', 'application/json');
 	request.send(JSON.stringify(outgoing)); 
 	request.onreadystatechange = function() {
 		if (request.readyState == 4) {
-			returnHandler(request.responseText, returnTarget);
+			returnHandler(request.status, request.responseText, returnTarget);
 		}
 	}
 }
@@ -69,8 +70,9 @@ function sjaxSend(request, outgoing, returnHandler) {
 		alert("AJAX call failed: "+ err);
 	}
 										
+	request.setRequestHeader('Content-Type', 'application/json');
 	request.send(JSON.stringify(outgoing)); 
-	returnHandler(request.responseText);
+	returnHandler(request.status, request.responseText);
 }
 ];
 
@@ -272,17 +274,29 @@ datasetController.prototype.unflag = function(field) {
 	field.style.backgroundColor = this.fieldcolor;
 };
 
-datasetController.prototype.searchResults = function(text, target) {
-	var incoming = JSON.parse(text);
-	for (widgetname in incoming.validator) {
-		var controller = eval(widgetname + 'Controller');
-		delete controller.validator;
-		controller.validator = incoming.validator[widgetname];
+datasetController.prototype.searchResults = function(status, text, target) {
+	var ok = /200/;
+	if (ok.test(status)) {
+		var incoming;
+		try {
+			incoming = JSON.parse(text);
+		} catch (e) {
+			alert('Your request could not be completed.  Usually this is due to internal redirection, often as a result of an invalid or expired user session. You may need to log in again.');
+			return;
+		}
+
+		for (widgetname in incoming.validator) {
+			var controller = eval(widgetname + 'Controller');
+			delete controller.validator;
+			controller.validator = incoming.validator[widgetname];
+		}
+
+		var html = incoming.html;
+
+		document.getElementById(target).innerHTML = html;
+	} else {
+		alert('The server returned an HTTP error of type '+status+' and the application cannot continue.');
 	}
-
-	var html = incoming.html;
-
-	document.getElementById(target).innerHTML = html;
 
 };
 
@@ -379,17 +393,29 @@ controllerController.prototype.select = function() {
 	ajaxSend(selectRequest, outgoing, this.selectResults, this.containerID);
 }
 
-controllerController.prototype.selectResults = function (text, target) {
-	var incoming = JSON.parse(text);
-	for (widgetname in incoming.validator) {
-		var controller = eval(widgetname + 'Controller');
-		delete controller.validator;
-		controller.validator = incoming.validator[widgetname];
+controllerController.prototype.selectResults = function(status, text, target) {
+	var ok = /200/;
+	if (ok.test(status)) {
+		var incoming;
+		try {
+			incoming = JSON.parse(text);
+		} catch (e) {
+			alert('Your request could not be completed.  Usually this is due to internal redirection, often as a result of an invalid or expired user session. You may need to login again');
+			return;
+		}
+
+		for (widgetname in incoming.validator) {
+			var controller = eval(widgetname + 'Controller');
+			delete controller.validator;
+			controller.validator = incoming.validator[widgetname];
+		}
+
+		var html = incoming.html;
+
+		document.getElementById(target).innerHTML = html;
+	} else {
+		alert('The server returned an HTTP error of type '+status+' and the application cannot continue.');
 	}
-
-	var html = incoming.html;
-
-	document.getElementById(target).innerHTML = html;
 }
 
 
@@ -450,32 +476,42 @@ sub load {
 
 }
 
-#-------------------------------------------------------------------------------------------------
-sub modules {
-	my $self = shift;
-	my @args = @_;
+#------------------------------------------------------------------------------------------------- 
+sub modules { 
+        my $self = shift; 
+        my @args = @_; 
 
-	my $output = $JSONPARSER . minify(input => $AJAXJS). minify(input => $SJAXJS);
-	my %inc;
-	
-	if (@args) {
-		foreach my $widget (@args) {
-			if (ref $widget eq 'CGI::Lazy::Widget::Composite') {
-				$inc{ref $widget} = 1;
-				foreach my $subwidget (@{$widget->memberarray}) {
-					$inc{ref $subwidget} = 1;
-				}
-			} else {
-				$inc{ref $widget} = 1;
-			}
-		}
+        my $output = $JSONPARSER . minify(input => $AJAXJS). minify(input => $SJAXJS); 
+                                
+        if (@args) {     
+                my $inc = {};   
+                                        
+                $self->parsewidget($inc, $_) foreach @args; 
+                                                        
+                $output .= minify(input => $component{$_}) foreach keys %$inc; 
+        }                                       
+                                                
+        return $self->q->jswrap($output);               
+}                                                       
+                                                
+#------------------------------------------------------------------------------------------------- 
+sub parsewidget {                                       
+        my $self = shift;                               
+        my $list = shift;                       
+        my $widget = shift;             
 
-		$output .= minify(input => $component{$_}) foreach keys %inc;
-	}
-
-	return $self->q->jswrap($output);
-}
-
+        if (ref $widget eq 'CGI::Lazy::Widget::Composite') { 
+                $list->{ref $widget} = 1; 
+                        
+                $self->parsewidget($list, $_) for @{$widget->memberarray}; 
+                                        
+        } else {                         
+                $list->{ref $widget} = 1; 
+        }                               
+                                        
+        return;                                 
+}                                                       
+                                      
 #-------------------------------------------------------------------------------------------------
 sub new {
 	my $class = shift;

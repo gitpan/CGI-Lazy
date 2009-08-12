@@ -39,14 +39,9 @@ sub new {
 
 	bless $self, $class;
 
-	my $docroot = $ENV{DOCUMENT_ROOT};
-	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
-	my $tmpldir = $self->config->tmplDir;
-	$tmpldir =~ s/^\///; #strip a leading slash so we don't double it
-
 	eval {
 		$self->{_template} = HTML::Template->new( 
-							filename => $docroot."/".$self->config->tmplDir."/".$tmplname, 
+							filename => $self->config->tmplDir."/".$tmplname, 
 							die_on_bad_params => 0,
 						);
 	};
