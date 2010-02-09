@@ -1,4 +1,10 @@
 Revision history for Perl extension CGI::Lazy.
+
+1.06	-fixed some misleading cruft in the docs.  (old documentation that was never updated)
+	-fixed bug where Datasets in Multi mode would insert into database in random order.  Now it inserts in the order in which you enter the data in the UI- as expected.
+	-fixed issue in Widget.pm where backslashes in form inputs would save to db, but would blow up on searches- bad escaping blew up the JSON parser.
+	-updated JSON parser to current version.  Still evals, but is safer.
+
 1.05	-Fixed bug in Session where sessions could not be explicitly terminated.  Removed need for 'expired' field in session table.  data object now sets a 'terminated' flag in the main data field.
 	-Changed handling of template and build directories so that they build off of the absolute path of the server (filesystem)  not the document root.  Leaving them in the document root exposes the templates and possible logic to the world at large.  Bad idea for security.  With them outside of the document root, the world will only see the html that's returned to the browser.
 	-Fixed Javascript.pm so that it will recursively parse contents of composite widgets for necessary javascript libraries

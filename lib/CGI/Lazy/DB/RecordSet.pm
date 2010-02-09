@@ -545,7 +545,7 @@ sub select {
 	eval {
 		$sth = $self->db->dbh->prepare($query);
 		$sth->execute(@bindvars);
-		#$self->q->util->debug->edump($query, @bindvars);
+#		$self->q->util->debug->edump($query, @bindvars);
 	};
 
 	if ($@) {

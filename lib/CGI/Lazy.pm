@@ -22,7 +22,7 @@ use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -282,9 +282,9 @@ CGI::Lazy
 
 	our $q = CGI::Lazy->new({
 
-					tmplDir 	=> "/templates",
+					tmplDir 	=> "/path/to/templates", 	#not off doc root
 
-					jsDir		=>  "/js",
+					jsDir		=>  "/js",			#off doc root
 
 					plugins 	=> {
 
@@ -367,9 +367,9 @@ CGI::Lazy
 
 =head1 DESCRIPTION
 
-CGI::Lazy was designed to simply abstract some of the more common cgi scripting tasks because the author finally got sick of writing the same code by hand for every new site or client that comes along.  It is my attemp to extend the wonderful CGI.pm with things that just about every modern website needs or wants, and to do it in a fairly portable manner.
+CGI::Lazy was designed to simply abstract some of the more common cgi scripting tasks because the author finally got sick of writing the same code by hand for every new site or client that comes along.  It is my attempt to extend the wonderful CGI.pm with things that just about every modern website needs or wants, and to do it in a fairly portable manner.
 
-There are plenty of webdev frameworks out there, many are far more full- featured.  Often these solutions are so monstrous that they are overkill for small apps, or so optimized that they require full admin rights on the server they run on.  CGI::Lazy was intended to be lightweight enough to run on any given server that could run perl cgis.  Of course, the more power you have, the fancier you will be able to get, so Lazy was written to be extensible and to (hopefully) play nice with whatever magic you have up your sleeve. 
+There are plenty of webdev frameworks out there, many are far more full- featured.  Often these solutions are so monstrous that they are overkill for small apps, or so optimized that they require full admin rights on the server they run on.  CGI::Lazy was intended to be lightweight enough to run on any given server that could run perl cgi's.  Of course, the more power you have, the fancier you will be able to get, so Lazy was written to be extensible and to (hopefully) play nice with whatever magic you have up your sleeve. 
 
 Lazy has also been written to be useful in a mod_perl environment if that is your pleasure.  The wonders of persistence and namespaces have been (again, hopefully) all accounted for.  It should plug into your mod_perl environment with little or no fuss.
 
@@ -459,13 +459,13 @@ If args is a hashref, it will assume that the hash is the config.
 If it's just a string, it's assumed to be the absolute path to the config file for the Lazy object.  That file will be parsed as JSON.
 
 
-	tmplDir 	=> Directory where Lazy will look for html templates.  Always relative to document root.
+	tmplDir 	=> Directory where Lazy will look for html templates.  Absolute path to directory.
 
-	jsDir		=> Directory where Lazy will look for javascript.  Always relative to document root.
+	buildDir	=> Directory where Lazy will build template stubs.  Absolute path to directory.
 
-	cssDir		=> Directory where Lazy will look for css.  Always relative to document root.
+	jsDir		=> Directory where Lazy will look for javascript.  Path relative to document root.
 
-	buildDir	=> Directory where Lazy will build template stubs.  
+	cssDir		=> Directory where Lazy will look for css.  Path relative to document root.
 
 	silent		=> Set to a true value, and internal errors will not be printed to STDERR.  Defaults to false.
 
@@ -524,6 +524,10 @@ returns the CGI::Lazy::Widget object
 Subversion repository available at:
 
 	http://www.nikogura.com/svn/CGI/trunk
+
+A collection of demo scripts are available at:
+
+	http://www.nikogura.com/svn/lazydemo/trunk
 
 =cut
 

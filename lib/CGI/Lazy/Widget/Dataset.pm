@@ -980,7 +980,7 @@ Hash of arguments.  Common args are mode => 'blank', for displaying a blank data
 
 =head2 display (args)
 
-Displays the widget initially.  Calls $self->contents, and adds preload lookups and instance specific javascript that will not be updated on subsequent ajax calls.
+Displays the widget.  Calls $self->contents, and adds preload lookups and instance specific javascript that will not be updated on subsequent ajax calls.  Print the return value of this method to STDOUT within a cgi or mod_perl handler.
 
 =head3 args
 

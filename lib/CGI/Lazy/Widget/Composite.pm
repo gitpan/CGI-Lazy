@@ -311,6 +311,13 @@ sub new {
 }
 
 #----------------------------------------------------------------------------------------
+sub recordset {
+	my $self = shift;
+
+        return $self->members->{$self->relationship->{parent}->{id}}->recordset;
+}
+
+#----------------------------------------------------------------------------------------
 sub relationship {
 	my $self = shift;
 
@@ -425,7 +432,7 @@ Hash of arguments.  Common args are mode => 'blank', for displaying a blank data
 
 =head2 display (args)
 
-Displays the widget initially.  Calls $self->contents, and adds preload lookups and instance specific javascript that will not be updated on subsequent ajax calls.
+Displays the widget.  Calls $self->contents, and adds preload lookups and instance specific javascript that will not be updated on subsequent ajax calls. Print the return value of this method to STDOUT in your cgi or mod_perl handler. 
 
 =head3 args
 

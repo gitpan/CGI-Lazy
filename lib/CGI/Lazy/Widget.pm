@@ -3,6 +3,7 @@ package CGI::Lazy::Widget;
 use strict;
 
 use JSON;
+use Tie::IxHash;
 use CGI::Lazy::Globals;
 use CGI::Lazy::Widget::Dataset;
 use CGI::Lazy::Widget::DomLoader;
@@ -250,23 +251,42 @@ sub inserts {
 		return;
 	}
 
-        my $data;
+        my $data = {};
+	tie %{$data}, 'Tie::IxHash';
+
 	my $widgetID = $self->vars->{id};
 
-        foreach my $key (grep {/^$widgetID-:INSERT:/} $self->q->param) {
-                if ($key =~ /^($widgetID-:INSERT:)(.+)--(\d+)$/) {
-			my ($pre, $field, $row) = ($1, $2, $3);
-			$data->{$row}->{$field} = $self->q->param($key) if $self->q->param($key);
-#			$self->q->util->debug->edump($field, $self->q->param($key)) if $self->q->param($key);
-		} elsif ($key =~ /^($widgetID-:INSERT:)(.+)--$/) {
+        foreach my $key (sort _byWidgetRow grep {/^$widgetID-:INSERT:/} $self->q->param) {
+		if ($key =~ /^($widgetID-:INSERT:)(.+)--$/) {
 #			$self->q->util->debug->edump($key);
 			my ($pre, $field) = ($1, $2);
 			$data->{1}->{$field} = $self->q->param($key) if $self->q->param($key);
-		}
+		} elsif ($key =~ /^($widgetID-:INSERT:)(.+)--(\d+)$/) {
+			my ($pre, $field, $row) = ($1, $2, $3);
+			$data->{$row}->{$field} = $self->q->param($key) if $self->q->param($key);
+#			$self->q->util->debug->edump($field, $self->q->param($key)) if $self->q->param($key);
+		} 
         }
 
 #	$self->q->util->debug->edump($data);
         return $data;
+}
+
+#----------------------------------------------------------------------------------------
+sub _byWidgetRow {
+
+	my $rowa;
+	my $rowb;
+
+	if ($a =~ /^(.+-:INSERT:)(.+)--(\d+)$/) {
+		$rowa = $3;
+	}
+
+	if ($b =~ /^(.+-:INSERT:)(.+)--(\d+)$/) {
+		$rowb = $3;
+	}
+	
+	return $rowa <=> $rowb;
 }
 
 #----------------------------------------------------------------------------------------
@@ -392,6 +412,7 @@ sub rawContents {
 	my %args = @_;
 
 	my $output = $self->contents(%args);
+	$output =~ s/\\/\\\\/g;
 	$output =~ s/"/\\"/g;
 	$output =~ s/[\t\n]//g;
 
