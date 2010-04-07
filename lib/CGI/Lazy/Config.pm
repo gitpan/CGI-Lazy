@@ -137,7 +137,7 @@ Returns the name of the config file the object is based on
 
 =head2 get ( property )
 
-Static accessor method.  Use in places where autoloading isn't appropriate.  e.g $q->widget->"somewstring".$variable  or some such nonsense.
+Static accessor method.  Use in places where autoloading isn't appropriate.  e.g $q->widget->"somestring".$variable  or some such nonsense.
 
 =head3 property
 
@@ -157,7 +157,7 @@ CGI::Lazy object.
 Hashref containing initialization variables, or absolute path to config file.
 
 
-CGI::Lazy::Config uses an autoloader to get and set it's properties.  You can access any property by calling $q->config->var  where var is the name of the property.
+CGI::Lazy::Config uses an autoloader to get and set its properties.  You can access any property by calling $q->config->var  where var is the name of the property.
 
 =head3 set ( prop, value )
 

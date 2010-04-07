@@ -700,7 +700,7 @@ CGI::Lazy::Template::BoilerPlate
 
 CGI::Lazy::Template::Boilerplate is a module to generate boilerplate template examples for Lazy widgets.  The templates generated can then be customized to do whatever you want, and look like whatever you want.  Some pieces of template syntax might be confusing to users of Lazy, so this will generate a nice starting point for you.
 
-The template directory must be writeable by apache, at least for as long as you're generating boilerplate templates
+The template directory must be writeable by whatever user Apache is configured to run as, at least for as long as you're generating boilerplate templates.
 
 =head1 METHODS
 

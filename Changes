@@ -1,6 +1,8 @@
 Revision history for Perl extension CGI::Lazy.
+1.07	-fixed some spelling and grammar issues in the POD.  Thanks to Bob McClure for spotting them.
+	-added noMinify flag to constructor.  If set to true, javascript will not be minified.  Helpful for debugging client side problems.
 
-1.06	-fixed some misleading cruft in the docs.  (old documentation that was never updated)
+1.06	-fixed some misleading cruft in the docs.  (old documentation that was never updated)  Thanks to Greg Jessup for spotting the problems.
 	-fixed bug where Datasets in Multi mode would insert into database in random order.  Now it inserts in the order in which you enter the data in the UI- as expected.
 	-fixed issue in Widget.pm where backslashes in form inputs would save to db, but would blow up on searches- bad escaping blew up the JSON parser.
 	-updated JSON parser to current version.  Still evals, but is safer.

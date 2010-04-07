@@ -468,7 +468,16 @@ sub load {
 	$docroot =~ s/\/$//; #strip the trailing slash so we don't double it
 
 	open IF, "< $docroot/$jsdir/$file" or $self->q->errorHandler->couldntOpenJsFile($docroot, $jsdir, $file, $!);
-	my $script = minify(input => *IF);
+
+	my $script;
+
+	if ($self->q->config->noMinify) {
+		local $/;
+		$script = <IF>;
+
+	} else {
+		$script = minify(input => *IF);
+	}
 
 	close IF;
 
@@ -481,14 +490,26 @@ sub modules {
         my $self = shift; 
         my @args = @_; 
 
-        my $output = $JSONPARSER . minify(input => $AJAXJS). minify(input => $SJAXJS); 
+	my $output;
+
+	if ($self->q->config->noMinify) {
+        	$output = $JSONPARSER . $AJAXJS. $SJAXJS; 
+
+	} else {
+        	$output = $JSONPARSER . minify(input => $AJAXJS). minify(input => $SJAXJS); 
+	}
                                 
         if (@args) {     
                 my $inc = {};   
                                         
                 $self->parsewidget($inc, $_) foreach @args; 
                                                         
-                $output .= minify(input => $component{$_}) foreach keys %$inc; 
+		if ($self->q->config->noMinify) {
+                	$output .= $component{$_} foreach keys %$inc; 
+
+		} else {
+                	$output .= minify(input => $component{$_}) foreach keys %$inc; 
+		}
         }                                       
                                                 
         return $self->q->jswrap($output);               
@@ -578,7 +599,7 @@ Returns CGI::Lazy object.
 
 Returns javascript for parsing JSON and making ajax calls, as well as the clientside goodness for the ajax widgets.  This method needs to be printed on any page that is going to use JSON or the Widget objects..
 
-It's included as a separate method as it should be sent only once per page, and would be included in the header except this would be an irritation for cases where CGI::Lazy is not using Widget objects.  If called without components, it will send out only the defaults listed below.
+Its included as a separate method as it should be sent only once per page, and would be included in the header except this would be an irritation for cases where CGI::Lazy is not using Widget objects.  If called without components, it will send out only the defaults listed below.
 
 =head3 components
 

@@ -127,7 +127,7 @@ CGI::Lazy::Template
 
 =head1 DESCRIPTION
 
-CGI::Lazy::Template is pretty much just a wrapper to HTML::Template.  It takes a template name as it's single argument, and has a single useful method: process, which takes a hashref of variables to shuffle together with the template for subsequent printing to the browser.
+CGI::Lazy::Template is pretty much just a wrapper to HTML::Template.  It takes a template name as its single argument, and has a single useful method: process, which takes a hashref of variables to shuffle together with the template for subsequent printing to the browser.
 
 =head1 METHODS
 

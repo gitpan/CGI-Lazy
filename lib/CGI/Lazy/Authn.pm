@@ -270,7 +270,7 @@ CGI::Lazy::Authn
 
 =head1 DESCRIPTION
 
-CGI::Lazy Authentication module.  Draws much of it's inspiration from CGI::Auth. Put the $q->authn->check call in your CGI, if theres a current authenticated session, it will return true.  If not, it will print the login template specified and return false.
+CGI::Lazy Authentication module.  Draws much of its inspiration from CGI::Auth. Put the $q->authn->check call in your CGI, if theres a current authenticated session, it will return true.  If not, it will print the login template specified and return false.
 
 The intended minimum database structure is as follows:
 

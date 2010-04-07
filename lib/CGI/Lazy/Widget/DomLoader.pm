@@ -101,7 +101,7 @@ CGI::Lazy::Widget::DomLoader
 
 CGI::Lazy::Widget::DomLoader is an object for preloading useful stuff into a page's DOM, such as lookup queries, or any javascript object that might be desired.  This is functionality that is duplicated from the internals of CGI::Lazy::Widget::Dataset, but it's included as a separate object for preloading arbitrary values for other purposes.
 
-It's created by calling the domloader method on the widget object, and passing in it's configuration hashref.
+It's created by calling the domloader method on the widget object, and passing in its configuration hashref.
 
 =head2 lookups
 

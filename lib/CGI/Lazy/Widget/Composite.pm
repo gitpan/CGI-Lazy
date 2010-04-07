@@ -395,7 +395,7 @@ CGI::Lazy::Widget::Composite
 
 Composite is a container for other widgets.  It allows you to perform actions on multiple widgets at once.  Depending on the relationship between the widgets, and how fancy you get, you may need to play with each subwidget by hand.  Otherwise, you can specify a type, and use a prebuilt type.
 
-parentChild is a widget that has one widget as the parent, and one or more set up as it's children.  Searching on the parent will return child records that match the parent's results.  Likewise dbwrite will call appropriate methods on all the children based on the widget's construction.
+parentChild is a widget that has one widget as the parent, and one or more set up as its children.  Searching on the parent will return child records that match the parent's results.  Likewise dbwrite will call appropriate methods on all the children based on the widget's construction.
 
 parentChild is pretty experimental.  The configuration given in the example works fine, but I'm not yet convinced the structure is abstracted enough to work for any given group of widgets.  Time will tell, and bugreports/comments.
 
@@ -451,9 +451,9 @@ CGI::Lazy object.
 
 Hashref of object configs.
 
-id			=> widget id 			(manditory)
+id			=> widget id 			(mandatory)
 
-members 		=> arrayref of member widgets	(manditory)
+members 		=> arrayref of member widgets	(mandatory)
 
 =head1 EXAMPLES
 

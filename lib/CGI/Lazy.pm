@@ -22,7 +22,7 @@ use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 
@@ -375,7 +375,7 @@ Lazy has also been written to be useful in a mod_perl environment if that is you
 
 For the most part, CGI::Lazy is simply a subclass of CGI::Pretty, which is an easier to read version of CGI.pm. 
 
-We need to use CGI::Pretty due to a css issue in IE where the style definitions aren't always followed unless there is the appropriate amount of whitespace between html tags.  Luckilly, CGI::Pretty takes care of this pretty transparently, and it's output is easier to read and debug.
+We need to use CGI::Pretty due to a css issue in IE where the style definitions aren't always followed unless there is the appropriate amount of whitespace between html tags.  Luckilly, CGI::Pretty takes care of this pretty transparently, and its output is easier to read and debug.
 
 CGI::Lazy adds a bunch of hooks in the interest of not working any harder than we need to, otherwise it's a CGI::Pretty object.
 
@@ -383,7 +383,7 @@ Probably 80% of the apps the author has been asked to write have been front ends
 
 Output to the web is intended to be through templates via HTML::Template.  However, if you want to write your content into the code manually, we won't stop you.  Again, the whole point was to be flexible and reusable, and to spend our time writing new stuff, not the same old crap over and over again.
 
-The CGI::Lazy::Widget::Dataset module especially was written to bring spreadsheet-like access to a database table to the web in a fairly transparent manner- after all, most of the time you're doing one of 4 operations on a database: select, insert, update, delete.  The Dataset is, at least at the time of the original writing, the crown jewel of the Lazy framework.
+The CGI::Lazy::Widget::Dataset module especially was written to bring spreadsheet-like access to a database table to the web in a fairly transparent manner- after all, most of the time you're doing one of 4 operations on a database: select, insert, update, delete.  The Dataset is, at least at the time of the original writing, the crown jewel of the Lazy framework.  The templates for a Dataset are pretty complicated, and are tied pretty tightly to the Javascript that controls them on the client side.  Because nobody (especially the author) wants to write these monsters from scratch every time a new Widget is called for, the CGI::Lazy::Template::Boilerplate class exists to generate boring, but functional templates for your Widgets.  The boilerplate templates give you a functional starting place.  After that, it's up to you.
 
 In any event, it is my hope that this is useful to you.  It has saved me quite alot of work.  I hope that it can do the same for you.  Bug reports and comments are always welcome.
 
@@ -466,6 +466,9 @@ If it's just a string, it's assumed to be the absolute path to the config file f
 	jsDir		=> Directory where Lazy will look for javascript.  Path relative to document root.
 
 	cssDir		=> Directory where Lazy will look for css.  Path relative to document root.
+
+	noMinify	=> By default javascript is minified before output- all whitespace is removed.  This speeds things up mightily, but can make for difficult debugging.  
+			   Set this to a true value, and javascript will be printed with all whitespace intact.
 
 	silent		=> Set to a true value, and internal errors will not be printed to STDERR.  Defaults to false.
 

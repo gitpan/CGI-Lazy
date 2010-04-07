@@ -180,7 +180,7 @@ sub contents {
 END
 
 	if ($javascript) {
-		$javascript = minify(input => $javascript)
+		$javascript = minify(input => $javascript) unless $self->q->config->noMinify;
 	}
 
 	my $js = $self->q->jswrap($javascript);

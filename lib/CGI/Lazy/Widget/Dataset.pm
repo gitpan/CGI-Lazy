@@ -483,7 +483,7 @@ sub contents {
 END
 
 	if ($javascript) {
-		$javascript = minify(input => $javascript)
+		$javascript = minify(input => $javascript) unless $self->q->config->noMinify;
 	}
 
 	my $js = $self->q->jswrap($javascript);
@@ -948,7 +948,9 @@ CGI::Lazy::Widget::Dataset
 							primarykey	=> 'detail.ID',
 
 				}),
-		}),
+		});
+
+	$q->template->boilerplate($widget)->buildTemplates();		#use a boilerplate object to create template stubs in the buildDir.
 
 =head1 DESCRIPTION
 
@@ -960,10 +962,10 @@ The Dataset is designed to, given a set of records, defined by a CGI::Lazy::DB::
 
 Furthermore, as much of the work as possible is done clientside to cut down on issues caused by network traffic.  It's using AJAX and JSON, but there's no eval-ing.  All data is passed into the browser as JSON, and washed though a JSON parser. 
 
-To do it's magic, the Dataset relies heavily on javascript that *should* work for Firefox and IE6.  At the time of publication, all funcitons and methods work flawlessly with FF2, FF3, and IE6.  The author has tried to write for W3C standards, and provide as much IE support as his corporate sponsors required.  YMMV.  Bug reports are always welcome, however we will not support IE to the detrement of W3C standards.  Get on board M$.
+To do its magic, the Dataset relies heavily on javascript that *should* work for Firefox and IE6.  At the time of publication, all functions and methods work flawlessly with FF2, FF3, and IE6.  The author has tried to write for W3C standards, and provide as much IE support as his corporate sponsors required.  YMMV.  Bug reports are always welcome, however we will not support IE to the detrement of W3C standards.  Get on board M$.
 
 
-The API for Lazy, Recordset, and Dataset allows for hooking simple widgets together to generate not-so-simple results, such as pages with Parent/Child 1 to Many relationships between the Datasets.  CGI::Lazy::Composite is a wrapper designed to connect Widgets, especially Datasets, together.
+The API for Lazy, Recordset, and Dataset allows for hooking simple widgets together to generate not-so-simple results, such as pages with Parent/Child 1 to Many relationships between the Datasets.  CGI::Lazy::Composite is a wrapper designed to connect Widgets, especially Datasets, together.  The Javascript and the Widget templates are highly dependent on each other, and are rather complex.  In order to prevent any user (including the author) from having to write them by hand, the CGI::Lazy::Template::Boilerplate object will create a basic, boring, no nonsense template to start from.  It won't be the most fancy piece of web automation on the planet, but it will be functional, and can be tweaked to your heart's content.
 
 
 =head1 METHODS
@@ -1019,19 +1021,19 @@ Hashref of object configs.
 
 	class			=> widget class name (lowercase, just as if you were calling $q->widget->$classname)  (only necessary if creating widgets automatically, such as members of a Composite widget)
 
-	id			=> widget id 			(manditory)
+	id			=> widget id 			(mandatory)
 	
-	type			=> widget type			(manditory)  'single' or 'multi'
+	type			=> widget type			(mandatory)  'single' or 'multi'
 
-	template		=> standard template		(manditory)
+	template		=> standard template		(mandatory)
 
-	multipleTemplate 	=> multiple template		(manditory if your searches could ever return multiple results)
+	multipleTemplate 	=> multiple template		(mandatory if your searches could ever return multiple results)
 
 	headings		=> 'none'			No headings displayed on a multi dataset.  If it's anyting other than 'none' its assumed to be the name of a template
 
 	headings		=> 'template name'		template to use for headings.  Integral div tags assumed.  
 
-	recordset		=> CGI::Lazy::RecordSet		(manditory)  Can pre-make recordset and pass object reference, or just pass hashref with recordset's particulars, and it'll get created on the fly.
+	recordset		=> CGI::Lazy::RecordSet		(mandatory)  Can pre-make recordset and pass object reference, or just pass hashref with recordset's particulars, and it'll get created on the fly.
 
 	flagColor		=> color to flag fields that fail validation (defaults to red)   (optional)
 
