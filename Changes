@@ -1,4 +1,6 @@
 Revision history for Perl extension CGI::Lazy.
+1.08	-exposed Multiple Dataset field labels to the templates.  Likely not used much, but doesn't hurt anything, and there's always that one need.
+
 1.07	-fixed some spelling and grammar issues in the POD.  Thanks to Bob McClure for spotting them.
 	-added noMinify flag to constructor.  If set to true, javascript will not be minified.  Helpful for debugging client side problems.
 

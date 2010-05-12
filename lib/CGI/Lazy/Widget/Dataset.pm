@@ -266,6 +266,7 @@ sub contents {
 
 					$row->{"NAME.".$fieldname} = $webname; 
 					$row->{"ID.".$fieldname} = $webID;
+					$row->{'LABEL.'.$fieldname} = $recset->label($fieldname) unless $recset->noLabel($fieldname);
 
 					my $value;
 
@@ -320,6 +321,7 @@ sub contents {
 
 			$blankrow->{"NAME.".$field} = $webname;
 			$blankrow->{"ID.".$field} = $webID;
+			$blankrow->{'LABEL.'.$field} = $recset->label($field) unless $recset->noLabel($field);
 
 			if ($recset->webcontrol($field)) {
 				my $webcontrol = $recset->webcontrol($field);
