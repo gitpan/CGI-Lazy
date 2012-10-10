@@ -90,6 +90,7 @@ sub buildSelect {
 	}
 
 	foreach (keys %$vals) {
+		
 		if ($vals->{$_} eq $value) {
 			push @$list, {'ITEM.LABEL' => $_, 'ITEM.VALUE' => $vals->{$_}, 'ITEM.SELECTED' => ' selected '};
 
@@ -132,12 +133,12 @@ sub buildRadio {
 
 	}
 
-	foreach (sort keys %$vals) {
+	foreach (keys %$vals) {
 		if ($vals->{$_} eq $value) {
 			push @$list, {
 				"ID.".$fieldname 		=> $webID."-$_", 
 				'NAME.'.$fieldname 		=> $webname, 
-				'VALUELABEL.'.$fieldname 	=> $vals->{$_}, 
+				'VALUELABEL.'.$fieldname 	=> $_, 
 				'VALUE.'.$fieldname 		=> $vals->{$_}, 
 				'CHECKED.'.$fieldname 		=> ' checked ',
 			};
@@ -146,7 +147,7 @@ sub buildRadio {
 			push @$list, {
 				"ID.".$fieldname 		=> $webID."-$_", 
 				'NAME.'.$fieldname 		=> $webname, 
-				'VALUELABEL.'.$fieldname 	=> $vals->{$_},
+				'VALUELABEL.'.$fieldname 	=> $_,
 				'VALUE.'.$fieldname 		=> $vals->{$_},
 			};
 

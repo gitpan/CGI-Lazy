@@ -1,4 +1,7 @@
 Revision history for Perl extension CGI::Lazy.
+1.09	-fixed bug in Dataset radio buttons where lables weren't being populated right
+	-got religion on TDD.  Expanded test suite.  (Ok, Ok, actually wrote a test suite.  It's about time.  It's not much yet, but I'll expand on it, I promise.)  
+
 1.08	-exposed Multiple Dataset field labels to the templates.  Likely not used much, but doesn't hurt anything, and there's always that one need.
 
 1.07	-fixed some spelling and grammar issues in the POD.  Thanks to Bob McClure for spotting them.

@@ -221,7 +221,7 @@ sub tmplCreateError {
 
 	print STDERR $msg unless $self->silent;
 
-	push @{$self->{_errors}}, ;
+	push @{$self->{_errors}}, $msg ;
 
 	return;
 }

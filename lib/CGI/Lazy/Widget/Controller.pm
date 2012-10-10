@@ -112,7 +112,7 @@ sub buildRadio {
 			push @$list, {
 				"ID.".$fieldname 		=> $webID."-$_", 
 				'NAME.'.$fieldname 		=> $webname, 
-				'VALUELABEL.'.$fieldname 	=> $vals->{$_}, 
+				'VALUELABEL.'.$fieldname 	=> $_, 
 				'VALUE.'.$fieldname 		=> $vals->{$_}, 
 				'CHECKED.'.$fieldname 		=> ' checked ',
 			};
@@ -121,7 +121,7 @@ sub buildRadio {
 			push @$list, {
 				"ID.".$fieldname 		=> $webID."-$_", 
 				'NAME.'.$fieldname 		=> $webname, 
-				'VALUELABEL.'.$fieldname 	=> $vals->{$_},
+				'VALUELABEL.'.$fieldname 	=> $_,
 				'VALUE.'.$fieldname 		=> $vals->{$_},
 			};
 
