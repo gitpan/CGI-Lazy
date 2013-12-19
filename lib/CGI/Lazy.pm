@@ -22,7 +22,7 @@ use CGI::Lazy::Authz;
 
 use base qw(CGI::Pretty);
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 our $AutoloadClass = 'CGI'; #this is neccesarry to get around an autoload problem in CGI.pm.  
 

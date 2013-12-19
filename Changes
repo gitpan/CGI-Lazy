@@ -1,4 +1,7 @@
 Revision history for Perl extension CGI::Lazy.
+1.10	-fixed bug in Recordset where it was trying to use an array for insertadditional and update additional
+	-fixed issue in Template where creation of an empty Lazy object was causing things to blow up under Strawberry Perl- didn't affect any real use, but the failure emails were getting annoying
+
 1.09	-fixed bug in Dataset radio buttons where lables weren't being populated right
 	-got religion on TDD.  Expanded test suite.  (Ok, Ok, actually wrote a test suite.  It's about time.  It's not much yet, but I'll expand on it, I promise.)  
 

@@ -39,12 +39,14 @@ sub new {
 
 	bless $self, $class;
 
-	eval {
-		$self->{_template} = HTML::Template->new( 
-							filename => $self->config->tmplDir."/".$tmplname, 
-							die_on_bad_params => 0,
-						);
-	};
+	if ($self->config->tmplDir && $tmplname) {
+		eval {
+			$self->{_template} = HTML::Template->new( 
+								filename => $self->config->tmplDir."/".$tmplname, 
+								die_on_bad_params => 0,
+							);
+		};
+	}
 
 	if ($@) {
 		$self->q->errorHandler->tmplCreateError;
